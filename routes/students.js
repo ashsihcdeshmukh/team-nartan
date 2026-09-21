@@ -249,7 +249,7 @@ router.post('/admit', async (req, res) => {
         `• Amount: ₹${fee_amount.toLocaleString('en-IN')} (Cash Paid)\n` +
         `• Next Due: ${due_date}\n\n` +
         `📍 Behind Bharat Petrol Pump, Station Road, Durg\n` +
-        `📞 7869240161\n\n` +
+        `📞 9999999999\n\n` +
         `See you on the dance floor! 💃🕺`;
     } else if (pmethod === 'online') {
       waMsg =
@@ -263,7 +263,7 @@ router.post('/admit', async (req, res) => {
         `💳 *Pay online here:*\n` +
         `👉 https://razorpay.me/@creativeedgedancestudio\n\n` +
         `📍 Behind Bharat Petrol Pump, Station Road, Durg\n` +
-        `📞 7869240161\n\n` +
+        `📞 9999999999\n\n` +
         `See you on the dance floor! 💃🕺`;
     } else {
       waMsg =
@@ -278,7 +278,7 @@ router.post('/admit', async (req, res) => {
         `💳 Pay at studio or online:\n` +
         `👉 https://razorpay.me/@creativeedgedancestudio\n\n` +
         `📍 Behind Bharat Petrol Pump, Station Road, Durg\n` +
-        `📞 7869240161\n\n` +
+        `📞 9999999999\n\n` +
         `See you on the dance floor! 💃🕺`;
     }
 

@@ -8,7 +8,7 @@ const fetch   = require('node-fetch');
 const SYSTEM = `You are a friendly assistant for Team Nartan Dance Studio in Durg, Chhattisgarh, India.
 
 STUDIO INFO:
-- Phone: 7869240161
+- Phone: 9999999999
 - Address: Behind Bharat Petrol Pump, Station Road, Durg
 - Google Maps: https://maps.app.goo.gl/Q4sSSqC5xWcT5LT68
 - Instagram: https://www.instagram.com/creative_edge_dance_studio
@@ -31,7 +31,7 @@ RULES:
 - For admission questions: share the form link.
 - For location questions: share Google Maps link.
 - For payment questions: share razorpay.me/@creativeedgedancestudio
-- If unsure about anything: say "Please call 7869240161"
+- If unsure about anything: say "Please call 9999999999"
 - Respond in Hindi or English based on user language.`;
 
 // GET /api/chatbot/test  — shows if API key is configured
@@ -62,7 +62,7 @@ router.post('/ask', async (req, res) => {
   if (!apiKey || apiKey.includes('PASTE') || apiKey.length < 20) {
     console.error('[Chatbot] ANTHROPIC_API_KEY is not set or is placeholder');
     return res.json({
-      reply: 'AI assistant is not configured yet. Please call us at 7869240161! 📞',
+      reply: 'AI assistant is not configured yet. Please call us at 9999999999! 📞',
       debug: 'API key missing'
     });
   }
@@ -89,21 +89,21 @@ router.post('/ask', async (req, res) => {
     if (data.error) {
       console.error('[Chatbot API Error]', JSON.stringify(data.error));
       return res.json({
-        reply: `AI error: ${data.error.message || 'Unknown'}. Please call 7869240161! 📞`,
+        reply: `AI error: ${data.error.message || 'Unknown'}. Please call 9999999999! 📞`,
         debug: data.error
       });
     }
 
     if (!data.content || !data.content[0]) {
       console.error('[Chatbot] Unexpected response:', JSON.stringify(data));
-      return res.json({ reply: 'Please call us at 7869240161! 📞' });
+      return res.json({ reply: 'Please call us at 9999999999! 📞' });
     }
 
     res.json({ reply: data.content[0].text });
 
   } catch (err) {
     console.error('[Chatbot Network Error]', err.message);
-    res.json({ reply: 'Connection error. Please call 7869240161! 📞' });
+    res.json({ reply: 'Connection error. Please call 9999999999! 📞' });
   }
 });
 

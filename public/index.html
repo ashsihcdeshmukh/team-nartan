@@ -206,12 +206,9 @@
             Default Master OTP: <span class="otp-code-pill" id="demoOtpBadge">000000</span>
           </div>
           <div style="margin-top: 6px; font-size: 13px; color: var(--text-muted);">
-            Click any test phone number to copy:
+            Use <strong>ANY random 10-digit mobile number</strong> (e.g. 9823417856) with OTP <strong>000000</strong>:
             <div class="demo-phones">
-              <span class="phone-chip" onclick="copyPhone('9876543210', 'Aarav Sharma')">9876543210 (Aarav - Kathak)</span>
-              <span class="phone-chip" onclick="copyPhone('9123456789', 'Ananya Roy')">9123456789 (Ananya - Bollywood)</span>
-              <span class="phone-chip" onclick="copyPhone('9988776655', 'Rohan Verma')">9988776655 (Rohan - HipHop)</span>
-              <span class="phone-chip" onclick="copyPhone('9811223344', 'Meera Nair')">9811223344 (Meera - Contemporary)</span>
+              <span class="phone-chip" id="randPhoneBadge" onclick="copyRandomPhone()">🎲 Click to Generate & Copy Random Test Number</span>
             </div>
           </div>
         </div>
@@ -317,9 +314,17 @@
       setTimeout(() => t.classList.remove('show'), 3000);
     }
 
+    function copyRandomPhone() {
+      const rand = '9' + Math.floor(100000000 + Math.random() * 900000000);
+      navigator.clipboard.writeText(rand);
+      const b = document.getElementById('randPhoneBadge');
+      if (b) b.textContent = `📋 Copied Test Number: ${rand}`;
+      showToast(`Copied random test number (${rand}) to clipboard!`);
+    }
+
     function copyPhone(phone, name) {
       navigator.clipboard.writeText(phone);
-      showToast(`Copied ${name}'s phone (${phone}) to clipboard!`);
+      showToast(`Copied test phone (${phone}) to clipboard!`);
     }
 
     // Check backend connection

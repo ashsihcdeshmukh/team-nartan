@@ -68,7 +68,7 @@ router.post('/webhook', async (req, res) => {
       for (const s of data) {
         try {
           const days = Math.floor((new Date(today)-new Date(s.due_date))/(1000*60*60*24));
-          await sendWhatsApp(s.phone, `⚠️ *Fee Reminder*\n\nDear ${s.name},\nFee of ₹${(s.fee_amount||0).toLocaleString('en-IN')} is ${days>0?`overdue by ${days} day(s)`:'due today'}.\n\n📞 7869240161`);
+          await sendWhatsApp(s.phone, `⚠️ *Fee Reminder*\n\nDear ${s.name},\nFee of ₹${(s.fee_amount||0).toLocaleString('en-IN')} is ${days>0?`overdue by ${days} day(s)`:'due today'}.\n\n📞 9999999999`);
           sent++; await new Promise(r => setTimeout(r, 1500));
         } catch(e) {}
       }

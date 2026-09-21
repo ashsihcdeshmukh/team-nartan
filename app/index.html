@@ -246,7 +246,8 @@ var BACKEND_URL  = (window.location.hostname === "localhost" || window.location.
     <button class="btn-grad" onclick="sendLoginOTP()" id="send-otp-btn">Send OTP</button>
     <button class="install-link" onclick="installApp()" id="install-login-btn">Install Student App</button>
     <a href="/tutorial.html" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;color:var(--accent);font-size:13px;font-weight:700;text-decoration:none;background:rgba(200,151,42,.08);padding:10px;border-radius:10px;border:1px dashed var(--accent)">🎥 Watch Tutorial Video: How to Use Portal</a>
-    <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--accent);font-weight:700;background:rgba(200,151,42,.06);padding:8px;border-radius:8px">🔑 Demo Master OTP: 000000 · Test Phone: 9876543210</div>
+    <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--accent);font-weight:700;background:rgba(200,151,42,.06);padding:8px;border-radius:8px">🔑 Enter ANY 10-Digit Mobile Number · Demo OTP: 000000</div>
+    <button type="button" onclick="generateRandomTestPhone()" style="background:transparent;border:1px dashed var(--accent);color:var(--accent);padding:9px;border-radius:10px;font-size:12px;font-weight:700;width:100%;margin-top:8px;cursor:pointer">🎲 Auto-Fill Random Test Mobile Number</button>
     <div class="login-err" id="phone-err">Please enter a valid 10-digit number</div>
     <div class="login-err" id="not-found-err">Phone not found. Please contact studio.</div>
   </div>
@@ -825,24 +826,31 @@ async function findStudentByPhone(phone){
     }
   } catch(e){}
 
-  // Demo Fallback for test phones
-  if(last10 === "9876543210" || last10 === "7869240161" || last10 === "9123456789" || last10 === "9988776655" || last10 === "0000000000"){
+  // Universal Demo Mode: Accept ANY 10-digit number entered by tester
+  if(last10.length === 10){
     return normalizeStudent({
-      id: "TN-DEMO-001",
-      name: last10 === "7869240161" ? "Sharda Yadav" : (last10 === "9123456789" ? "Ananya Roy" : "Aarav Sharma"),
+      id: "TN-" + Math.floor(1000 + Math.random() * 9000),
+      name: "Demo Dancer (" + last10.slice(-4) + ")",
       phone: last10,
       dance_style: "Kathak & Bollywood Commercial",
-      batch: "Team Nartan Elite Batch",
+      batch: "Team Nartan Regular Batch",
       category: "Adults",
       fee_plan: "3 Months",
       fee_amount: 5000,
       fee_status: "paid",
-      next_due_date: "2026-11-15",
-      admission_date: "2026-01-15"
+      next_due_date: "2026-11-20",
+      admission_date: "2026-01-10"
     });
   }
 
   return null;
+}
+
+function generateRandomTestPhone(){
+  var rand = "9" + Math.floor(100000000 + Math.random() * 900000000);
+  var inp = document.getElementById("login-phone");
+  if(inp) inp.value = rand;
+  showToast("Generated Random Demo Mobile: " + rand);
 }
 
 // ── EXPLICIT 6-DIGIT SMS OTP LOGIN FLOW ──
@@ -1868,7 +1876,7 @@ var studioCMS = {
       type: "info",
       tag: "Notice",
       title: "Studio Batches",
-      body: "Team Nartan runs Monday to Friday batches for Kids Dance, Zumba, Basic Hip-Hop, and Hip-Hop Advance. For inquiries, contact 7869240161.",
+      body: "Team Nartan runs Monday to Friday batches for Kids Dance, Zumba, Basic Hip-Hop, and Hip-Hop Advance. For inquiries, contact 9999999999.",
       date: "1 Jul 2026"
     }
   ]
