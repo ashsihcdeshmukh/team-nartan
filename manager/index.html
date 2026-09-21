@@ -90,7 +90,7 @@
       <h2 style="margin:0 0 6px;font-size:22px;color:#fff;font-weight:800">Studio Manager</h2>
       <p style="margin:0 0 24px;font-size:13px;color:#94a3b8">Enter Master PIN to access studio dashboard</p>
       
-      <input type="password" id="manager-pin-input" placeholder="Enter PIN (e.g. 7869)" maxlength="6" inputmode="numeric" 
+      <input type="password" id="manager-pin-input" placeholder="PIN: 1234 or 000000" maxlength="6" inputmode="numeric" 
         style="width:100%;font-size:24px;letter-spacing:8px;text-align:center;padding:14px;border-radius:12px;border:1px solid #33415f;background:#0b1020;color:#f59e0b;margin-bottom:16px;outline:none"
         onkeydown="if(event.key==='Enter') unlockStudioManager()">
         
@@ -112,7 +112,7 @@
     function unlockStudioManager(){
       var input = document.getElementById('manager-pin-input').value.trim();
       var err = document.getElementById('pin-error-msg');
-      if(input === '7869' || input === '1234' || input === '9340852788' || input === '8319707595'){
+      if(input === '000000' || input === '0000' || input === '1234' || input === '7869' || input === '9340852788' || input === '8319707595'){
         if(document.getElementById('remember-pin-device').checked){
           localStorage.setItem('ce_manager_unlocked', 'true');
         }
