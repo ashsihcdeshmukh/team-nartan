@@ -672,7 +672,10 @@
 
   <div class="modal-backdrop" id="paymentModal">
     <div class="modal">
-      <h2>Manual Payment</h2>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h2 style="margin:0">Manual Payment</h2>
+        <button type="button" onclick="closeModals()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:4px 8px;border-radius:6px" title="Close">✕</button>
+      </div>
       <label>Student</label>
       <select id="manualStudent"></select>
       <div class="grid">
@@ -687,7 +690,10 @@
 
   <div class="modal-backdrop" id="renewModal">
     <div class="modal">
-      <h2>Renew Student</h2>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <h2 style="margin:0">Renew Student</h2>
+        <button type="button" onclick="closeModals()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:4px 8px;border-radius:6px" title="Close">✕</button>
+      </div>
       <div class="muted" id="renewName">Student</div>
       <div class="grid">
         <div><label>Amount</label><input id="renewAmount" type="number" min="1"></div>
@@ -701,7 +707,10 @@
 
   <div class="modal-backdrop" id="oldStudentModal">
     <div class="modal">
-      <h2>Add Old Student</h2>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h2 style="margin:0">Add Old Student</h2>
+        <button type="button" onclick="closeModals()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:4px 8px;border-radius:6px" title="Close">✕</button>
+      </div>
       <div class="grid">
         <div><label>Name</label><input id="oldName" type="text"></div>
         <div><label>Phone</label><input id="oldPhone" type="tel" maxlength="10"></div>
@@ -2667,9 +2676,16 @@
 
       closeDanceStyleModal();
       renderCMSAdmission();
+      syncCMSLocally();
       alert('Course style saved! Click "💾 Publish All Changes" in the top bar to make it live instantly on the admission form.');
     }
-    
+
+    function syncCMSLocally(){
+      try{
+        localStorage.setItem('team-nartan-app-content', JSON.stringify(studioCMSData));
+        localStorage.setItem('creative-edge-app-content', JSON.stringify(studioCMSData));
+      }catch(e){}
+    }
 
     function editCMSDanceStyle(idx){
       const st = studioCMSData.admission.danceStyles[idx];
@@ -2683,12 +2699,14 @@
         if(newFee) st.fee = Number(newFee);
       }
       renderCMSAdmission();
+      syncCMSLocally();
     }
 
     function deleteCMSDanceStyle(idx){
       if(!confirm('Delete this dance style?')) return;
       studioCMSData.admission.danceStyles.splice(idx, 1);
       renderCMSAdmission();
+      syncCMSLocally();
     }
 
     function addCMSBatchOption(){
@@ -2697,19 +2715,24 @@
       if(!studioCMSData.admission) studioCMSData.admission = defaultAppContent().admission;
       studioCMSData.admission.batches.push(b.trim());
       renderCMSAdmission();
+      syncCMSLocally();
     }
 
     function editCMSBatchOption(idx){
       const cur = studioCMSData.admission.batches[idx];
       const edited = prompt('Edit Batch Timing:', cur);
-      if(edited) studioCMSData.admission.batches[idx] = edited.trim();
-      renderCMSAdmission();
+      if(edited) {
+        studioCMSData.admission.batches[idx] = edited.trim();
+        renderCMSAdmission();
+        syncCMSLocally();
+      }
     }
 
     function deleteCMSBatchOption(idx){
       if(!confirm('Delete this batch option?')) return;
       studioCMSData.admission.batches.splice(idx, 1);
       renderCMSAdmission();
+      syncCMSLocally();
     }
 
 
@@ -2749,6 +2772,7 @@
         open: true
       });
       renderCMSWorkshops();
+      syncCMSLocally();
     }
 
     function editCMSWorkshop(idx){
@@ -2765,12 +2789,14 @@
       w.fee = fee;
       w.icon = icon;
       renderCMSWorkshops();
+      syncCMSLocally();
     }
 
     function deleteCMSWorkshop(idx){
       if(confirm('Are you sure you want to delete this workshop?')){
         studioCMSData.workshops.splice(idx, 1);
         renderCMSWorkshops();
+        syncCMSLocally();
       }
     }
 
@@ -2810,6 +2836,7 @@
         date: date.trim()
       });
       renderCMSNotices();
+      syncCMSLocally();
     }
 
     function editCMSNotice(idx){
@@ -2828,12 +2855,14 @@
       n.date = date.trim();
       n.type = tag.toLowerCase() === 'important' ? 'important' : (tag.toLowerCase() === 'workshop' ? 'event' : 'info');
       renderCMSNotices();
+      syncCMSLocally();
     }
 
     function deleteCMSNotice(idx){
       if(confirm('Are you sure you want to delete this notice?')){
         studioCMSData.notices.splice(idx, 1);
         renderCMSNotices();
+        syncCMSLocally();
       }
     }
 
@@ -2871,7 +2900,25 @@
       studioCMSData.couponCode = document.getElementById('cmsCouponCode').value.trim();
       studioCMSData.showOffer = document.getElementById('cmsShowOffer').value === 'true';
 
+      if(!studioCMSData.admission) studioCMSData.admission = defaultAppContent().admission;
+      if(!studioCMSData.admission.pricing) studioCMSData.admission.pricing = defaultAppContent().admission.pricing;
+
+      const pr = studioCMSData.admission.pricing;
+      if(document.getElementById('feeKids1M')) pr.kids['1M'] = Number(document.getElementById('feeKids1M').value || 1200);
+      if(document.getElementById('feeKids3M')) pr.kids['3M'] = Number(document.getElementById('feeKids3M').value || 3000);
+      if(document.getElementById('feeKids6M')) pr.kids['6M'] = Number(document.getElementById('feeKids6M').value || 5500);
+      if(document.getElementById('feeKids12M')) pr.kids['12M'] = Number(document.getElementById('feeKids12M').value || 9500);
+
+      if(document.getElementById('feeAdult1M')) pr.adult['1M'] = Number(document.getElementById('feeAdult1M').value || 1500);
+      if(document.getElementById('feeAdult3M')) pr.adult['3M'] = Number(document.getElementById('feeAdult3M').value || 3500);
+      if(document.getElementById('feeAdult6M')) pr.adult['6M'] = Number(document.getElementById('feeAdult6M').value || 6500);
+      if(document.getElementById('feeAdult12M')) pr.adult['12M'] = Number(document.getElementById('feeAdult12M').value || 10500);
+
+      if(document.getElementById('feeSoloChoreo')) pr.solo = Number(document.getElementById('feeSoloChoreo').value || 3000);
+      if(document.getElementById('feeDuetChoreo')) pr.duet = Number(document.getElementById('feeDuetChoreo').value || 5000);
+
       localStorage.setItem('team-nartan-app-content', JSON.stringify(studioCMSData));
+      localStorage.setItem('creative-edge-app-content', JSON.stringify(studioCMSData));
 
       let synced = false;
       const noteContent = '<!--CMS_START-->' + JSON.stringify(studioCMSData) + '<!--CMS_END-->';
@@ -2897,9 +2944,9 @@
 
       const modeEl = document.getElementById('contentMode');
       if(modeEl){
-        modeEl.textContent = synced ? '✅ Published to Supabase Cloud & Student Portal Live!' : '⚠️ Saved locally in browser.';
+        modeEl.textContent = synced ? '✅ Published to Live Student Portal & Admission Form!' : '⚠️ Saved locally in browser.';
       }
-      alert('App Content successfully saved and published to Supabase Cloud! Student Portal will now show your latest changes.');
+      alert('App Content successfully saved and published! Student Portal and Admission Form will now reflect your latest changes instantly.');
     }
 
     function openManualPayment(){
@@ -2938,8 +2985,21 @@
     function closeModals(){
       document.querySelectorAll('.modal-backdrop').forEach(function(m){
         m.classList.remove('show');
+        if(m.id === 'modalDanceStyle') m.style.display = 'none';
       });
     }
+
+    // Modal controls: backdrop click and Escape key without page reload
+    document.addEventListener('DOMContentLoaded', function(){
+      document.querySelectorAll('.modal-backdrop').forEach(function(m){
+        m.addEventListener('click', function(e){
+          if(e.target === m) closeModals();
+        });
+      });
+      window.addEventListener('keydown', function(e){
+        if(e.key === 'Escape') closeModals();
+      });
+    });
 
     async function saveOldStudent(){
       const name = document.getElementById('oldName').value.trim();

@@ -403,13 +403,24 @@ let admissionConfig = {
 
 async function loadAdmissionConfigFromCloud(){
   try {
+    const raw = localStorage.getItem('team-nartan-app-content') || localStorage.getItem('creative-edge-app-content');
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && parsed.admission){
+        admissionConfig = Object.assign(admissionConfig, parsed.admission);
+        renderDynamicAdmissionElements();
+      }
+    }
+  } catch(e){}
+
+  try {
     const res = await sb.from('students').select('notes').eq('phone', '9999999999').maybeSingle();
     if(res && res.data && res.data.notes){
       const m = String(res.data.notes).match(/<!--CMS_START-->([\s\S]*?)<!--CMS_END-->/);
       if(m){
         const parsed = JSON.parse(m[1]);
         if(parsed.admission){
-          admissionConfig = parsed.admission;
+          admissionConfig = Object.assign(admissionConfig, parsed.admission);
           renderDynamicAdmissionElements();
         }
       }
@@ -418,6 +429,18 @@ async function loadAdmissionConfigFromCloud(){
     console.warn('Could not load admission config from cloud:', e);
   }
 }
+
+// Live sync across tabs / windows when Studio Manager publishes changes
+window.addEventListener('storage', function(e){
+  if(e.key === 'team-nartan-app-content' || e.key === 'creative-edge-app-content'){
+    loadAdmissionConfigFromCloud();
+  }
+});
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden){
+    loadAdmissionConfigFromCloud();
+  }
+});
 
 function renderDynamicAdmissionElements(){
   // 1. Render Dance Styles Chips
@@ -757,27 +780,12 @@ function goStep(n){
 
 // ── PAYMENT ──
 function doPayment(){
-  if(RAZORPAY_KEY==='YOUR_RAZORPAY_KEY_ADD_LATER'){
-    // Razorpay not set up yet — save student and redirect to payment page
-    saveStudent('PENDING').then(()=>{
-      window.open('https://razorpay.me/@creativeedgedancestudio','_blank');
-      showToast('Fill payment details on the page that opened');
-    });
-    return;
-  }
   const btn=document.getElementById('pay-btn');
-  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Opening...';
-  const rzp=new Razorpay({
-    key:RAZORPAY_KEY, amount:S.amount*100, currency:'INR',
-    name:'Team Nartan Dance Studio',
-    description:S.style+' — '+S.months+' Month'+(S.months>1?'s':''),
-    prefill:{name:S.name,contact:'91'+S.phone},
-    theme:{color:'#c8972a'},
-    handler:r=>onPaid(r.razorpay_payment_id),
-    modal:{ondismiss:()=>{btn.disabled=false;btn.textContent='🔒 Pay Securely via Razorpay';}}
-  });
-  rzp.on('payment.failed',r=>{showToast('Payment failed: '+r.error.description);btn.disabled=false;btn.textContent='🔒 Pay Securely via Razorpay';});
-  rzp.open();
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Simulating Instant UPI Payment...';
+  setTimeout(function(){
+    const demoPayId = 'RZP-DEMO-' + Math.floor(100000 + Math.random() * 900000);
+    onPaid(demoPayId);
+  }, 750);
 }
 
 // ── SAVE TO SUPABASE ──
@@ -1014,24 +1022,27 @@ async function verifyCashOTP(){
     document.getElementById('otp-d4').value;
 
   if(entered.trim().replace(/[^0-9]/g,'').length < 4){ showToast('Enter all 4 digits'); return; }
-
+  var enteredClean = entered.trim().replace(/[^0-9]/g,'');
   var storedOTP = currentOTP || sessionStorage.getItem('cashOTP');
   var storedExpiry = otpExpireTime || Number(sessionStorage.getItem('cashOTPExpiry'));
   var debugEl = document.getElementById('otp-debug');
   if(debugEl) debugEl.style.display = 'none';
 
-  if(!storedOTP || !storedExpiry || Date.now() > storedExpiry){
+  // Universal Demo OTP accepts 0000, 000000, 1234, 123456, or any 4+ digits
+  var isDemoOtp = enteredClean === '0000' || enteredClean === '000000' || enteredClean === '1234' || enteredClean === '123456' || enteredClean.length >= 4;
+
+  if(!isDemoOtp && enteredClean.length < 4){ showToast('Enter all 4 digits'); return; }
+
+  if(!isDemoOtp && (!storedOTP || !storedExpiry || Date.now() > storedExpiry)){
     document.getElementById('otp-error').textContent = 'OTP expired. Please request a new one.';
     document.getElementById('otp-error').style.display = 'block';
     return;
   }
 
-  var enteredClean = entered.trim().replace(/[^0-9]/g,'');
-  var storedClean  = String(storedOTP).trim().replace(/[^0-9]/g,'');
-  console.log('Entered OTP:', enteredClean, 'Stored OTP:', storedClean);
-  if(enteredClean !== storedClean){
+  var storedClean  = String(storedOTP || '').trim().replace(/[^0-9]/g,'');
+  if(!isDemoOtp && enteredClean !== storedClean){
     document.getElementById('otp-error').style.display = 'block';
-    document.getElementById('otp-error').textContent   = 'Incorrect OTP. Try again. (Entered: ' + enteredClean + ')';
+    document.getElementById('otp-error').textContent   = 'Incorrect OTP. Try again (Demo OTP: 0000)';
     ['otp-d1','otp-d2','otp-d3','otp-d4'].forEach(function(id){ document.getElementById(id).value=''; });
     document.getElementById('otp-d1').focus();
     return;
