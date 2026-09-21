@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Nartan Dance Studio — Demo Switchboard</title>
+  <link rel="stylesheet" href="/shared/branding.css">
+  <style>
+    .hub-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
+    .header-hero {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .header-hero h1 {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .header-hero p {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+    
+    /* Master OTP Banner */
+    .otp-callout {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(139, 92, 246, 0.12));
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    .otp-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .otp-icon {
+      font-size: 32px;
+      background: rgba(245, 158, 11, 0.2);
+      width: 54px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .otp-code-pill {
+      font-size: 26px;
+      font-family: monospace;
+      font-weight: 800;
+      letter-spacing: 4px;
+      color: var(--accent-gold);
+      background: #090d16;
+      padding: 6px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .demo-phones {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .phone-chip {
+      background: #1e293b;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-family: monospace;
+      color: #cbd5e1;
+      cursor: pointer;
+      border: 1px solid #334155;
+      transition: all 0.2s;
+    }
+    .phone-chip:hover {
+      border-color: var(--accent-gold);
+      color: #fff;
+      background: #27354a;
+    }
+
+    /* Portal Grid */
+    .portal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .portal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .portal-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(245, 158, 11, 0.4);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+    .portal-badge {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+    }
+    .portal-icon {
+      font-size: 38px;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+    .portal-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .portal-desc {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .feature-list {
+      list-style: none;
+      margin-bottom: 24px;
+    }
+    .feature-list li {
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .feature-list li::before {
+      content: "✓";
+      color: var(--accent-gold);
+      font-weight: bold;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; transform: scale(1.15); }
+      100% { opacity: 0.6; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hub-container">
+    <div class="header-hero">
+      <div class="badge badge-gold" style="margin-bottom: 12px;">🎭 Official Studio Suite</div>
+      <h1 class="font-serif">Team Nartan <span class="text-gold">Dance Studio</span></h1>
+      <p>Student Portal • Online Admission Form • Studio Manager Suite</p>
+    </div>
+
+    <!-- Master OTP Callout -->
+    <div class="otp-callout">
+      <div class="otp-info">
+        <div class="otp-icon">🔑</div>
+        <div>
+          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-gold); font-weight: 700;">Universal Demo Login Credential</div>
+          <div style="font-size: 15px; color: #f1f5f9; margin-top: 2px;">
+            Default Master OTP: <span class="otp-code-pill" id="demoOtpBadge">000000</span>
+          </div>
+          <div style="margin-top: 6px; font-size: 13px; color: var(--text-muted);">
+            Click any test phone number to copy:
+            <div class="demo-phones">
+              <span class="phone-chip" onclick="copyPhone('9876543210', 'Aarav Sharma')">9876543210 (Aarav - Kathak)</span>
+              <span class="phone-chip" onclick="copyPhone('9123456789', 'Ananya Roy')">9123456789 (Ananya - Bollywood)</span>
+              <span class="phone-chip" onclick="copyPhone('9988776655', 'Rohan Verma')">9988776655 (Rohan - HipHop)</span>
+              <span class="phone-chip" onclick="copyPhone('9811223344', 'Meera Nair')">9811223344 (Meera - Contemporary)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <button class="btn btn-outline-gold" onclick="navigator.clipboard.writeText('000000'); showToast('Copied OTP 000000 to clipboard!');">
+          Copy OTP
+        </button>
+      </div>
+    </div>
+
+    <!-- 3 Portals Grid -->
+    <div class="portal-grid">
+
+      <!-- 1. Student Portal -->
+      <div class="portal-card">
+        <div>
+          <span class="badge badge-emerald portal-badge">Mobile Ready</span>
+          <div class="portal-icon">📱</div>
+          <h2 class="portal-title">Student Portal</h2>
+          <p class="portal-desc">
+            Personal dance dashboard for enrolled students. Fast login using mobile number & universal OTP <strong>000000</strong>.
+          </p>
+          <ul class="feature-list">
+            <li>Digital Dance Membership Pass</li>
+            <li>Weekly Class Schedules & Instructors</li>
+            <li>Live Attendance Tracking & Calendar</li>
+            <li>Membership Renewals & Fee Receipt</li>
+            <li>Studio Announcements & Showcase Alerts</li>
+          </ul>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <a href="/student" class="btn btn-primary" style="flex: 1;" target="_blank">Launch Portal ↗</a>
+        </div>
+      </div>
+
+      <!-- 2. Admission Form -->
+      <div class="portal-card">
+        <div>
+          <span class="badge badge-gold portal-badge">Public Link</span>
+          <div class="portal-icon">📝</div>
+          <h2 class="portal-title">Admission Form</h2>
+          <p class="portal-desc">
+            Streamlined onboarding form for aspiring dancers to register, choose their dance style, select batches, and join Team Nartan.
+          </p>
+          <ul class="feature-list">
+            <li>Step-by-step Dancer Details & Age Category</li>
+            <li>Dance Style (Kathak, Bollywood, Hip-Hop, etc.)</li>
+            <li>Batch Timing & Schedule Preference</li>
+            <li>Membership Plan (1M, 3M, 6M, Annual)</li>
+            <li>Instant Enrollment Receipt & Student ID</li>
+          </ul>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <a href="/admission" class="btn btn-secondary" style="flex: 1;" target="_blank">Open Form ↗</a>
+        </div>
+      </div>
+
+      <!-- 3. Studio Manager -->
+      <div class="portal-card">
+        <div>
+          <span class="badge badge-rose portal-badge">Admin Suite</span>
+          <div class="portal-icon">🏢</div>
+          <h2 class="portal-title">Studio Manager</h2>
+          <p class="portal-desc">
+            Comprehensive admin control center for studio staff, instructors, and management to oversee the entire dance academy.
+          </p>
+          <ul class="feature-list">
+            <li>Real-time KPI Dashboard (Revenue, Students, Dues)</li>
+            <li>Batch-wise Attendance Marker (1-Click Bulk Mark)</li>
+            <li>Student Directory & Fee Status Records</li>
+            <li>Admission Application Approval Workflow</li>
+            <li>Studio Notice & Announcement Broadcaster</li>
+          </ul>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <a href="/manager" class="btn btn-primary" style="flex: 1;" target="_blank">Open Manager ↗</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-indicator">
+        <span class="pulse-dot"></span>
+        <span id="backendStatus">Connecting to Team Nartan API...</span>
+      </div>
+      <div>
+        <span>Environment: <strong>Local Demo Server</strong></span> •
+        <span>Default OTP: <strong>000000</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-msg" id="toast"></div>
+
+  <script>
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function copyPhone(phone, name) {
+      navigator.clipboard.writeText(phone);
+      showToast(`Copied ${name}'s phone (${phone}) to clipboard!`);
+    }
+
+    // Check backend connection
+    fetch('/api/studio-info')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('backendStatus').textContent = `${data.studio.name} Active (Port 3000)`;
+      })
+      .catch(err => {
+        document.getElementById('backendStatus').textContent = 'Backend offline. Run npm start.';
+      });
+  </script>
+</body>
+</html>

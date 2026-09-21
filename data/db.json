@@ -1,0 +1,445 @@
+{
+  "studioInfo": {
+    "name": "Team Nartan Dance Studio",
+    "tagline": "Elevate Your Rhythm & Grace",
+    "phone": "+91 98765 43210",
+    "email": "hello@teamnartan.com",
+    "address": "4th Floor, Rhythm Heights, Art District, Mumbai",
+    "defaultOtp": "000000"
+  },
+  "batches": [
+    {
+      "id": "batch-1",
+      "name": "Kathak Classical (Weekend)",
+      "style": "Kathak",
+      "instructor": "Guru Nartan Joshi",
+      "timing": "Sat & Sun 10:00 AM - 11:30 AM",
+      "room": "Studio Hall A (Mirrors)",
+      "feeMonthly": 2200
+    },
+    {
+      "id": "batch-2",
+      "name": "Bollywood Commercial (MWF)",
+      "style": "Bollywood",
+      "instructor": "Rhea Malhotra",
+      "timing": "Mon, Wed, Fri 6:00 PM - 7:00 PM",
+      "room": "Studio Hall B",
+      "feeMonthly": 1800
+    },
+    {
+      "id": "batch-3",
+      "name": "Urban Hip-Hop & Popping (TTS)",
+      "style": "Hip-Hop",
+      "instructor": "Rohan / Rhea",
+      "timing": "Tue, Thu, Sat 7:00 PM - 8:30 PM",
+      "room": "Studio Hall A (Mirrors)",
+      "feeMonthly": 2000
+    },
+    {
+      "id": "batch-4",
+      "name": "Contemporary & Movement (Weekend)",
+      "style": "Contemporary",
+      "instructor": "Vikram Sengupta",
+      "timing": "Sat & Sun 4:00 PM - 5:30 PM",
+      "room": "Studio Hall C (Wooden Floor)",
+      "feeMonthly": 2400
+    },
+    {
+      "id": "batch-5",
+      "name": "Morning Zumba & Dance Fitness",
+      "style": "Zumba",
+      "instructor": "Pooja Desai",
+      "timing": "Mon to Fri 7:00 AM - 8:00 AM",
+      "room": "Studio Hall B",
+      "feeMonthly": 1600
+    }
+  ],
+  "students": [
+    {
+      "id": "TN-2026-001",
+      "name": "Aarav Sharma",
+      "phone": "9876543210",
+      "email": "aarav.sharma@example.com",
+      "age": 21,
+      "gender": "Male",
+      "category": "Adults",
+      "style": "Kathak",
+      "batchId": "batch-1",
+      "batchName": "Kathak Classical (Weekend)",
+      "enrolledDate": "2026-01-15",
+      "feePlan": "3 Months",
+      "feeAmount": 6000,
+      "feeStatus": "Paid",
+      "dueDate": "2026-10-15",
+      "lastPaymentDate": "2026-07-15",
+      "attendanceRate": 83,
+      "photo": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80",
+      "notes": "Excellent footwork, preparing for solo showcase."
+    },
+    {
+      "id": "TN-2026-002",
+      "name": "Ananya Roy",
+      "phone": "9123456789",
+      "email": "ananya.roy@example.com",
+      "age": 19,
+      "gender": "Female",
+      "category": "Adults",
+      "style": "Bollywood",
+      "batchId": "batch-2",
+      "batchName": "Bollywood Commercial (MWF)",
+      "enrolledDate": "2026-02-10",
+      "feePlan": "3 Months",
+      "feeAmount": 1800,
+      "feeStatus": "Paid",
+      "dueDate": "2026-12-21",
+      "lastPaymentDate": "2026-09-21",
+      "attendanceRate": 85,
+      "photo": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80",
+      "notes": "Due reminder sent on Sep 19."
+    },
+    {
+      "id": "TN-2026-003",
+      "name": "Rohan Verma",
+      "phone": "9988776655",
+      "email": "rohan.v@example.com",
+      "age": 23,
+      "gender": "Male",
+      "category": "Adults",
+      "style": "Hip-Hop",
+      "batchId": "batch-3",
+      "batchName": "Urban Hip-Hop & Popping (TTS)",
+      "enrolledDate": "2026-03-01",
+      "feePlan": "6 Months",
+      "feeAmount": 11000,
+      "feeStatus": "Paid",
+      "dueDate": "2026-10-01",
+      "lastPaymentDate": "2026-04-01",
+      "attendanceRate": 96,
+      "photo": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+      "notes": "Crew lead for battle division."
+    },
+    {
+      "id": "TN-2026-004",
+      "name": "Meera Nair",
+      "phone": "9811223344",
+      "email": "meera.nair@example.com",
+      "age": 16,
+      "gender": "Female",
+      "category": "Teens",
+      "parentName": "Suresh Nair",
+      "style": "Contemporary",
+      "batchId": "batch-4",
+      "batchName": "Contemporary & Movement (Weekend)",
+      "enrolledDate": "2026-04-10",
+      "feePlan": "3 Months",
+      "feeAmount": 6500,
+      "feeStatus": "Paid",
+      "dueDate": "2026-10-20",
+      "lastPaymentDate": "2026-07-20",
+      "attendanceRate": 88,
+      "photo": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80",
+      "notes": "High flexibility, working on floor-work techniques."
+    },
+    {
+      "id": "TN-2026-005",
+      "name": "Kabir Kapoor",
+      "phone": "9822334455",
+      "email": "kabir.k@example.com",
+      "age": 28,
+      "gender": "Male",
+      "category": "Adults",
+      "style": "Zumba",
+      "batchId": "batch-5",
+      "batchName": "Morning Zumba & Dance Fitness",
+      "enrolledDate": "2026-05-01",
+      "feePlan": "1 Month",
+      "feeAmount": 1600,
+      "feeStatus": "Paid",
+      "dueDate": "2026-10-05",
+      "lastPaymentDate": "2026-09-05",
+      "attendanceRate": 90,
+      "photo": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80",
+      "notes": "Fitness track with high consistency."
+    },
+    {
+      "id": "TN-2026-006",
+      "name": "Tanvi Kulkarni",
+      "phone": "9765432109",
+      "email": "tanvi.k@example.com",
+      "age": 14,
+      "gender": "Female",
+      "category": "Kids & Teens",
+      "parentName": "Sunita Kulkarni",
+      "style": "Kathak",
+      "batchId": "batch-1",
+      "batchName": "Kathak Classical (Weekend)",
+      "enrolledDate": "2026-01-20",
+      "feePlan": "1 Month",
+      "feeAmount": 2200,
+      "feeStatus": "Overdue",
+      "dueDate": "2026-09-15",
+      "lastPaymentDate": "2026-08-15",
+      "attendanceRate": 50,
+      "photo": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&auto=format&fit=crop&q=80",
+      "notes": "Requested weekend catchup for missed tatkar session."
+    },
+    {
+      "id": "TN-2026-007",
+      "name": "Pooja Hegde",
+      "phone": "9845012345",
+      "email": "",
+      "age": 20,
+      "gender": "Female",
+      "category": "Adults",
+      "style": "Bollywood",
+      "batchId": "batch-2",
+      "batchName": "Bollywood Commercial (MWF)",
+      "enrolledDate": "2026-09-21",
+      "feePlan": "3 Months",
+      "feeAmount": 1800,
+      "feeStatus": "Paid",
+      "dueDate": "2026-10-21",
+      "lastPaymentDate": "2026-09-21",
+      "attendanceRate": 100,
+      "photo": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+      "notes": "Enrolled from online admission application #ADM-4142"
+    }
+  ],
+  "attendance": [
+    {
+      "studentId": "TN-2026-001",
+      "date": "2026-09-20",
+      "status": "Present",
+      "batchId": "batch-1"
+    },
+    {
+      "studentId": "TN-2026-001",
+      "date": "2026-09-19",
+      "status": "Present",
+      "batchId": "batch-1"
+    },
+    {
+      "studentId": "TN-2026-001",
+      "date": "2026-09-13",
+      "status": "Present",
+      "batchId": "batch-1"
+    },
+    {
+      "studentId": "TN-2026-001",
+      "date": "2026-09-12",
+      "status": "Present",
+      "batchId": "batch-1"
+    },
+    {
+      "studentId": "TN-2026-001",
+      "date": "2026-09-06",
+      "status": "Absent",
+      "batchId": "batch-1"
+    },
+    {
+      "studentId": "TN-2026-002",
+      "date": "2026-09-21",
+      "status": "Present",
+      "batchId": "batch-2"
+    },
+    {
+      "studentId": "TN-2026-002",
+      "date": "2026-09-18",
+      "status": "Present",
+      "batchId": "batch-2"
+    },
+    {
+      "studentId": "TN-2026-002",
+      "date": "2026-09-16",
+      "status": "Absent",
+      "batchId": "batch-2"
+    },
+    {
+      "studentId": "TN-2026-003",
+      "date": "2026-09-19",
+      "status": "Present",
+      "batchId": "batch-3"
+    },
+    {
+      "studentId": "TN-2026-003",
+      "date": "2026-09-17",
+      "status": "Present",
+      "batchId": "batch-3"
+    },
+    {
+      "studentId": "TN-2026-004",
+      "date": "2026-09-20",
+      "status": "Present",
+      "batchId": "batch-4"
+    },
+    {
+      "studentId": "TN-2026-005",
+      "date": "2026-09-21",
+      "status": "Present",
+      "batchId": "batch-5"
+    },
+    {
+      "studentId": "TN-2026-006",
+      "date": "2026-09-20",
+      "status": "Absent",
+      "batchId": "batch-1"
+    },
+    {
+      "studentId": "TN-2026-001",
+      "date": "2026-09-22",
+      "status": "Present",
+      "batchId": "batch-1"
+    },
+    {
+      "studentId": "TN-2026-006",
+      "date": "2026-09-22",
+      "status": "Present",
+      "batchId": "batch-1"
+    }
+  ],
+  "payments": [
+    {
+      "id": "PAY-134578",
+      "studentId": "TN-2026-002",
+      "studentName": "Ananya Roy",
+      "amount": 5000,
+      "date": "2026-09-21",
+      "mode": "Cash at Desk",
+      "plan": "3 Months",
+      "status": "Success",
+      "ref": "ref_oc1fcof"
+    },
+    {
+      "id": "PAY-901",
+      "studentId": "TN-2026-001",
+      "studentName": "Aarav Sharma",
+      "amount": 6000,
+      "date": "2026-07-15",
+      "mode": "Online / Razorpay",
+      "plan": "3 Months",
+      "status": "Success",
+      "ref": "rzp_test_901928"
+    },
+    {
+      "id": "PAY-902",
+      "studentId": "TN-2026-003",
+      "studentName": "Rohan Verma",
+      "amount": 11000,
+      "date": "2026-04-01",
+      "mode": "Online / UPI",
+      "plan": "6 Months",
+      "status": "Success",
+      "ref": "upi_88771122"
+    },
+    {
+      "id": "PAY-903",
+      "studentId": "TN-2026-004",
+      "studentName": "Meera Nair",
+      "amount": 6500,
+      "date": "2026-07-20",
+      "mode": "Cash at Desk",
+      "plan": "3 Months",
+      "status": "Success",
+      "ref": "CASH-2026-720"
+    },
+    {
+      "id": "PAY-904",
+      "studentId": "TN-2026-005",
+      "studentName": "Kabir Kapoor",
+      "amount": 1600,
+      "date": "2026-09-05",
+      "mode": "Online / Razorpay",
+      "plan": "1 Month",
+      "status": "Success",
+      "ref": "rzp_test_102839"
+    }
+  ],
+  "notices": [
+    {
+      "id": "not-1",
+      "title": "🎭 Team Nartan Annual Showcase 2026 Auditions",
+      "date": "2026-09-20",
+      "tag": "Event",
+      "content": "Auditions for lead roles in the Annual Showcase production will be held on Saturday, Oct 3 at 5:00 PM. Open to all active students in Kathak, Bollywood, and Contemporary batches."
+    },
+    {
+      "id": "not-2",
+      "title": "⚡ Masterclass with Guru Nartan Joshi",
+      "date": "2026-09-18",
+      "tag": "Workshop",
+      "content": "An exclusive 2-hour intensive workshop exploring 'Abhinaya & Rhythm Transitions'. Limited seats available at the reception desk."
+    },
+    {
+      "id": "not-3",
+      "title": "👟 Studio Etiquette & Clean Footwear",
+      "date": "2026-09-12",
+      "tag": "Notice",
+      "content": "Please ensure outdoor shoes are kept at the entrance racks. Studio Hall A and Hall C require bare feet or clean jazz shoes."
+    }
+  ],
+  "admissions": [
+    {
+      "id": "ADM-4142",
+      "name": "Pooja Hegde",
+      "phone": "9845012345",
+      "email": "",
+      "age": 20,
+      "gender": "Female",
+      "parentName": "",
+      "style": "Bollywood",
+      "batchPreference": "Bollywood Commercial (MWF)",
+      "feePlan": "3 Months",
+      "submittedAt": "2026-09-21T15:22:04.142Z",
+      "status": "Approved",
+      "priorExperience": "None",
+      "notes": ""
+    },
+    {
+      "id": "ADM-7939",
+      "name": "Pooja Hegde",
+      "phone": "9845012345",
+      "email": "",
+      "age": 20,
+      "gender": "Female",
+      "parentName": "",
+      "style": "Bollywood",
+      "batchPreference": "Bollywood Commercial (MWF)",
+      "feePlan": "3 Months",
+      "submittedAt": "2026-09-21T15:21:37.939Z",
+      "status": "Approved",
+      "priorExperience": "None",
+      "notes": ""
+    },
+    {
+      "id": "ADM-101",
+      "name": "Ishita Saxena",
+      "phone": "9833445566",
+      "email": "ishita.s@example.com",
+      "age": 22,
+      "gender": "Female",
+      "style": "Contemporary",
+      "batchPreference": "Contemporary & Movement (Weekend)",
+      "feePlan": "3 Months",
+      "submittedAt": "2026-09-20T14:30:00.000Z",
+      "status": "Pending",
+      "priorExperience": "2 years of classical Bharatnatyam training",
+      "notes": "Wants to audition for the showcase team."
+    },
+    {
+      "id": "ADM-102",
+      "name": "Devansh Bhatia",
+      "phone": "9722334411",
+      "email": "devansh.b@example.com",
+      "age": 12,
+      "gender": "Male",
+      "parentName": "Vikram Bhatia",
+      "style": "Hip-Hop",
+      "batchPreference": "Urban Hip-Hop & Popping (TTS)",
+      "feePlan": "1 Month",
+      "submittedAt": "2026-09-21T09:15:00.000Z",
+      "status": "Pending",
+      "priorExperience": "Beginner enthusiast",
+      "notes": "Parent requested Tuesday demo session."
+    }
+  ]
+}

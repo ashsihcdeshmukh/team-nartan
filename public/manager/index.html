@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Manager — Team Nartan Dance Studio</title>
+  <link rel="stylesheet" href="/shared/branding.css">
+  <style>
+    body {
+      background-color: #0b0f19;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+    .manager-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+    @media (max-width: 900px) {
+      .manager-layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        display: none;
+      }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: #111827;
+      border-right: 1px solid var(--border-color);
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .brand-box {
+      margin-bottom: 24px;
+    }
+    .brand-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .brand-sub {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-gold);
+    }
+    .conn-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 10px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .conn-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 14px;
+      flex: 1;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #94a3b8;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: #1e293b;
+      color: #fff;
+    }
+    .nav-btn.active {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: var(--accent-gold);
+    }
+
+    /* Main Content Area */
+    .main-content {
+      padding: 28px 36px 60px;
+      max-width: 1400px;
+      width: 100%;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .page-heading h1 {
+      font-size: 26px;
+      font-weight: 800;
+    }
+    .page-heading p {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* KPI Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .kpi-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .kpi-val {
+      font-size: 28px;
+      font-weight: 800;
+      margin: 8px 0 4px;
+    }
+
+    /* Panels & Tables */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .panel-head {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .panel-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .panel-tools {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+    th {
+      background: #0d121f;
+      padding: 12px 18px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    td {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #cbd5e1;
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Attendance marker tool */
+    .marker-controls {
+      background: #0d121f;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-box {
+      background: #111827;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      max-width: 540px;
+      width: 100%;
+      padding: 26px;
+      box-shadow: var(--shadow-card);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="manager-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand-box">
+        <div class="brand-title font-serif">Team Nartan</div>
+        <div class="brand-sub">Studio Manager</div>
+        <div class="conn-status">
+          <span class="conn-dot"></span>
+          <span>System Online • Port 3000</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <button class="nav-btn active" onclick="showView('dashboard', this)">
+          <span>📊</span> Dashboard
+        </button>
+        <button class="nav-btn" onclick="showView('students', this)">
+          <span>👥</span> Students Roster
+        </button>
+        <button class="nav-btn" onclick="showView('attendance', this)">
+          <span>📝</span> Attendance Marker
+        </button>
+        <button class="nav-btn" onclick="showView('payments', this)">
+          <span>💳</span> Payments & Dues
+        </button>
+        <button class="nav-btn" onclick="showView('admissions', this)">
+          <span>📥</span> Admissions Queue <span class="badge badge-gold" id="admBadgeCount" style="margin-left: auto;">2</span>
+        </button>
+        <button class="nav-btn" onclick="showView('notices', this)">
+          <span>📢</span> Studio Bulletins
+        </button>
+      </nav>
+
+      <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted);">
+        Default Master OTP: <strong class="text-gold">000000</strong>
+        <div style="margin-top: 8px;">
+          <a href="/student" target="_blank" style="color: var(--accent-gold); text-decoration: none;">Student Portal ↗</a> •
+          <a href="/admission" target="_blank" style="color: var(--accent-gold); text-decoration: none;">Admission Form ↗</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content">
+
+      <!-- TOP BAR -->
+      <div class="top-bar">
+        <div class="page-heading">
+          <h1 id="viewTitle">Dashboard Overview</h1>
+          <p id="viewSubtitle">Welcome to Team Nartan Dance Studio administration suite</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-outline-gold" onclick="refreshAllData()">
+            🔄 Refresh Data
+          </button>
+          <button class="btn btn-primary" onclick="openAddStudentModal()">
+            + Add New Student
+          </button>
+        </div>
+      </div>
+
+      <!-- ── 1. DASHBOARD VIEW ── -->
+      <div id="view-dashboard" class="content-view">
+        
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">Active Dancers</span>
+            <div class="kpi-val text-gold" id="kpiActiveStudents">6</div>
+            <span class="text-muted" style="font-size: 12px;">Enrolled across 5 batches</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Total Revenue</span>
+            <div class="kpi-val text-emerald" id="kpiRevenue">₹25,100</div>
+            <span class="text-muted" style="font-size: 12px;">Collections to date</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Overdue Accounts</span>
+            <div class="kpi-val text-rose" id="kpiOverdue">2</div>
+            <span class="text-muted" style="font-size: 12px;">Require renewal action</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Average Attendance</span>
+            <div class="kpi-val" id="kpiAttendance">88%</div>
+            <span class="text-muted" style="font-size: 12px;">Academy average</span>
+          </div>
+        </div>
+
+        <!-- Overdue Action List -->
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">🚨 Action Required: Overdue Membership Dues</span>
+            <span class="badge badge-rose">Attention</span>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Phone</th>
+                  <th>Batch</th>
+                  <th>Plan Tier</th>
+                  <th>Due Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="overdueTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent Admissions -->
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">📥 Recent Online Admission Applications</span>
+            <button class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;" onclick="showView('admissions')">View All</button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ref #</th>
+                  <th>Applicant</th>
+                  <th>Mobile</th>
+                  <th>Style Preference</th>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="dashAdmissionsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── 2. STUDENTS ROSTER VIEW ── -->
+      <div id="view-students" class="content-view" style="display: none;">
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Dancer Directory</span>
+            <div class="panel-tools">
+              <input type="text" id="studentSearch" placeholder="Search by name, phone, or style..." style="width: 260px;" oninput="renderStudentsTable()">
+              <select id="batchFilter" onchange="renderStudentsTable()" style="width: 180px;">
+                <option value="ALL">All Batches</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Style</th>
+                  <th>Batch</th>
+                  <th>Fee Status</th>
+                  <th>Attendance</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 3. ATTENDANCE MARKER VIEW ── -->
+      <div id="view-attendance" class="content-view" style="display: none;">
+        
+        <div class="marker-controls">
+          <div>
+            <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Session Date</label>
+            <input type="date" id="attDate" style="width: 170px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Select Batch</label>
+            <select id="attBatchSelect" style="width: 240px;" onchange="loadBatchForAttendance()"></select>
+          </div>
+          <div style="margin-left: auto; display: flex; gap: 10px; align-items: flex-end;">
+            <button class="btn btn-secondary" onclick="markAllPresent()">
+              ✓ Mark All Present
+            </button>
+            <button class="btn btn-primary" onclick="saveBatchAttendance()">
+              💾 Save Attendance Record
+            </button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title" id="attPanelBatchTitle">Batch Attendance Roster</span>
+            <span class="text-muted" style="font-size: 13px;" id="attStudentCountDisplay">0 students</span>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Current Rate</th>
+                  <th>Status for Selected Date</th>
+                </tr>
+              </thead>
+              <tbody id="attMarkerTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── 4. PAYMENTS VIEW ── -->
+      <div id="view-payments" class="content-view" style="display: none;">
+        
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Transaction Ledger</span>
+            <button class="btn btn-primary" style="font-size: 12px; padding: 6px 14px;" onclick="openRecordPaymentModal()">
+              + Record Offline / Cash Fee
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Receipt #</th>
+                  <th>Student</th>
+                  <th>Amount</th>
+                  <th>Plan Tier</th>
+                  <th>Date</th>
+                  <th>Payment Mode</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="paymentsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── 5. ADMISSIONS QUEUE VIEW ── -->
+      <div id="view-admissions" class="content-view" style="display: none;">
+        
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Online Admission Inquiries</span>
+            <span class="text-muted" style="font-size: 13px;">Review applications received via the public Admission Form</span>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ref #</th>
+                  <th>Applicant Name</th>
+                  <th>Contact</th>
+                  <th>Age / Category</th>
+                  <th>Style & Batch Preference</th>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admissionsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── 6. NOTICES VIEW ── -->
+      <div id="view-notices" class="content-view" style="display: none;">
+        
+        <div class="panel" style="margin-bottom: 24px;">
+          <div class="panel-head">
+            <span class="panel-title">Broadcast New Studio Notice 📢</span>
+          </div>
+          <div style="padding: 20px;">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px;">
+              <div>
+                <label style="display: block; font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Notice Title</label>
+                <input type="text" id="noticeTitle" placeholder="e.g. Masterclass with Guru Nartan on Sunday">
+              </div>
+              <div>
+                <label style="display: block; font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Category Tag</label>
+                <select id="noticeTag">
+                  <option value="Notice">Notice</option>
+                  <option value="Event">Event / Audition</option>
+                  <option value="Workshop">Masterclass Workshop</option>
+                  <option value="Showcase">Showcase 2026</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-bottom: 14px;">
+              <label style="display: block; font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Content</label>
+              <textarea id="noticeContent" placeholder="Enter message to broadcast to all students in their portal..."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="publishNotice()">
+              Broadcast Notice to Student Portals
+            </button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Active Notices</span>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Tag</th>
+                  <th>Date</th>
+                  <th>Content Preview</th>
+                </tr>
+              </thead>
+              <tbody id="noticesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ── MODAL: ADD STUDENT ── -->
+  <div class="modal-overlay" id="addStudentModal">
+    <div class="modal-box">
+      <h3 class="font-serif" style="margin-bottom: 16px;">Enroll New Student</h3>
+      <form id="addStudentForm" onsubmit="saveNewStudent(event)">
+        <div style="display: grid; gap: 12px; margin-bottom: 20px;">
+          <div>
+            <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Full Name *</label>
+            <input type="text" id="mStudentName" required placeholder="Dancer name">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Phone *</label>
+              <input type="tel" id="mStudentPhone" required maxlength="10" placeholder="10-digit number">
+            </div>
+            <div>
+              <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Age</label>
+              <input type="number" id="mStudentAge" value="20">
+            </div>
+          </div>
+          <div>
+            <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Assign Batch *</label>
+            <select id="mStudentBatch"></select>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Plan</label>
+              <select id="mStudentPlan">
+                <option value="1 Month">1 Month</option>
+                <option value="3 Months" selected>3 Months</option>
+                <option value="6 Months">6 Months</option>
+                <option value="12 Months">12 Months</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Fee Amount</label>
+              <input type="number" id="mStudentAmount" value="5000">
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addStudentModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Enroll Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── MODAL: RECORD PAYMENT ── -->
+  <div class="modal-overlay" id="recordPaymentModal">
+    <div class="modal-box">
+      <h3 class="font-serif" style="margin-bottom: 16px;">Record Fee Payment</h3>
+      <form id="recordPaymentForm" onsubmit="savePayment(event)">
+        <div style="display: grid; gap: 12px; margin-bottom: 20px;">
+          <div>
+            <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Select Student *</label>
+            <select id="payStudentSelect" required></select>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Amount (₹) *</label>
+              <input type="number" id="payAmount" value="2000" required>
+            </div>
+            <div>
+              <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Plan</label>
+              <select id="payPlan">
+                <option value="1 Month">1 Month</option>
+                <option value="3 Months">3 Months</option>
+                <option value="6 Months">6 Months</option>
+                <option value="12 Months">12 Months</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Payment Mode</label>
+            <select id="payMode">
+              <option value="Cash at Desk">Cash at Desk</option>
+              <option value="UPI / QR Code">UPI / QR Code</option>
+              <option value="Card Swipe">Card Swipe</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('recordPaymentModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Payment & Receipt</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-msg" id="toast"></div>
+
+  <script src="/manager/app.js"></script>
+</body>
+</html>

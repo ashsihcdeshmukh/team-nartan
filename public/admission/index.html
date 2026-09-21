@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admission Form — Team Nartan Dance Studio</title>
+  <link rel="stylesheet" href="/shared/branding.css">
+  <style>
+    body {
+      background-color: #070a12;
+      padding: 30px 16px 60px;
+    }
+    .admission-wrapper {
+      max-width: 680px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 36px 30px;
+      box-shadow: var(--shadow-card);
+    }
+    .adm-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .adm-header h1 {
+      font-size: 32px;
+      margin-bottom: 6px;
+    }
+    .adm-header p {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    /* Stepper */
+    .steps-indicator {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin-bottom: 36px;
+    }
+    .steps-indicator::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 30px;
+      right: 30px;
+      height: 2px;
+      background: var(--border-color);
+      z-index: 1;
+    }
+    .step-node {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .step-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 2px solid var(--border-color);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    .step-node.active .step-circle {
+      background: var(--accent-gold);
+      border-color: var(--accent-gold);
+      color: #0b0f19;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+    }
+    .step-node.done .step-circle {
+      background: #10b981;
+      border-color: #10b981;
+      color: #fff;
+    }
+    .step-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .step-node.active .step-title {
+      color: var(--accent-gold);
+    }
+
+    /* Step containers */
+    .form-step {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+    .form-step.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .full-width {
+      grid-column: span 2;
+    }
+
+    .field-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field-wrap label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Style selector cards */
+    .style-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .style-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .style-card:hover {
+      border-color: var(--border-focus);
+    }
+    .style-card.selected {
+      border-color: var(--accent-gold);
+      background: rgba(245, 158, 11, 0.1);
+    }
+    .style-card-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .style-card-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* Plan cards */
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .plan-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 18px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .plan-box.selected {
+      border-color: var(--accent-gold);
+      background: rgba(245, 158, 11, 0.12);
+    }
+    .plan-box-duration {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .plan-box-price {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent-gold);
+      margin: 6px 0;
+    }
+
+    .actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Success Card */
+    .success-card {
+      text-align: center;
+      padding: 20px 10px;
+    }
+    .success-badge {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.2);
+      border: 2px solid #10b981;
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      margin: 0 auto 18px;
+    }
+    .receipt-box {
+      background: #090d16;
+      border: 1px dashed var(--accent-gold);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin: 24px 0;
+      text-align: left;
+    }
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .receipt-row:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admission-wrapper">
+
+    <!-- Header -->
+    <div class="adm-header">
+      <div class="badge badge-gold" style="margin-bottom: 10px;">🌟 New Admissions Open 2026</div>
+      <h1 class="font-serif">Team Nartan <span class="text-gold">Dance Academy</span></h1>
+      <p>Official Admission & Student Registration Form</p>
+      
+      <!-- 1-Click Fill Demo Data -->
+      <div style="margin-top: 12px;">
+        <button type="button" class="btn btn-outline-gold" style="font-size: 12px; padding: 5px 12px;" onclick="fillDemoApplicant()">
+          ⚡ Auto-Fill Sample Dancer Application
+        </button>
+      </div>
+    </div>
+
+    <!-- Steps Stepper -->
+    <div class="steps-indicator">
+      <div class="step-node active" id="stepNode1">
+        <div class="step-circle">1</div>
+        <span class="step-title">Dancer</span>
+      </div>
+      <div class="step-node" id="stepNode2">
+        <div class="step-circle">2</div>
+        <span class="step-title">Style & Batch</span>
+      </div>
+      <div class="step-node" id="stepNode3">
+        <div class="step-circle">3</div>
+        <span class="step-title">Plan</span>
+      </div>
+      <div class="step-node" id="stepNode4">
+        <div class="step-circle">4</div>
+        <span class="step-title">Confirm</span>
+      </div>
+    </div>
+
+    <form id="admissionForm" onsubmit="return false;">
+
+      <!-- STEP 1: DANCER PERSONAL DETAILS -->
+      <div class="form-step active" id="step1">
+        <h3 class="font-serif" style="margin-bottom: 14px;">1. Dancer Information</h3>
+        <div class="form-grid">
+          <div class="field-wrap full-width">
+            <label>Full Name *</label>
+            <input type="text" id="admName" placeholder="e.g. Ishita Saxena" required>
+          </div>
+          <div class="field-wrap">
+            <label>Contact Mobile *</label>
+            <input type="tel" id="admPhone" placeholder="10-digit mobile" maxlength="10" required>
+          </div>
+          <div class="field-wrap">
+            <label>Email Address</label>
+            <input type="email" id="admEmail" placeholder="e.g. dancer@example.com">
+          </div>
+          <div class="field-wrap">
+            <label>Age *</label>
+            <input type="number" id="admAge" placeholder="e.g. 19" min="4" max="80" required>
+          </div>
+          <div class="field-wrap">
+            <label>Gender</label>
+            <select id="admGender">
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+              <option value="Non-binary">Non-binary / Other</option>
+            </select>
+          </div>
+          <div class="field-wrap full-width" id="parentFieldWrap">
+            <label>Parent / Guardian Name (Mandatory for Minors under 18)</label>
+            <input type="text" id="admParent" placeholder="Parent or Guardian name">
+          </div>
+        </div>
+
+        <div class="actions-bar">
+          <div></div>
+          <button type="button" class="btn btn-primary" onclick="goToStep(2)">
+            Next: Dance Style & Batch →
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: STYLE & BATCH SELECTION -->
+      <div class="form-step" id="step2">
+        <h3 class="font-serif" style="margin-bottom: 14px;">2. Choose Dance Discipline</h3>
+        
+        <div class="style-cards">
+          <div class="style-card selected" onclick="selectStyle('Kathak', 'batch-1', 'Kathak Classical (Weekend)', this)">
+            <div class="style-card-icon">🪘</div>
+            <div class="style-card-name">Kathak</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Classical & Taal</div>
+          </div>
+
+          <div class="style-card" onclick="selectStyle('Bollywood', 'batch-2', 'Bollywood Commercial (MWF)', this)">
+            <div class="style-card-icon">🎬</div>
+            <div class="style-card-name">Bollywood</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Commercial & Expressions</div>
+          </div>
+
+          <div class="style-card" onclick="selectStyle('Hip-Hop', 'batch-3', 'Urban Hip-Hop & Popping (TTS)', this)">
+            <div class="style-card-icon">🧢</div>
+            <div class="style-card-name">Hip-Hop</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Urban & Popping</div>
+          </div>
+
+          <div class="style-card" onclick="selectStyle('Contemporary', 'batch-4', 'Contemporary & Movement (Weekend)', this)">
+            <div class="style-card-icon">🩰</div>
+            <div class="style-card-name">Contemporary</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Lyrical & Floorwork</div>
+          </div>
+
+          <div class="style-card" onclick="selectStyle('Zumba', 'batch-5', 'Morning Zumba & Dance Fitness', this)">
+            <div class="style-card-icon">🔥</div>
+            <div class="style-card-name">Zumba</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Dance Fitness</div>
+          </div>
+        </div>
+
+        <div class="field-wrap" style="margin-bottom: 20px;">
+          <label>Selected Batch Preference</label>
+          <input type="text" id="admBatchSelected" value="Kathak Classical (Weekend)" readonly style="background: #141c2e;">
+        </div>
+
+        <div class="field-wrap">
+          <label>Prior Dance Experience (Optional)</label>
+          <textarea id="admExperience" placeholder="Tell us if you have trained before in classical, folk, or western styles..."></textarea>
+        </div>
+
+        <div class="actions-bar">
+          <button type="button" class="btn btn-secondary" onclick="goToStep(1)">
+            ← Back
+          </button>
+          <button type="button" class="btn btn-primary" onclick="goToStep(3)">
+            Next: Membership Plan →
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3: MEMBERSHIP PLAN -->
+      <div class="form-step" id="step3">
+        <h3 class="font-serif" style="margin-bottom: 14px;">3. Select Membership Duration</h3>
+        <p class="text-muted" style="font-size: 13px; margin-bottom: 18px;">
+          Select your training tenure. Long-term passes include showcase registration discounts.
+        </p>
+
+        <div class="plan-grid">
+          <div class="plan-box" onclick="selectFeePlan('1 Month', 2000, this)">
+            <div class="plan-box-duration">1 Month</div>
+            <div class="plan-box-price">₹2,000</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Standard</div>
+          </div>
+
+          <div class="plan-box selected" onclick="selectFeePlan('3 Months', 5400, this)">
+            <div class="plan-box-duration">3 Months</div>
+            <div class="plan-box-price">₹5,400</div>
+            <div style="font-size: 11px; color: var(--accent-gold);">Save ₹600</div>
+          </div>
+
+          <div class="plan-box" onclick="selectFeePlan('6 Months', 10000, this)">
+            <div class="plan-box-duration">6 Months</div>
+            <div class="plan-box-price">₹10,000</div>
+            <div style="font-size: 11px; color: var(--accent-gold);">Save ₹2,000</div>
+          </div>
+
+          <div class="plan-box" onclick="selectFeePlan('12 Months', 18000, this)">
+            <div class="plan-box-duration">Annual (12M)</div>
+            <div class="plan-box-price">₹18,000</div>
+            <div style="font-size: 11px; color: var(--accent-gold);">Showcase Pass</div>
+          </div>
+        </div>
+
+        <div class="field-wrap full-width" style="margin-top: 10px;">
+          <label>Medical / Injury Notes (if any)</label>
+          <input type="text" id="admNotes" placeholder="e.g. Right knee sensitivity, asthma, none">
+        </div>
+
+        <div class="actions-bar">
+          <button type="button" class="btn btn-secondary" onclick="goToStep(2)">
+            ← Back
+          </button>
+          <button type="button" class="btn btn-primary" onclick="goToStep(4)">
+            Next: Review & Submit →
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 4: REVIEW & CONFIRM -->
+      <div class="form-step" id="step4">
+        <h3 class="font-serif" style="margin-bottom: 14px;">4. Review & Confirm Application</h3>
+        
+        <div style="background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+          <div class="receipt-row">
+            <span class="text-muted">Applicant Name</span>
+            <strong id="revName">—</strong>
+          </div>
+          <div class="receipt-row">
+            <span class="text-muted">Mobile Number</span>
+            <strong id="revPhone">—</strong>
+          </div>
+          <div class="receipt-row">
+            <span class="text-muted">Dance Style</span>
+            <strong id="revStyle" class="text-gold">—</strong>
+          </div>
+          <div class="receipt-row">
+            <span class="text-muted">Selected Batch</span>
+            <strong id="revBatch">—</strong>
+          </div>
+          <div class="receipt-row">
+            <span class="text-muted">Membership Tier</span>
+            <strong id="revPlan">—</strong>
+          </div>
+        </div>
+
+        <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 13px; color: #cbd5e1; margin-bottom: 20px;">
+          <input type="checkbox" id="admTerms" checked style="width: 18px; height: 18px; margin-top: 2px;">
+          <span>I agree to follow the studio rules and code of conduct of Team Nartan Dance Studio.</span>
+        </label>
+
+        <div class="actions-bar">
+          <button type="button" class="btn btn-secondary" onclick="goToStep(3)">
+            ← Back
+          </button>
+          <button type="button" class="btn btn-primary" id="btnSubmitAdmission" onclick="submitAdmissionForm()">
+            Submit Admission Application 🎉
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 5: SUCCESS RECEIPT SCREEN -->
+      <div class="form-step" id="step5">
+        <div class="success-card">
+          <div class="success-badge">✓</div>
+          <h2 class="font-serif" style="font-size: 28px; margin-bottom: 6px;">Admission Successful!</h2>
+          <p class="text-muted">Welcome to Team Nartan Dance Studio family!</p>
+
+          <div class="receipt-box">
+            <div style="text-align: center; margin-bottom: 14px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px;">
+              OFFICIAL ENROLLMENT PASS
+            </div>
+            <div class="receipt-row">
+              <span class="text-muted">Application Ref #</span>
+              <strong id="succAppId" class="text-gold">ADM-101</strong>
+            </div>
+            <div class="receipt-row">
+              <span class="text-muted">Dancer Name</span>
+              <strong id="succName">Ishita Saxena</strong>
+            </div>
+            <div class="receipt-row">
+              <span class="text-muted">Registered Phone</span>
+              <strong id="succPhone">9833445566</strong>
+            </div>
+            <div class="receipt-row">
+              <span class="text-muted">Dance Style</span>
+              <strong id="succStyle">Kathak Classical</strong>
+            </div>
+            <div class="receipt-row">
+              <span class="text-muted">Demo Portal OTP</span>
+              <strong class="badge badge-gold">000000</strong>
+            </div>
+          </div>
+
+          <div style="display: grid; gap: 12px; max-width: 380px; margin: 0 auto;">
+            <a href="/student" target="_blank" class="btn btn-primary">
+              🚀 Open Student Portal Now
+            </a>
+            <a href="/manager" target="_blank" class="btn btn-secondary">
+              🏢 View in Studio Manager
+            </a>
+            <button type="button" class="btn btn-outline-gold" onclick="resetForm()">
+              Register Another Student
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="toast-msg" id="toast"></div>
+
+  <script>
+    let currentStep = 1;
+    let selectedStyle = 'Kathak';
+    let selectedBatchId = 'batch-1';
+    let selectedBatchName = 'Kathak Classical (Weekend)';
+    let selectedPlan = '3 Months';
+    let selectedFee = 5400;
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function selectStyle(style, batchId, batchName, el) {
+      selectedStyle = style;
+      selectedBatchId = batchId;
+      selectedBatchName = batchName;
+      document.getElementById('admBatchSelected').value = batchName;
+      document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function selectFeePlan(plan, fee, el) {
+      selectedPlan = plan;
+      selectedFee = fee;
+      document.querySelectorAll('.plan-box').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function goToStep(step) {
+      if (step === 2) {
+        const name = document.getElementById('admName').value.trim();
+        const phone = document.getElementById('admPhone').value.trim();
+        const age = document.getElementById('admAge').value.trim();
+        if (!name || !phone || !age) {
+          alert('Please fill in Name, Phone, and Age before continuing.');
+          return;
+        }
+      }
+
+      if (step === 4) {
+        document.getElementById('revName').textContent = document.getElementById('admName').value;
+        document.getElementById('revPhone').textContent = `+91 ${document.getElementById('admPhone').value}`;
+        document.getElementById('revStyle').textContent = selectedStyle;
+        document.getElementById('revBatch').textContent = selectedBatchName;
+        document.getElementById('revPlan').textContent = `${selectedPlan} (₹${selectedFee})`;
+      }
+
+      currentStep = step;
+      document.querySelectorAll('.form-step').forEach((s, idx) => {
+        s.classList.toggle('active', idx + 1 === step);
+      });
+
+      for (let i = 1; i <= 4; i++) {
+        const node = document.getElementById(`stepNode${i}`);
+        if (!node) continue;
+        node.classList.remove('active', 'done');
+        if (i === step) node.classList.add('active');
+        if (i < step) node.classList.add('done');
+      }
+    }
+
+    function fillDemoApplicant() {
+      document.getElementById('admName').value = 'Ishita Saxena';
+      document.getElementById('admPhone').value = '9833445566';
+      document.getElementById('admEmail').value = 'ishita.saxena@example.com';
+      document.getElementById('admAge').value = '22';
+      document.getElementById('admGender').value = 'Female';
+      document.getElementById('admParent').value = 'Anand Saxena';
+      document.getElementById('admExperience').value = 'Trained in classical Kathak for 3 years, wanting to join intermediate performance batch.';
+      showToast('Pre-filled sample dancer Ishita Saxena!');
+    }
+
+    async function submitAdmissionForm() {
+      const terms = document.getElementById('admTerms').checked;
+      if (!terms) {
+        alert('Please agree to the studio rules before submitting.');
+        return;
+      }
+
+      const btn = document.getElementById('btnSubmitAdmission');
+      btn.disabled = true;
+      btn.textContent = 'Submitting Application...';
+
+      const payload = {
+        name: document.getElementById('admName').value.trim(),
+        phone: document.getElementById('admPhone').value.trim(),
+        email: document.getElementById('admEmail').value.trim(),
+        age: document.getElementById('admAge').value.trim(),
+        gender: document.getElementById('admGender').value,
+        parentName: document.getElementById('admParent').value.trim(),
+        style: selectedStyle,
+        batchPreference: selectedBatchName,
+        feePlan: selectedPlan,
+        priorExperience: document.getElementById('admExperience').value.trim(),
+        notes: document.getElementById('admNotes').value.trim()
+      };
+
+      try {
+        const res = await fetch('/api/admissions/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          document.getElementById('succAppId').textContent = data.admission.id;
+          document.getElementById('succName').textContent = data.admission.name;
+          document.getElementById('succPhone').textContent = `+91 ${data.admission.phone}`;
+          document.getElementById('succStyle').textContent = data.admission.style;
+
+          goToStep(5);
+          showToast('Admission submitted successfully! 🎉');
+        } else {
+          alert(data.error || 'Failed to submit admission.');
+        }
+      } catch (err) {
+        alert('Network error. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit Admission Application 🎉';
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('admissionForm').reset();
+      goToStep(1);
+    }
+  </script>
+</body>
+</html>

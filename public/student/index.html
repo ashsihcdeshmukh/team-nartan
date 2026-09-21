@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Student Portal — Team Nartan Dance Studio</title>
+  <link rel="stylesheet" href="/shared/branding.css">
+  <link rel="stylesheet" href="/student/style.css">
+</head>
+<body>
+
+  <!-- MOBILE APP WRAPPER -->
+  <div class="mobile-frame">
+
+    <!-- ── AUTH VIEW: LOGIN ── -->
+    <div id="authView" class="view-screen">
+      <div class="auth-header">
+        <div class="logo-circle">💃</div>
+        <div class="badge badge-gold" style="margin-bottom: 8px;">Official Student App</div>
+        <h1 class="font-serif">Team Nartan</h1>
+        <p class="subtitle">Dance Studio Portal</p>
+      </div>
+
+      <!-- Demo Master OTP Notification Banner -->
+      <div class="demo-otp-banner">
+        <div class="banner-title">🔑 Demo Master OTP Active</div>
+        <div class="banner-desc">
+          Enter any registered phone and use default OTP:
+          <span class="code-pill">000000</span>
+        </div>
+      </div>
+
+      <!-- Quick Demo Student Pickers -->
+      <div class="quick-pickers">
+        <span class="pick-label">Quick Demo Login:</span>
+        <div class="pick-buttons">
+          <button type="button" class="pick-btn" onclick="quickFillPhone('9876543210')">
+            <strong>Aarav</strong> (Kathak)
+          </button>
+          <button type="button" class="pick-btn" onclick="quickFillPhone('9123456789')">
+            <strong>Ananya</strong> (Bollywood)
+          </button>
+          <button type="button" class="pick-btn" onclick="quickFillPhone('9988776655')">
+            <strong>Rohan</strong> (Hip-Hop)
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 1: Phone input -->
+      <div id="phoneStep" class="auth-step">
+        <div class="input-group">
+          <label>Mobile Number</label>
+          <div class="phone-input-wrapper">
+            <span class="country-prefix">+91</span>
+            <input type="tel" id="loginPhone" placeholder="Enter 10-digit number" maxlength="10" value="9876543210">
+          </div>
+        </div>
+        <button id="btnSendOtp" class="btn btn-primary btn-block" onclick="sendLoginOtp()">
+          Send OTP
+        </button>
+        <div id="phoneErr" class="form-err"></div>
+      </div>
+
+      <!-- Step 2: OTP input -->
+      <div id="otpStep" class="auth-step" style="display: none;">
+        <div class="otp-subheading">
+          Enter the 6-digit verification code sent to <strong id="sentPhoneDisplay"></strong>
+        </div>
+
+        <div class="otp-row">
+          <input type="tel" class="otp-digit" id="otp1" maxlength="1" oninput="moveOtp(this, 'otp2')" onkeyup="backOtp(event, '')">
+          <input type="tel" class="otp-digit" id="otp2" maxlength="1" oninput="moveOtp(this, 'otp3')" onkeyup="backOtp(event, 'otp1')">
+          <input type="tel" class="otp-digit" id="otp3" maxlength="1" oninput="moveOtp(this, 'otp4')" onkeyup="backOtp(event, 'otp2')">
+          <input type="tel" class="otp-digit" id="otp4" maxlength="1" oninput="moveOtp(this, 'otp5')" onkeyup="backOtp(event, 'otp3')">
+          <input type="tel" class="otp-digit" id="otp5" maxlength="1" oninput="moveOtp(this, 'otp6')" onkeyup="backOtp(event, 'otp4')">
+          <input type="tel" class="otp-digit" id="otp6" maxlength="1" oninput="moveOtp(this, '')" onkeyup="backOtp(event, 'otp5')">
+        </div>
+
+        <div style="text-align: center; margin-bottom: 16px;">
+          <button type="button" class="btn btn-outline-gold" style="font-size: 12px; padding: 6px 12px;" onclick="autoFillDefaultOtp()">
+            ⚡ Auto-Fill Default OTP: 000000
+          </button>
+        </div>
+
+        <button id="btnVerifyOtp" class="btn btn-primary btn-block" onclick="verifyLoginOtp()">
+          Verify & Enter Portal
+        </button>
+
+        <div id="otpErr" class="form-err"></div>
+
+        <div class="resend-row">
+          <span onclick="resetLoginStep()">← Change phone number</span>
+        </div>
+      </div>
+
+      <div class="auth-footer">
+        Not enrolled yet? <a href="/admission" target="_blank">Fill Admission Form ↗</a>
+      </div>
+    </div>
+
+    <!-- ── LOGGED IN PORTAL VIEW ── -->
+    <div id="portalView" class="view-screen" style="display: none;">
+
+      <!-- Top Header -->
+      <header class="portal-header">
+        <div class="user-greeting">
+          <div class="avatar-sm" id="headerAvatar">TN</div>
+          <div>
+            <div class="greeting-sub">Welcome back,</div>
+            <div class="greeting-name font-serif" id="headerStudentName">Student</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logoutStudent()" title="Logout">
+          <span style="font-size: 16px;">🚪</span> Logout
+        </button>
+      </header>
+
+      <!-- TAB CONTENTS -->
+      <div class="tab-scroller">
+
+        <!-- 1. HOME TAB -->
+        <section id="tab-home" class="tab-pane active">
+
+          <!-- Digital Membership Card -->
+          <div class="dance-card">
+            <div class="dance-card-bg"></div>
+            <div class="card-top">
+              <div>
+                <span class="card-brand">TEAM NARTAN</span>
+                <div class="card-category" id="cardCategory">DANCER PASS</div>
+              </div>
+              <span class="badge badge-emerald" id="cardFeeStatus">Paid</span>
+            </div>
+
+            <div class="card-middle">
+              <div class="dancer-photo-wrap">
+                <img id="cardPhoto" src="" alt="Dancer">
+              </div>
+              <div>
+                <h3 class="dancer-name" id="cardName">Student Name</h3>
+                <div class="dancer-style" id="cardStyle">Kathak Classical</div>
+                <div class="dancer-id" id="cardId">TN-2026-001</div>
+              </div>
+            </div>
+
+            <div class="card-bottom">
+              <div>
+                <span class="meta-label">Active Batch</span>
+                <span class="meta-val" id="cardBatch">Weekend Morning</span>
+              </div>
+              <div>
+                <span class="meta-label">Next Renewal</span>
+                <span class="meta-val text-gold" id="cardDueDate">15 Oct 2026</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Metrics Bar -->
+          <div class="quick-stats-row">
+            <div class="mini-stat">
+              <span class="stat-number" id="quickAttendanceRate">92%</span>
+              <span class="stat-label">Attendance</span>
+            </div>
+            <div class="mini-stat">
+              <span class="stat-number" id="quickFeePlan">3M</span>
+              <span class="stat-label">Plan Tier</span>
+            </div>
+            <div class="mini-stat">
+              <span class="stat-number text-gold" id="quickSessionsThisMonth">8</span>
+              <span class="stat-label">Attended</span>
+            </div>
+          </div>
+
+          <!-- Active Announcements -->
+          <div class="section-heading">
+            <h4>Studio Bulletins 📢</h4>
+          </div>
+          <div id="homeNoticesList" class="notices-list"></div>
+
+          <!-- Next Scheduled Class Alert -->
+          <div class="next-class-card">
+            <div class="next-class-icon">📅</div>
+            <div>
+              <div style="font-size: 11px; text-transform: uppercase; color: var(--accent-gold); font-weight: 700;">Upcoming Session</div>
+              <div style="font-size: 15px; font-weight: 700;" id="nextClassTitle">Kathak Classical Batch</div>
+              <div style="font-size: 12px; color: var(--text-muted);" id="nextClassTime">Tomorrow • 10:00 AM - 11:30 AM (Studio Hall A)</div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- 2. SCHEDULE TAB -->
+        <section id="tab-schedule" class="tab-pane">
+          <div class="section-heading">
+            <h3 class="font-serif">Studio Timetable</h3>
+            <p class="text-muted" style="font-size: 13px;">All weekly training batches and master instructors</p>
+          </div>
+          <div id="scheduleBatchList" class="batch-list"></div>
+        </section>
+
+        <!-- 3. ATTENDANCE TAB -->
+        <section id="tab-attendance" class="tab-pane">
+          <div class="section-heading">
+            <h3 class="font-serif">Attendance Tracker</h3>
+            <p class="text-muted" style="font-size: 13px;">Your official studio presence record</p>
+          </div>
+
+          <div class="att-summary-card">
+            <div class="att-dial">
+              <span class="att-dial-num" id="attOverallPercent">92%</span>
+              <span class="att-dial-lbl">Overall</span>
+            </div>
+            <div class="att-info-box">
+              <div style="font-weight: 700; margin-bottom: 4px;">Discipline Badge: <span class="text-gold">Rhythm Star ⭐</span></div>
+              <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">Consistent dancers are selected for live theater showcases and video productions.</p>
+            </div>
+          </div>
+
+          <h4 style="font-size: 14px; margin: 20px 0 10px; color: #cbd5e1;">Recent Check-in Logs</h4>
+          <div id="attendanceHistoryList" class="att-history-list"></div>
+        </section>
+
+        <!-- 4. PAY & RENEW TAB -->
+        <section id="tab-pay" class="tab-pane">
+          <div class="section-heading">
+            <h3 class="font-serif">Fee & Membership</h3>
+            <p class="text-muted" style="font-size: 13px;">Manage your training package and renewal</p>
+          </div>
+
+          <!-- Current status card -->
+          <div class="fee-status-card" id="feeStatusBox">
+            <div>
+              <span style="font-size: 12px; text-transform: uppercase; color: var(--text-muted);">Current Status</span>
+              <div style="font-size: 20px; font-weight: 800;" id="feeCurrentStatus">Paid</div>
+              <div style="font-size: 12px; color: var(--text-muted);" id="feeDueNotice">Valid until 15 Oct 2026</div>
+            </div>
+            <div class="status-pill-big" id="feeStatusBadge">Active</div>
+          </div>
+
+          <h4 style="font-size: 15px; margin: 24px 0 12px; font-weight: 700;">Select Renewal Package</h4>
+          
+          <div class="plan-cards-grid">
+            <div class="plan-card" onclick="selectRenewalPlan(1, 1800, this)">
+              <div class="plan-head">
+                <span class="plan-title">1 Month</span>
+                <span class="plan-price">₹1,800</span>
+              </div>
+              <div class="plan-desc">Standard monthly access</div>
+            </div>
+
+            <div class="plan-card selected" onclick="selectRenewalPlan(3, 5000, this)">
+              <span class="popular-ribbon">Most Popular</span>
+              <div class="plan-head">
+                <span class="plan-title">3 Months</span>
+                <span class="plan-price">₹5,000</span>
+              </div>
+              <div class="plan-desc">Save ₹400 • Intensive quarter</div>
+            </div>
+
+            <div class="plan-card" onclick="selectRenewalPlan(6, 9500, this)">
+              <div class="plan-head">
+                <span class="plan-title">6 Months</span>
+                <span class="plan-price">₹9,500</span>
+              </div>
+              <div class="plan-desc">Save ₹1,300 • Semi-annual pass</div>
+            </div>
+
+            <div class="plan-card" onclick="selectRenewalPlan(12, 18000, this)">
+              <div class="plan-head">
+                <span class="plan-title">12 Months (Annual)</span>
+                <span class="plan-price">₹18,000</span>
+              </div>
+              <div class="plan-desc">Best Value • Priority showcase entry</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px; display: grid; gap: 10px;">
+            <button class="btn btn-primary btn-block" onclick="simulateOnlinePayment()">
+              💳 Pay Online via Demo Razorpay / UPI
+            </button>
+            <button class="btn btn-secondary btn-block" onclick="generateCashDeskToken()">
+              🏢 Request Cash Payment at Studio Desk
+            </button>
+          </div>
+
+          <!-- Payment history -->
+          <h4 style="font-size: 14px; margin: 26px 0 10px; color: #cbd5e1;">Payment History</h4>
+          <div id="paymentHistoryList" class="pay-history-list"></div>
+
+        </section>
+
+        <!-- 5. PROFILE TAB -->
+        <section id="tab-profile" class="tab-pane">
+          <div class="section-heading">
+            <h3 class="font-serif">Dancer Profile</h3>
+            <p class="text-muted" style="font-size: 13px;">Manage membership details and leave requests</p>
+          </div>
+
+          <div class="profile-card">
+            <div class="prof-row">
+              <span class="prof-label">Full Name</span>
+              <span class="prof-val" id="profName">Aarav Sharma</span>
+            </div>
+            <div class="prof-row">
+              <span class="prof-label">Phone</span>
+              <span class="prof-val" id="profPhone">9876543210</span>
+            </div>
+            <div class="prof-row">
+              <span class="prof-label">Email</span>
+              <span class="prof-val" id="profEmail">aarav@example.com</span>
+            </div>
+            <div class="prof-row">
+              <span class="prof-label">Category</span>
+              <span class="prof-val" id="profCategory">Adults (Age 21)</span>
+            </div>
+            <div class="prof-row">
+              <span class="prof-label">Enrolled Date</span>
+              <span class="prof-val" id="profEnrolled">2026-01-15</span>
+            </div>
+          </div>
+
+          <!-- Freeze / Leave Request -->
+          <div class="freeze-card">
+            <h4 style="font-size: 15px; margin-bottom: 6px;">Request Membership Freeze / Leave ❄️</h4>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">
+              Going out of town or injured? Request a temporary freeze up to 14 days without losing validity.
+            </p>
+            <div class="input-group" style="margin-bottom: 10px;">
+              <label>Reason / Dates</label>
+              <input type="text" id="freezeReason" placeholder="e.g., College exams from Oct 1 to Oct 7">
+            </div>
+            <button class="btn btn-outline-gold" style="width: 100%; font-size: 13px;" onclick="submitFreezeRequest()">
+              Submit Freeze Request
+            </button>
+          </div>
+
+        </section>
+
+      </div>
+
+      <!-- BOTTOM NAVIGATION BAR -->
+      <nav class="portal-nav">
+        <button class="nav-item active" onclick="switchTab('home', this)">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-text">Home</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('schedule', this)">
+          <span class="nav-icon">📅</span>
+          <span class="nav-text">Schedule</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('attendance', this)">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Attendance</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('pay', this)">
+          <span class="nav-icon">💳</span>
+          <span class="nav-text">Renew</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('profile', this)">
+          <span class="nav-icon">👤</span>
+          <span class="nav-text">Profile</span>
+        </button>
+      </nav>
+
+    </div>
+
+  </div>
+
+  <div class="toast-msg" id="toast"></div>
+
+  <script src="/student/app.js"></script>
+</body>
+</html>
