@@ -17,6 +17,7 @@
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/shared/nartan-db.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
 :root{
@@ -207,14 +208,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
 <!-- CONFIG -->
 <script>
-var SUPABASE_URL = "https://flzreearlfdultvspdmx.supabase.co";
-var SUPABASE_KEY = "sb_publishable_vtHDcCNL1dMBScbVx-FhcA_CL_yyNsQ";
-var RAZORPAY_KEY = "rzp_live_SdEdsmNOQvqmgv";
-var TG_TOKEN     = "8266966923:AAEn8emSbU7J05GDqsn7_UGoD-wFfAsBbHc";
-var TG_OWNER     = "735593509";
-var WA_KEY       = "ChdoC5rR2WuN";
-var TWOFACTOR_API_KEY = "1925099b-9969-11f1-9cb1-0200cd936042";
-var BACKEND_URL  = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://localhost:3000" : "https://team-nartan-backend.onrender.com";
+var SUPABASE_URL = "https://team-nartan-demo.supabase.co";
+var SUPABASE_KEY = "sb_demo_key_team_nartan";
+var RAZORPAY_KEY = "rzp_test_team_nartan_demo";
+var TG_TOKEN     = "demo_bot_token";
+var TG_OWNER     = "demo_owner_id";
+var WA_KEY       = "demo_wa_key";
+var TWOFACTOR_API_KEY = "demo_2factor_key";
+var BACKEND_URL  = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://localhost:3000" : "";
 </script>
 
 <!-- LOGIN SCREEN -->

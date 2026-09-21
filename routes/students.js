@@ -16,55 +16,115 @@ function sbHeaders(extra = {}) {
   };
 }
 
+const store = require('../data/store');
+
 async function dbSelect(table, filters = '', columns = '*') {
-  const url = `${process.env.SUPABASE_URL}/rest/v1/${table}?select=${columns}${filters ? '&' + filters : ''}`;
-  const r   = await fetch(url, { headers: sbHeaders() });
-  const text = await r.text();
-  let data = [];
-  try { if (text) data = JSON.parse(text); } catch(e) {}
-  if (!r.ok) { throw new Error(data.message || `DB error ${r.status}`); }
-  return data;
+  try {
+    if (!process.env.SUPABASE_URL || process.env.SUPABASE_URL.includes('demo') || process.env.SUPABASE_URL.includes('flzreearlfdultvspdmx')) {
+      throw new Error('Local store active');
+    }
+    const url = `${process.env.SUPABASE_URL}/rest/v1/${table}?select=${columns}${filters ? '&' + filters : ''}`;
+    const r   = await fetch(url, { headers: sbHeaders() });
+    const text = await r.text();
+    let data = [];
+    try { if (text) data = JSON.parse(text); } catch(e) {}
+    if (!r.ok) { throw new Error(data.message || `DB error ${r.status}`); }
+    return data;
+  } catch (err) {
+    const db = store.readDb();
+    if (table === 'students') {
+      let list = (db.students || []).map(s => Object.assign({}, s, {
+        due_date: s.dueDate || s.due_date,
+        fee_amount: s.feeAmount || s.fee_amount,
+        dance_style: s.style || s.dance_style,
+        admission_date: s.enrolledDate || s.admission_date
+      }));
+      if (filters.includes('phone=eq.')) {
+        const p = filters.split('phone=eq.')[1].split('&')[0].replace(/\D/g, '').slice(-10);
+        list = list.filter(s => String(s.phone).replace(/\D/g, '').slice(-10) === p);
+      }
+      return list;
+    }
+    return db[table] || [];
+  }
 }
 
 async function dbInsert(table, data) {
-  const url = `${process.env.SUPABASE_URL}/rest/v1/${table}`;
-  const r   = await fetch(url, {
-    method:  'POST',
-    headers: sbHeaders({ 'Prefer': 'return=representation' }),
-    body:    JSON.stringify(data)
-  });
-  const text = await r.text();
-  let json = [];
-  try { if (text) json = JSON.parse(text); } catch(e) {}
-  if (!r.ok) {
-    console.error('[DB Insert Error]', text);
-    throw new Error(json.message || json.details || json.hint || `DB insert failed (${r.status})`);
+  try {
+    if (!process.env.SUPABASE_URL || process.env.SUPABASE_URL.includes('demo') || process.env.SUPABASE_URL.includes('flzreearlfdultvspdmx')) {
+      throw new Error('Local store active');
+    }
+    const url = `${process.env.SUPABASE_URL}/rest/v1/${table}`;
+    const r   = await fetch(url, {
+      method:  'POST',
+      headers: sbHeaders({ 'Prefer': 'return=representation' }),
+      body:    JSON.stringify(data)
+    });
+    const text = await r.text();
+    let json = [];
+    try { if (text) json = JSON.parse(text); } catch(e) {}
+    if (!r.ok) throw new Error(json.message || `DB insert failed`);
+    return json[0];
+  } catch (err) {
+    const db = store.readDb();
+    const item = Object.assign({ id: 'TN-' + Math.floor(1000 + Math.random() * 9000), created_at: new Date().toISOString() }, data);
+    if (!db[table]) db[table] = [];
+    db[table].unshift(item);
+    store.writeDb(db);
+    return item;
   }
-  return json[0];
 }
 
 async function dbUpdate(table, id, data) {
-  const url = `${process.env.SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`;
-  const r   = await fetch(url, {
-    method:  'PATCH',
-    headers: sbHeaders({ 'Prefer': 'return=representation' }),
-    body:    JSON.stringify(data)
-  });
-  const text = await r.text();
-  let json = [];
-  try { if (text) json = JSON.parse(text); } catch(e) {}
-  if (!r.ok) { throw new Error(json.message || `DB update failed`); }
-  return json;
+  try {
+    if (!process.env.SUPABASE_URL || process.env.SUPABASE_URL.includes('demo') || process.env.SUPABASE_URL.includes('flzreearlfdultvspdmx')) {
+      throw new Error('Local store active');
+    }
+    const url = `${process.env.SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`;
+    const r   = await fetch(url, {
+      method:  'PATCH',
+      headers: sbHeaders({ 'Prefer': 'return=representation' }),
+      body:    JSON.stringify(data)
+    });
+    const text = await r.text();
+    let json = [];
+    try { if (text) json = JSON.parse(text); } catch(e) {}
+    if (!r.ok) { throw new Error(json.message || `DB update failed`); }
+    return json;
+  } catch (err) {
+    const db = store.readDb();
+    if (db[table]) {
+      const idx = db[table].findIndex(x => x.id === id);
+      if (idx !== -1) {
+        db[table][idx] = Object.assign({}, db[table][idx], data);
+        store.writeDb(db);
+        return [db[table][idx]];
+      }
+    }
+    return [data];
+  }
 }
 
 async function dbDelete(table, id) {
-  const url = `${process.env.SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`;
-  const r   = await fetch(url, { method: 'DELETE', headers: sbHeaders() });
-  const text = await r.text();
-  let data = {};
-  try { if (text) data = JSON.parse(text); } catch(e) {}
-  if (!r.ok) { throw new Error(data.message || `DB delete failed`); }
-  return true;
+  try {
+    if (!process.env.SUPABASE_URL || process.env.SUPABASE_URL.includes('demo') || process.env.SUPABASE_URL.includes('flzreearlfdultvspdmx')) {
+      throw new Error('Local store active');
+    }
+    const url = `${process.env.SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`;
+    const r   = await fetch(url, { method: 'DELETE', headers: sbHeaders() });
+    const text = await r.text();
+    let data = {};
+    try { if (text) data = JSON.parse(text); } catch(e) {}
+    if (!r.ok) { throw new Error(data.message || `DB delete failed`); }
+    return true;
+  } catch (err) {
+    const db = store.readDb();
+    if (db[table]) {
+      db[table] = db[table].filter(x => x.id !== id);
+      store.writeDb(db);
+    }
+    return true;
+  }
 }
 
 // ── WhatsApp helper ──────────────────────────────

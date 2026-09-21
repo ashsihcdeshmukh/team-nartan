@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Team Nartan Studio Manager</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/shared/nartan-db.js"></script>
   <style>
     *{box-sizing:border-box}
     body{margin:0;background:#0b1020;color:#e5e7eb;font-family:Inter,Segoe UI,Arial,sans-serif}
@@ -728,10 +729,221 @@
   </div>
 
   <script>
-    const sb = window.supabase.createClient(
-      'https://flzreearlfdultvspdmx.supabase.co',
-      'sb_publishable_vtHDcCNL1dMBScbVx-FhcA_CL_yyNsQ'
-    );
+    (function(){
+      // Purge any old Creative Edge data from localStorage
+      try {
+        for(let i = localStorage.length - 1; i >= 0; i--){
+          const k = localStorage.key(i);
+          if(k && (k.startsWith('creative-edge-') || k.includes('ce_students') || k.includes('flzreearlfdultvspdmx'))){
+            localStorage.removeItem(k);
+          }
+        }
+      } catch(e){}
+    })();
+
+    function createNartanClient(){
+      const INITIAL_STUDENTS = [
+        {
+          id: "TN-2026-001",
+          name: "Aarav Sharma",
+          phone: "9876543210",
+          category: "Adults",
+          batch: "Kathak Classical (Weekend)",
+          dance_style: "Kathak",
+          fee_plan: "3 Months",
+          fee_amount: 6000,
+          monthly_fee: 6000,
+          fee_status: "paid",
+          due_date: "2026-10-15",
+          next_due_date: "2026-10-15",
+          enrolled_date: "2026-01-15",
+          created_at: "2026-01-15T10:00:00.000Z",
+          status: "Active",
+          notes: "Demo Dancer Profile - Team Nartan"
+        },
+        {
+          id: "TN-2026-002",
+          name: "Ananya Roy",
+          phone: "9123456789",
+          category: "Adults",
+          batch: "Bollywood Commercial (MWF)",
+          dance_style: "Bollywood",
+          fee_plan: "1 Month",
+          fee_amount: 1800,
+          monthly_fee: 1800,
+          fee_status: "paid",
+          due_date: "2026-10-20",
+          next_due_date: "2026-10-20",
+          enrolled_date: "2026-02-10",
+          created_at: "2026-02-10T11:00:00.000Z",
+          status: "Active",
+          notes: "Demo Dancer Profile - Team Nartan"
+        },
+        {
+          id: "TN-2026-003",
+          name: "Rohan Verma",
+          phone: "9988776655",
+          category: "Adults",
+          batch: "Urban Hip-Hop & Popping (TTS)",
+          dance_style: "Hip-Hop",
+          fee_plan: "3 Months",
+          fee_amount: 5500,
+          monthly_fee: 5500,
+          fee_status: "paid",
+          due_date: "2026-11-05",
+          next_due_date: "2026-11-05",
+          enrolled_date: "2026-03-01",
+          created_at: "2026-03-01T09:00:00.000Z",
+          status: "Active",
+          notes: "Demo Dancer Profile - Team Nartan"
+        },
+        {
+          id: "TN-2026-004",
+          name: "Meera Nair",
+          phone: "9811223344",
+          category: "Adults",
+          batch: "Contemporary & Movement (Weekend)",
+          dance_style: "Contemporary",
+          fee_plan: "3 Months",
+          fee_amount: 6500,
+          monthly_fee: 6500,
+          fee_status: "paid",
+          due_date: "2026-10-30",
+          next_due_date: "2026-10-30",
+          enrolled_date: "2026-03-15",
+          created_at: "2026-03-15T09:00:00.000Z",
+          status: "Active",
+          notes: "Demo Dancer Profile - Team Nartan"
+        }
+      ];
+
+      function getTable(table){
+        const key = 'tn_db_' + table;
+        const raw = localStorage.getItem(key);
+        if(!raw){
+          if(table === 'students'){
+            localStorage.setItem(key, JSON.stringify(INITIAL_STUDENTS));
+            return JSON.parse(JSON.stringify(INITIAL_STUDENTS));
+          }
+          return [];
+        }
+        try { return JSON.parse(raw) || []; } catch(e){ return []; }
+      }
+
+      function setTable(table, data){
+        localStorage.setItem('tn_db_' + table, JSON.stringify(data));
+      }
+
+      return {
+        from: function(table){
+          return {
+            select: function(cols){
+              let rows = getTable(table);
+              let filters = [];
+              let sortField = null;
+              let sortAsc = true;
+              let limitCount = null;
+
+              const queryObj = {
+                order: function(col, opt){
+                  sortField = col;
+                  sortAsc = opt ? (opt.ascending !== false) : true;
+                  return queryObj;
+                },
+                eq: function(field, val){
+                  filters.push(function(r){ return String(r[field] || '') === String(val || ''); });
+                  return queryObj;
+                },
+                limit: function(n){
+                  limitCount = n;
+                  return queryObj;
+                },
+                maybeSingle: async function(){
+                  let res = rows.filter(function(r){ return filters.every(function(f){ return f(r); }); });
+                  return { data: res[0] || null, error: null };
+                },
+                single: async function(){
+                  let res = rows.filter(function(r){ return filters.every(function(f){ return f(r); }); });
+                  return { data: res[0] || null, error: null };
+                },
+                then: function(resolve){
+                  let res = rows.filter(function(r){ return filters.every(function(f){ return f(r); }); });
+                  if(sortField){
+                    res.sort(function(a, b){
+                      let va = a[sortField] || '';
+                      let vb = b[sortField] || '';
+                      return sortAsc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+                    });
+                  }
+                  if(limitCount != null) res = res.slice(0, limitCount);
+                  resolve({ data: res, error: null });
+                }
+              };
+              return queryObj;
+            },
+            insert: function(records){
+              let rows = getTable(table);
+              let inserted = (records || []).map(function(r){
+                return Object.assign({
+                  id: r.id || ('TN-' + Math.floor(1000 + Math.random() * 9000)),
+                  created_at: r.created_at || new Date().toISOString()
+                }, r);
+              });
+              rows = inserted.concat(rows);
+              setTable(table, rows);
+              return Promise.resolve({ data: inserted, error: null });
+            },
+            update: function(updates){
+              let filters = [];
+              const updateObj = {
+                eq: function(field, val){
+                  filters.push(function(r){ return String(r[field] || '') === String(val || ''); });
+                  return updateObj;
+                },
+                then: function(resolve){
+                  let rows = getTable(table);
+                  let updated = [];
+                  rows = rows.map(function(r){
+                    if(filters.every(function(f){ return f(r); })){
+                      let nr = Object.assign({}, r, updates);
+                      updated.push(nr);
+                      return nr;
+                    }
+                    return r;
+                  });
+                  setTable(table, rows);
+                  resolve({ data: updated, error: null });
+                }
+              };
+              return updateObj;
+            },
+            delete: function(){
+              let filters = [];
+              const delObj = {
+                eq: function(field, val){
+                  filters.push(function(r){ return String(r[field] || '') === String(val || ''); });
+                  return delObj;
+                },
+                then: function(resolve){
+                  let rows = getTable(table);
+                  rows = rows.filter(function(r){ return !filters.every(function(f){ return f(r); }); });
+                  setTable(table, rows);
+                  resolve({ data: null, error: null });
+                }
+              };
+              return delObj;
+            }
+          };
+        },
+        channel: function(){
+          return {
+            on: function(){ return this; },
+            subscribe: function(){ return this; }
+          };
+        }
+      };
+    }
+    const sb = createNartanClient();
     const TG_BOT_TOKEN = '8266966923:AAEn8emSbU7J05GDqsn7_UGoD-wFfAsBbHc';
     const TG_OWNER_ID = '735593509';
     const OWNER_PHONE = '919999999999';
@@ -834,7 +1046,7 @@
       try{
         const result = await sb.from('students').select('id').limit(1);
         if(result.error) throw result.error;
-        setConnection(true, 'Supabase connected');
+        setConnection(true, 'Team Nartan Database Online');
         return true;
       }catch(e){
         console.error('Supabase connection failed:', e);
