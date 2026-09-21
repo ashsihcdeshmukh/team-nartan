@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: team-nartan
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: DEFAULT_OTP
+        value: 000000
+      - key: NODE_ENV
+        value: production

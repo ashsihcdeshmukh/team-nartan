@@ -1,0 +1,20 @@
+{
+  "projects": {
+    "default": "team-nartan-app"
+  },
+  "targets": {
+    "team-nartan-app": {
+      "hosting": {
+        "student-portal": [
+          "team-nartan-student"
+        ],
+        "admission-form": [
+          "team-nartan-admission"
+        ],
+        "studio-manager": [
+          "team-nartan-manager"
+        ]
+      }
+    }
+  }
+}
