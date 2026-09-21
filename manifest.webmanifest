@@ -1,0 +1,50 @@
+{
+  "name": "Creative Edge Dance Studio",
+  "short_name": "Creative Edge",
+  "description": "Student portal, fee payments, attendance, and studio updates for Creative Edge Dance Studio.",
+  "start_url": "/app/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e0b14",
+  "theme_color": "#c8972a",
+  "categories": ["education", "lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Student Portal",
+      "short_name": "Portal",
+      "url": "/app/index.html"
+    },
+    {
+      "name": "Admission Form",
+      "short_name": "Admission",
+      "url": "/index.html"
+    }
+  ]
+}

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admission Form Video Guide — Team Nartan Dance Studio</title>
+<meta name="theme-color" content="#c8972a">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f19;
+    --surface: #131b2e;
+    --surface-2: #1c2742;
+    --accent: #c8972a;
+    --accent-glow: rgba(200, 151, 42, 0.3);
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --border: #2d3b59;
+    --purple: #a855f7;
+    --purple-glow: rgba(168, 85, 247, 0.3);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+  .header {
+    background: radial-gradient(ellipse at 50% 0%, rgba(168,85,247,0.18) 0%, transparent 70%), #0d1322;
+    border-bottom: 1px solid var(--border);
+    padding: 30px 20px 22px;
+    text-align: center;
+  }
+  .logo-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #fff;
+  }
+  .header h1 span { color: var(--purple); }
+  .header p {
+    color: var(--muted);
+    font-size: 13.5px;
+    margin-top: 8px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .container {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 20px 16px;
+  }
+
+  /* VIDEO CONTAINER */
+  .video-card {
+    background: #000;
+    border: 2px solid var(--purple);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.85), 0 0 25px var(--purple-glow);
+    position: relative;
+    margin-bottom: 22px;
+  }
+  video {
+    width: 100%;
+    max-height: 560px;
+    display: block;
+    object-fit: contain;
+    background: #000;
+  }
+
+  .btn-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent), #e5ab3b);
+    color: #0b0f19;
+    font-weight: 800;
+    font-size: 16px;
+    border: none;
+    border-radius: 14px;
+    text-decoration: none;
+    box-shadow: 0 6px 20px var(--accent-glow);
+    transition: transform 0.15s ease;
+    margin-bottom: 24px;
+  }
+  .btn-login:active { transform: scale(0.98); }
+
+  /* CHAPTERS */
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chapter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .chapter-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .chapter-item:hover, .chapter-item.active {
+    background: var(--surface-2);
+    border-color: var(--purple);
+    transform: translateX(4px);
+  }
+  .ch-info { display: flex; align-items: center; gap: 12px; }
+  .ch-badge {
+    background: var(--purple);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+  }
+  .ch-title { font-size: 14px; font-weight: 700; color: #fff; }
+  .ch-desc { font-size: 12px; color: #c084fc; margin-top: 2px; font-weight: 500; }
+  .ch-time {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+  }
+
+  /* FEATURES GRID */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .feat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .feat-icon { font-size: 26px; margin-bottom: 8px; }
+  .feat-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .feat-body { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+  .footer a { color: var(--accent); text-decoration: none; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-tag">✦ Team Nartan Dance Studio ✦</div>
+  <h1>Online Admission<br><span>Video Guide</span></h1>
+  <p>एडमिशन फॉर्म भरने और ऑनलाइन रजिस्ट्रेशन का पूरा वीडियो गाइड।</p>
+</div>
+
+<div class="container">
+
+  <!-- VIDEO PLAYER -->
+  <div class="video-card">
+    <video id="tutVideo" controls autoplay loop playsinline poster="/icons/icon.svg">
+      <source src="/admission_tutorial.mp4" type="video/mp4">
+      Your browser does not support video playback.
+    </video>
+  </div>
+
+  <!-- DIRECT ACTION -->
+  <a href="/" class="btn-login">
+    <span>📝 Fill Admission Form Now →</span>
+  </a>
+
+  <!-- VIDEO CHAPTERS -->
+  <div class="section-title">⏱️ Admission Steps &amp; Timestamps</div>
+  <div class="chapter-list">
+    <div class="chapter-item" onclick="seekVideo(0)">
+      <div class="ch-info">
+        <div class="ch-badge">STEP 1</div>
+        <div>
+          <div class="ch-title">Enter Student Details</div>
+          <div class="ch-desc">नाम, उम्र, मोबाइल नंबर और पता भरें</div>
+        </div>
+      </div>
+      <div class="ch-time">00:00</div>
+    </div>
+
+    <div class="chapter-item" onclick="seekVideo(5)">
+      <div class="ch-info">
+        <div class="ch-badge">STEP 2</div>
+        <div>
+          <div class="ch-title">Choose Course &amp; Batch</div>
+          <div class="ch-desc">डांस स्टाइल, बैच टाइमिंग और पैकेज प्लान चुनें</div>
+        </div>
+      </div>
+      <div class="ch-time">00:05</div>
+    </div>
+
+    <div class="chapter-item" onclick="seekVideo(11)">
+      <div class="ch-info">
+        <div class="ch-badge">STEP 3</div>
+        <div>
+          <div class="ch-title">Review Application</div>
+          <div class="ch-desc">फॉर्म और फीस की जानकारी चेक करें</div>
+        </div>
+      </div>
+      <div class="ch-time">00:11</div>
+    </div>
+
+    <div class="chapter-item" onclick="seekVideo(16)">
+      <div class="ch-info">
+        <div class="ch-badge">STEP 4</div>
+        <div>
+          <div class="ch-title">Pay &amp; Get Student Login</div>
+          <div class="ch-desc">ऑनलाइन UPI / कार्ड्स या स्टूडियो कैश से पेमेंट करें</div>
+        </div>
+      </div>
+      <div class="ch-time">00:16</div>
+    </div>
+  </div>
+
+  <!-- CORE FEATURES -->
+  <div class="section-title">⭐ Admission Benefits</div>
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon">💃</div>
+      <div class="feat-title">Expert Dance Trainers</div>
+      <div class="feat-body">Learn Hip-Hop, Zumba, Kids &amp; Choreography from certified professional dancers.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📱</div>
+      <div class="feat-title">Student Login Portal</div>
+      <div class="feat-body">Instant access to your portal to track attendance, schedules, leaves &amp; receipts.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🌴</div>
+      <div class="feat-title">Leave Allowance</div>
+      <div class="feat-body">Enjoy built-in leave allowances that automatically extend your package validity.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔒</div>
+      <div class="feat-title">Safe &amp; Flexible</div>
+      <div class="feat-body">Pay online securely or at the studio desk with instant confirmation receipts.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Team Nartan Dance Studio · Inquiries: <strong>7869240161</strong></p>
+    <p style="margin-top:6px"><a href="/">👉 Back to Admission Form</a> · <a href="https://team-nartan-student.web.app" target="_blank" style="margin-left:8px">🚀 Student Login Portal</a></p>
+  </div>
+
+</div>
+
+<script>
+  function seekVideo(seconds) {
+    const v = document.getElementById('tutVideo');
+    if (v) {
+      v.currentTime = seconds;
+      v.play();
+      v.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+</script>
+
+</body>
+</html>

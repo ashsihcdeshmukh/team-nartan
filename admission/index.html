@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admission — Team Nartan Dance Studio</title>
+<meta name="theme-color" content="#c8972a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Team Nartan">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--bg:#faf8f4;--surface:#fff;--accent:#c8972a;--accent2:#8b3a3a;--dark:#1a1208;--text:#2c2416;--muted:#9a8e7a;--border:#e8e0d0;--success:#2d7a4f;--error:#a33030;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+  .hero{background:var(--dark);padding:40px 24px 36px;text-align:center;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(200,151,42,.25) 0%,transparent 70%);}
+  .hero-logo{font-family:'Cormorant Garamond',serif;font-size:12px;letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;position:relative;}
+  .hero h1{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:#fff;line-height:1.2;position:relative;}
+  .hero h1 span{color:var(--accent);}
+  .hero p{color:#b0a898;font-size:14px;margin-top:10px;position:relative;}
+  .steps-bar{background:var(--dark);padding:0 24px 24px;display:flex;justify-content:center;}
+  .step-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #3a3020;color:#5a5040;transition:all .3s;}
+  .step-circle.active{background:var(--accent);border-color:var(--accent);color:#000;}
+  .step-circle.done{background:var(--success);border-color:var(--success);color:#fff;}
+  .step-line{width:36px;height:2px;background:#3a3020;margin:0 4px;align-self:center;transition:background .3s;}
+  .step-line.done{background:var(--success);}
+  .step-label{font-size:10px;color:#5a5040;text-align:center;margin-top:3px;}
+  .container{max-width:500px;margin:0 auto;padding:20px 14px 60px;}
+  .form-card{background:var(--surface);border-radius:14px;padding:20px;margin-bottom:14px;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,.06);display:none;}
+  .form-card.active{display:block;animation:slideIn .25s ease;}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .section-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--dark);margin-bottom:3px;}
+  .section-sub{font-size:13px;color:var(--muted);margin-bottom:18px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:5px;}
+  .req{color:var(--accent2);}
+  input[type=text],input[type=number],input[type=tel],select,textarea{width:100%;padding:11px 13px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;-webkit-appearance:none;appearance:none;}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+  textarea{resize:vertical;min-height:75px;}
+  .input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  /* PHOTO — native file input visible on mobile */
+  .photo-box{background:var(--bg);border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center;}
+  .photo-box p{font-size:13px;color:var(--muted);margin-bottom:10px;}
+  .photo-box input[type=file]{display:block;width:100%;font-size:14px;color:var(--text);background:transparent;border:none;cursor:pointer;margin:0 auto;}
+  #photo-preview{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);display:none;margin:10px auto 0;}
+  /* FEE CARDS */
+  .fee-section{margin-bottom:16px;}
+  .fee-section h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+  .fee-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .fee-card{border:2px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer;text-align:center;position:relative;transition:all .15s;}
+  .fee-card.selected{border-color:var(--accent);background:rgba(200,151,42,.06);}
+  .fee-card.selected::after{content:'✓';position:absolute;top:5px;right:7px;font-size:11px;color:var(--accent);font-weight:700;}
+  .fee-card.popular{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,151,42,.12);background:#fffbef;}
+  .fee-card.popular::before{content:'MOST POPULAR';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--accent);color:#150f06;border-radius:999px;padding:3px 8px;font-size:9px;font-weight:800;letter-spacing:.5px;white-space:nowrap;}
+  .fee-dur{font-size:12px;font-weight:700;color:var(--dark);}
+  .fee-amt{font-size:20px;font-weight:700;color:var(--accent);font-family:'Cormorant Garamond',serif;margin:3px 0;}
+  .fee-per{font-size:10px;color:var(--muted);}
+  .fee-save{font-size:10px;color:var(--success);font-weight:600;margin-top:2px;}
+  /* STYLE CHIPS */
+  .style-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+  .style-chip{border:1.5px solid var(--border);border-radius:8px;padding:9px 10px;cursor:pointer;font-size:13px;font-weight:500;text-align:center;transition:all .15s;}
+  .style-chip.selected{border-color:var(--accent);background:rgba(200,151,42,.08);color:var(--accent);font-weight:700;}
+  /* SUMMARY */
+  .summary-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;}
+  .summary-row:last-child{border-bottom:none;}
+  .summary-row .lbl{color:var(--muted);}
+  .summary-row .val{font-weight:600;color:var(--dark);text-align:right;max-width:58%;}
+  .summary-total{background:var(--dark);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
+  .t-label{color:#b0a898;font-size:13px;}
+  .t-amt{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--accent);font-weight:700;}
+  /* BUTTONS */
+  .btn-primary{width:100%;padding:15px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--accent),#e8b030);color:#1a1208;font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:18px;box-shadow:0 3px 12px rgba(200,151,42,.3);}
+  .btn-back{background:none;border:1.5px solid var(--border);color:var(--muted);padding:11px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;width:100%;font-family:'DM Sans',sans-serif;}
+  .pay-note{text-align:center;font-size:12px;color:var(--muted);margin-top:10px;}
+  /* SUCCESS */
+  .success-page{display:none;text-align:center;padding:40px 20px;}
+  .success-page.active{display:block;}
+  .success-icon{font-size:60px;margin-bottom:14px;}
+  .success-page h2{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--dark);margin-bottom:8px;}
+  .success-page p{color:var(--muted);font-size:14px;line-height:1.7;}
+  .success-id{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin:16px 0;font-size:13px;color:var(--muted);}
+  .success-id strong{color:var(--accent);font-size:15px;}
+  /* ERRORS */
+  .err{font-size:12px;color:var(--error);margin-top:4px;display:none;}
+  .has-error input,.has-error select,.has-error textarea{border-color:var(--error) !important;}
+  .has-error .err{display:block;}
+  /* SPINNER */
+
+  /* Remove OTP spinner arrows */
+  input[type=tel]::-webkit-inner-spin-button,
+  input[type=tel]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+  input[type=number] { -moz-appearance:textfield; }
+  .otp-input { width:54px !important; height:60px !important; text-align:center; font-size:24px !important; font-weight:700; border-radius:12px !important; border:2px solid var(--border) !important; background:var(--bg); color:var(--dark); outline:none; }
+  .otp-input:focus { border-color:var(--accent) !important; box-shadow:0 0 0 3px rgba(200,151,42,.15); }
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.15);border-top-color:#000;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  /* TOAST */
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1208;color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;z-index:999;transition:transform .3s;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .install-btn{display:none;position:fixed;right:14px;bottom:14px;z-index:900;background:var(--accent);color:#141006;border:0;border-radius:999px;padding:12px 16px;font-size:13px;font-weight:800;box-shadow:0 6px 20px rgba(0,0,0,.18);font-family:'DM Sans',sans-serif;}
+  @media(max-width:380px){.input-row{grid-template-columns:1fr;}.fee-grid{grid-template-columns:1fr 1fr;}.hero h1{font-size:28px;}}
+</style>
+</head>
+<body>
+
+<script>
+  const SUPABASE_URL     = 'https://flzreearlfdultvspdmx.supabase.co';
+  const SUPABASE_ANON_KEY= 'sb_publishable_vtHDcCNL1dMBScbVx-FhcA_CL_yyNsQ';
+  const RAZORPAY_KEY     = 'rzp_live_SdEdsmNOQvqmgv';
+</script>
+
+<div class="hero">
+  <div class="hero-logo">✦ Team Nartan ✦</div>
+  <h1>Dance Studio<br><span>Admission Form</span></h1>
+  <p>Monday to Friday batches. For inquiries, contact 7869240161.</p>
+</div>
+<button class="install-btn" id="install-app-btn" onclick="installCreativeEdgeApp()">Install App</button>
+
+<div class="steps-bar">
+  <div style="display:flex;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;align-items:center"><div class="step-circle active" id="sc-1">1</div><div class="step-label" style="color:var(--accent)">Details</div></div>
+    <div class="step-line" id="sl-1" style="margin-top:13px"></div>
+    <div style="display:flex;flex-direction:column;align-items:center"><div class="step-circle" id="sc-2">2</div><div class="step-label">Course</div></div>
+    <div class="step-line" id="sl-2" style="margin-top:13px"></div>
+    <div style="display:flex;flex-direction:column;align-items:center"><div class="step-circle" id="sc-3">3</div><div class="step-label">Review</div></div>
+    <div class="step-line" id="sl-3" style="margin-top:13px"></div>
+    <div style="display:flex;flex-direction:column;align-items:center"><div class="step-circle" id="sc-4">4</div><div class="step-label">Pay</div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- STEP 1 -->
+  <div class="form-card active" id="step-1">
+    <div class="section-title">Personal Details</div>
+    <div class="section-sub">Tell us about the student</div>
+
+    <div class="field" id="f-name">
+      <label>Student Name <span class="req">*</span></label>
+      <input type="text" id="inp-name" placeholder="Full name" autocomplete="name">
+      <div class="err">Please enter student name</div>
+    </div>
+
+    <div class="input-row">
+      <div class="field" id="f-age">
+        <label>Age <span class="req">*</span></label>
+        <input type="number" id="inp-age" placeholder="e.g. 8" min="2" max="70">
+        <div class="err">Enter valid age</div>
+      </div>
+      <div class="field" id="f-phone">
+        <label>Phone <span class="req">*</span></label>
+        <input type="tel" id="inp-phone" placeholder="10 digits" maxlength="10" pattern="[0-9]{10}">
+        <div class="err">10-digit number</div>
+      </div>
+    </div>
+
+    <div class="field" id="f-parent">
+      <label>Parent / Guardian <span class="req">*</span></label>
+      <input type="text" id="inp-parent" placeholder="Parent or guardian name">
+      <div class="err">Enter parent/guardian name</div>
+    </div>
+
+    <div class="field" id="f-address">
+      <label>Address <span class="req">*</span></label>
+      <textarea id="inp-address" placeholder="Home address..."></textarea>
+      <div class="err">Enter address</div>
+    </div>
+
+    <div class="field">
+      <label>Photo (Optional)</label>
+      <div class="photo-box">
+        <p>Upload student photo (optional)</p>
+        <input type="file" id="inp-photo" accept="image/jpeg,image/png,image/jpg" capture="user">
+        <img id="photo-preview" src="" alt="Preview">
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="step1Next()">Continue →</button>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="form-card" id="step-2">
+    <div class="section-title">Choose Your Course</div>
+    <div class="section-sub">Select style, batch &amp; duration</div>
+
+    <div class="field">
+      <label>Dance Style <span class="req">*</span></label>
+      <div class="style-grid" id="style-grid">
+        <div class="style-chip" onclick="pickStyle(this,'Kids Dance')">Kids Dance</div>
+        <div class="style-chip" onclick="pickStyle(this,'Zumba')">Zumba</div>
+        <div class="style-chip" onclick="pickStyle(this,'Basic Hip-Hop')">Basic Hip-Hop</div>
+        <div class="style-chip" onclick="pickStyle(this,'Hip-Hop Advance')">Hip-Hop Advance</div>
+        <div class="style-chip" onclick="pickStyle(this,'Solo Choreography for Events / Competition')" style="grid-column:1/-1;border-color:var(--accent);background:rgba(245,158,11,.08);font-weight:700">⭐ Solo Choreography for Events / Competition (₹3,000)</div>
+        <div class="style-chip" onclick="pickStyle(this,'Duet & Group Choreography for Events / Competition')" style="grid-column:1/-1;border-color:#38bdf8;background:rgba(56,189,248,.08);font-weight:700">👥 Duet &amp; Group Choreography for Events / Competition (₹5,000)</div>
+      </div>
+      <div class="err" id="style-err" style="display:none">Please select a dance style</div>
+    </div>
+
+    <div class="field" id="f-batch">
+      <label>Batch / Timing <span class="req">*</span></label>
+      <select id="inp-batch" onchange="updateCategoryAndFees()">
+        <option value="">Select batch</option>
+        <option>Monday to Friday — 4:00 PM Kids Batch (2.5 to 6 years)</option>
+        <option>Monday to Friday — 5:00 PM Kids Batch (3 to 8 years)</option>
+        <option>Monday to Friday — 5:00 PM to 6:00 PM Zumba</option>
+        <option>Monday to Friday — 6:00 PM to 7:30 PM Hip-Hop Advance Batch</option>
+        <option>Monday to Friday — 6:00 PM to 8:00 PM Basic Hip-Hop Batch</option>
+        <option>Solo Choreography for Events / Competition Batch</option>
+        <option>Duet & Group Choreography for Events / Competition Batch</option>
+      </select>
+      <div class="err">Select a batch</div>
+    </div>
+
+    <div class="field">
+      <label>Category</label>
+      <div id="cat-display" style="padding:10px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--muted)">Detected from age</div>
+    </div>
+
+    <div id="kids-fees" style="display:none">
+      <div class="fee-section">
+        <h3>🧒 Kids Fee (Age 3–8)</h3>
+        <div class="fee-grid">
+          <div class="fee-card" onclick="pickFee(this,1200,1)"><div class="fee-dur">1 Month</div><div class="fee-amt">₹1,200</div><div class="fee-per">₹1,200/mo</div></div>
+          <div class="fee-card" onclick="pickFee(this,3000,3)"><div class="fee-dur">3 Months</div><div class="fee-amt">₹3,000</div><div class="fee-per">₹1,000/mo</div><div class="fee-save">Save ₹600</div></div>
+          <div class="fee-card popular" onclick="pickFee(this,5500,6)"><div class="fee-dur">6 Months</div><div class="fee-amt">₹5,500</div><div class="fee-per">₹917/mo</div><div class="fee-save">Best value · Save ₹1,700</div></div>
+          <div class="fee-card" onclick="pickFee(this,9500,12)"><div class="fee-dur">12 Months</div><div class="fee-amt">₹9,500</div><div class="fee-per">₹792/mo</div><div class="fee-save">Save ₹4,900 🔥</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="adult-fees" style="display:none">
+      <div class="fee-section">
+        <h3>🧑 Adult / Advance Fee</h3>
+        <div class="fee-grid">
+          <div class="fee-card" onclick="pickFee(this,1500,1)"><div class="fee-dur">1 Month</div><div class="fee-amt">₹1,500</div><div class="fee-per">₹1,500/mo</div></div>
+          <div class="fee-card" onclick="pickFee(this,3500,3)"><div class="fee-dur">3 Months</div><div class="fee-amt">₹3,500</div><div class="fee-per">₹1,167/mo</div><div class="fee-save">Save ₹1,000</div></div>
+          <div class="fee-card popular" onclick="pickFee(this,6500,6)"><div class="fee-dur">6 Months</div><div class="fee-amt">₹6,500</div><div class="fee-per">₹1,083/mo</div><div class="fee-save">Best value · Save ₹2,500</div></div>
+          <div class="fee-card" onclick="pickFee(this,10500,12)"><div class="fee-dur">12 Months</div><div class="fee-amt">₹10,500</div><div class="fee-per">₹875/mo</div><div class="fee-save">Save ₹7,500 🔥</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="solo-fees" style="display:none">
+      <div class="fee-section">
+        <h3 style="color:#f59e0b">⭐ Solo Choreography Fee</h3>
+        <div class="fee-grid" style="grid-template-columns:1fr">
+          <div class="fee-card selected" id="card-solo-3000" onclick="pickFee(this,3000,1)" style="border:2px solid var(--accent);background:rgba(245,158,11,.08)">
+            <div class="fee-dur" style="font-size:16px;font-weight:700;color:var(--accent)">⭐ Solo Event / Competition Routine</div>
+            <div class="fee-amt" style="font-size:28px;margin:8px 0">₹3,000</div>
+            <div class="fee-per" style="color:var(--text)">Complete Solo Choreography &amp; Performance Routine</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="duet-fees" style="display:none">
+      <div class="fee-section">
+        <h3 style="color:#38bdf8">👥 Duet &amp; Group Choreography Fee</h3>
+        <div class="fee-grid" style="grid-template-columns:1fr">
+          <div class="fee-card selected" id="card-duet-5000" onclick="pickFee(this,5000,1)" style="border:2px solid #38bdf8;background:rgba(56,189,248,.08)">
+            <div class="fee-dur" style="font-size:16px;font-weight:700;color:#38bdf8">👥 Duet &amp; Group Event / Competition Routine</div>
+            <div class="fee-amt" style="font-size:28px;margin:8px 0">₹5,000</div>
+            <div class="fee-per" style="color:var(--text)">Complete Duet / Group Choreography &amp; Performance Routine</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="err" id="fee-err" style="display:none">Please select a fee plan</div>
+
+    <button class="btn-primary" onclick="step2Next()">Review & Pay →</button>
+    <button class="btn-back" onclick="goStep(1)">← Back</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="form-card" id="step-3">
+    <div class="section-title">Review Details</div>
+    <div class="section-sub">Confirm before paying</div>
+    <div id="review-body"></div>
+    <button class="btn-primary" onclick="goStep4()">Proceed to Payment →</button>
+    <button class="btn-back" onclick="goStep(2)">← Edit</button>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="form-card" id="step-4">
+    <div class="section-title">Secure Payment</div>
+    <div class="section-sub">Choose your payment method</div>
+    <div id="pay-summary"></div>
+
+    <!-- PAYMENT METHOD CHOOSER -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px" id="pay-methods">
+      <div onclick="selectPayMethod('online')" id="pm-online" style="border:2px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s">
+        <div style="font-size:26px;margin-bottom:6px">💳</div>
+        <div style="font-size:13px;font-weight:700;color:var(--dark)">Pay Online</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">UPI · Cards · Net Banking</div>
+      </div>
+      <div onclick="selectPayMethod('cash')" id="pm-cash" style="border:2px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s">
+        <div style="font-size:26px;margin-bottom:6px">💵</div>
+        <div style="font-size:13px;font-weight:700;color:var(--dark)">Pay Cash</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">At Studio Desk</div>
+      </div>
+    </div>
+
+    <!-- ONLINE PAYMENT -->
+    <div id="online-section" style="display:none;margin-top:16px">
+      <button class="btn-primary" id="pay-btn" onclick="doPayment()">🔒 Pay Securely via Razorpay</button>
+      <div class="pay-note">🔒 UPI · Cards · Net Banking · Wallets</div>
+    </div>
+
+    <!-- CASH OTP SECTION -->
+    <div id="cash-section" style="display:none;margin-top:16px">
+      <!-- State 1: Request OTP -->
+      <div id="cash-request" style="background:#fffbf0;border:1.5px solid #f0d080;border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">💵</div>
+        <div style="font-size:15px;font-weight:700;color:var(--dark);margin-bottom:6px">Cash Payment at Studio</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Click below to generate OTP. Give cash to staff and they will share the OTP with you.</div>
+        <button type="button" class="btn-primary" onclick="requestCashOTP()" style="margin-top:0" id="otp-req-btn">Generate OTP & Notify Staff</button>
+      </div>
+
+      <!-- State 2: Enter OTP -->
+      <div id="cash-otp-entry" style="display:none;background:#f0fff4;border:1.5px solid #a0e0b0;border-radius:12px;padding:20px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">🔐</div>
+        <div style="font-size:15px;font-weight:700;color:var(--dark);margin-bottom:4px">Enter OTP</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Staff has been notified. Get OTP from studio desk after paying cash.</div>
+        <div id="otp-timer" style="font-size:12px;color:#e07000;font-weight:700;margin-bottom:14px">Expires in 15:00</div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px">
+          <input type="tel" id="otp-d1" maxlength="1" class="otp-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="otpMove(this,'otp-d2')" onkeyup="otpBack(event,'')">
+          <input type="tel" id="otp-d2" maxlength="1" class="otp-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="otpMove(this,'otp-d3')" onkeyup="otpBack(event,'otp-d1')">
+          <input type="tel" id="otp-d3" maxlength="1" class="otp-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="otpMove(this,'otp-d4')" onkeyup="otpBack(event,'otp-d2')">
+          <input type="tel" id="otp-d4" maxlength="1" class="otp-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="otpMove(this,'')" onkeyup="otpBack(event,'otp-d3')">
+        </div>
+        <div id="otp-debug" style="font-size:11px;color:var(--muted);margin-bottom:8px;display:none"></div>
+        <div id="otp-error" style="font-size:12px;color:var(--error);margin-bottom:10px;display:none">Incorrect OTP. Try again.</div>
+        <button type="button" class="btn-primary" onclick="verifyCashOTP()" style="margin-top:0" id="cash-verify-btn">Verify OTP & Confirm Payment</button>
+        <button type="button" class="btn-back" onclick="resetCashOTP()" style="margin-top:8px">Resend OTP</button>
+      </div>
+    </div>
+
+    <button class="btn-back" onclick="goStep(3)" style="margin-top:12px">← Back</button>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-page" id="success-page">
+    <div class="success-icon">🎉</div>
+    <h2>Welcome to Team Nartan!</h2>
+    <p>Your admission is confirmed and payment received. See you on the dance floor!</p>
+    <div class="success-id">Payment ID: <strong id="pay-id-show">—</strong></div>
+
+    <!-- CLICKABLE STUDENT LOGIN PORTAL LINK -->
+    <div style="margin:20px 0;background:linear-gradient(135deg,#131b2e,#0b0f19);border:2px solid var(--accent);border-radius:18px;padding:20px 16px;box-shadow:0 12px 35px rgba(0,0,0,0.7),0 0 25px rgba(200,151,42,0.25);text-align:center">
+      <div style="font-size:12px;font-weight:800;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:6px">⚡ STUDENT LOGIN PORTAL</div>
+      <p style="font-size:14px;color:#f8fafc;line-height:1.5;margin-bottom:16px">Your student account is active! You can now log in using your registered mobile number <strong id="success-phone-show" style="color:var(--accent)"></strong> to track your class attendance, schedule, and package validity.</p>
+      <a href="https://team-nartan-student.web.app" target="_blank" class="btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;margin:0;font-size:15px;font-weight:800;background:linear-gradient(135deg,#c8972a,#e5ab3b);color:#0b0f19;box-shadow:0 6px 20px rgba(200,151,42,0.4)">
+        <span>🚀 Click Here to Open Student Login Portal →</span>
+      </a>
+      <div style="margin-top:12px;font-size:12.5px;color:#94a3b8">Link: <a href="https://team-nartan-student.web.app" target="_blank" style="color:#38bdf8;font-weight:700;word-break:break-all">https://team-nartan-student.web.app</a></div>
+    </div>
+
+    <p style="font-size:13px;color:var(--muted)">Our team will also contact you on WhatsApp to confirm batch timings. 💃</p>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let deferredInstallPrompt = null;
+
+// ── ADMISSION LIVE CMS ENGINE ──
+let admissionConfig = {
+  danceStyles: [
+    { id: 's1', name: 'Kids Dance', icon: '🧒', type: 'regular' },
+    { id: 's2', name: 'Zumba', icon: '💃', type: 'regular' },
+    { id: 's3', name: 'Basic Hip-Hop', icon: '🧢', type: 'regular' },
+    { id: 's4', name: 'Hip-Hop Advance', icon: '🔥', type: 'regular' },
+    { id: 's5', name: 'Solo Choreography for Events / Competition', icon: '⭐', fee: 3000, type: 'special' },
+    { id: 's6', name: 'Duet & Group Choreography for Events / Competition', icon: '👥', fee: 5000, type: 'special' }
+  ],
+  batches: [
+    'Monday to Friday — 4:00 PM Kids Batch (2.5 to 6 years)',
+    'Monday to Friday — 5:00 PM Kids Batch (3 to 8 years)',
+    'Monday to Friday — 5:00 PM to 6:00 PM Zumba',
+    'Monday to Friday — 6:00 PM to 7:30 PM Hip-Hop Advance Batch',
+    'Monday to Friday — 6:00 PM to 8:00 PM Basic Hip-Hop Batch',
+    'Solo Choreography for Events / Competition Batch',
+    'Duet & Group Choreography for Events / Competition Batch'
+  ],
+  pricing: {
+    kids: { '1M': 1200, '3M': 3000, '6M': 5500, '12M': 9500 },
+    adult: { '1M': 1500, '3M': 3500, '6M': 6500, '12M': 10500 },
+    solo: 3000,
+    duet: 5000
+  }
+};
+
+async function loadAdmissionConfigFromCloud(){
+  try {
+    const res = await sb.from('students').select('notes').eq('phone', '9999999999').maybeSingle();
+    if(res && res.data && res.data.notes){
+      const m = String(res.data.notes).match(/<!--CMS_START-->([\s\S]*?)<!--CMS_END-->/);
+      if(m){
+        const parsed = JSON.parse(m[1]);
+        if(parsed.admission){
+          admissionConfig = parsed.admission;
+          renderDynamicAdmissionElements();
+        }
+      }
+    }
+  } catch(e){
+    console.warn('Could not load admission config from cloud:', e);
+  }
+}
+
+function renderDynamicAdmissionElements(){
+  // 1. Render Dance Styles Chips
+  const styleGrid = document.getElementById('style-grid');
+  if(styleGrid && admissionConfig.danceStyles){
+    styleGrid.innerHTML = admissionConfig.danceStyles.map(function(st){
+      if(st.type === 'special'){
+        const durText = st.duration_val ? (' · ' + st.duration_val + ' ' + (st.duration_unit || 'Days')) : '';
+        return '<div class="style-chip" onclick="pickStyle(this,\'' + st.name + '\')" style="grid-column:1/-1;border-color:var(--accent);background:rgba(200,151,42,.08);font-weight:700">' +
+          (st.icon ? st.icon + ' ' : '') + st.name + ' (₹' + (st.fee || 3000).toLocaleString('en-IN') + durText + ')' +
+        '</div>';
+      }
+      return '<div class="style-chip" onclick="pickStyle(this,\'' + st.name + '\')">' +
+        (st.icon ? st.icon + ' ' : '') + st.name +
+      '</div>';
+    }).join('');
+  }
+
+  // 2. Render Batch Dropdown Options
+  const batchSelect = document.getElementById('inp-batch');
+  if(batchSelect && admissionConfig.batches){
+    const curVal = batchSelect.value;
+    batchSelect.innerHTML = '<option value="">Select batch</option>' +
+      admissionConfig.batches.map(function(b){
+        return '<option value="' + b + '" ' + (b === curVal ? 'selected' : '') + '>' + b + '</option>';
+      }).join('');
+  }
+
+  // 3. Render Fee Packages for Kids & Adults
+  const pr = admissionConfig.pricing;
+  if(pr){
+    const kFees = document.getElementById('kids-fees');
+    if(kFees && pr.kids){
+      const k1 = pr.kids['1M'] || 1200;
+      const k3 = pr.kids['3M'] || 3000;
+      const k6 = pr.kids['6M'] || 5500;
+      const k12 = pr.kids['12M'] || 9500;
+
+      kFees.innerHTML = '<div class="fee-section">' +
+        '<h3>🧒 Kids Fee (Age 3–8)</h3>' +
+        '<div class="fee-grid">' +
+          '<div class="fee-card" onclick="pickFee(this,' + k1 + ',1)"><div class="fee-dur">1 Month</div><div class="fee-amt">₹' + k1.toLocaleString('en-IN') + '</div><div class="fee-per">₹' + k1 + '/mo</div></div>' +
+          '<div class="fee-card" onclick="pickFee(this,' + k3 + ',3)"><div class="fee-dur">3 Months</div><div class="fee-amt">₹' + k3.toLocaleString('en-IN') + '</div><div class="fee-per">₹' + Math.round(k3/3) + '/mo</div><div class="fee-save">Save ₹' + (k1*3 - k3) + '</div></div>' +
+          '<div class="fee-card popular" onclick="pickFee(this,' + k6 + ',6)"><div class="fee-dur">6 Months</div><div class="fee-amt">₹' + k6.toLocaleString('en-IN') + '</div><div class="fee-per">₹' + Math.round(k6/6) + '/mo</div><div class="fee-save">Best value · Save ₹' + (k1*6 - k6) + '</div></div>' +
+          '<div class="fee-card" onclick="pickFee(this,' + k12 + ',12)"><div class="fee-dur">12 Months</div><div class="fee-amt">₹' + k12.toLocaleString('en-IN') + '</div><div class="fee-per">₹' + Math.round(k12/12) + '/mo</div><div class="fee-save">Save ₹' + (k1*12 - k12) + ' 🔥</div></div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    const aFees = document.getElementById('adult-fees');
+    if(aFees && pr.adult){
+      const a1 = pr.adult['1M'] || 1500;
+      const a3 = pr.adult['3M'] || 3500;
+      const a6 = pr.adult['6M'] || 6500;
+      const a12 = pr.adult['12M'] || 10500;
+
+      aFees.innerHTML = '<div class="fee-section">' +
+        '<h3>🧑 Adult / Advance Fee</h3>' +
+        '<div class="fee-grid">' +
+          '<div class="fee-card" onclick="pickFee(this,' + a1 + ',1)"><div class="fee-dur">1 Month</div><div class="fee-amt">₹' + a1.toLocaleString('en-IN') + '</div><div class="fee-per">₹' + a1 + '/mo</div></div>' +
+          '<div class="fee-card" onclick="pickFee(this,' + a3 + ',3)"><div class="fee-dur">3 Months</div><div class="fee-amt">₹' + a3.toLocaleString('en-IN') + '</div><div class="fee-per">₹' + Math.round(a3/3) + '/mo</div><div class="fee-save">Save ₹' + (a1*3 - a3) + '</div></div>' +
+          '<div class="fee-card popular" onclick="pickFee(this,' + a6 + ',6)"><div class="fee-dur">6 Months</div><div class="fee-amt">₹' + a6.toLocaleString('en-IN') + '</div><div class="fee-per">₹' + Math.round(a6/6) + '/mo</div><div class="fee-save">Best value · Save ₹' + (a1*6 - a6) + '</div></div>' +
+          '<div class="fee-card" onclick="pickFee(this,' + a12 + ',12)"><div class="fee-dur">12 Months</div><div class="fee-amt">₹' + a12.toLocaleString('en-IN') + '</div><div class="fee-per">₹' + Math.round(a12/12) + '/mo</div><div class="fee-save">Save ₹' + (a1*12 - a12) + ' 🔥</div></div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    const soloCard = document.getElementById('card-solo-3000');
+    if(soloCard && pr.solo){
+      soloCard.setAttribute('onclick', 'pickFee(this,' + pr.solo + ',1)');
+      const amtEl = soloCard.querySelector('.fee-amt');
+      if(amtEl) amtEl.textContent = '₹' + pr.solo.toLocaleString('en-IN');
+    }
+
+    const duetCard = document.getElementById('card-duet-5000');
+    if(duetCard && pr.duet){
+      duetCard.setAttribute('onclick', 'pickFee(this,' + pr.duet + ',1)');
+      const amtEl = duetCard.querySelector('.fee-amt');
+      if(amtEl) amtEl.textContent = '₹' + pr.duet.toLocaleString('en-IN');
+    }
+  }
+}
+
+
+window.addEventListener('load', function(){
+  loadAdmissionConfigFromCloud();
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').catch(function(err){
+      console.log('Service worker registration failed:', err);
+    });
+  }
+});
+
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  showInstallButton();
+});
+
+window.addEventListener('appinstalled', function(){
+  deferredInstallPrompt = null;
+  hideInstallButton();
+  showToast('App installed successfully.');
+});
+
+function isCreativeEdgeStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function showInstallButton(){
+  if(isCreativeEdgeStandalone()) return;
+  var btn = document.getElementById('install-app-btn');
+  if(btn) btn.style.display = 'block';
+}
+
+function hideInstallButton(){
+  var btn = document.getElementById('install-app-btn');
+  if(btn) btn.style.display = 'none';
+}
+
+async function installCreativeEdgeApp(){
+  if(isCreativeEdgeStandalone()){
+    showToast('App is already installed.');
+    return;
+  }
+  if(!deferredInstallPrompt){
+    showToast('Use browser menu and tap Add to Home Screen.');
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  hideInstallButton();
+}
+
+// ── SUPABASE INIT ──
+let sb;
+try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e){}
+
+function esc(t){
+  if(t === null || t === undefined) return '';
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── STATE ──
+const S = { name:'',age:0,phone:'',parent:'',address:'',photo:null,style:'',batch:'',months:0,duration_val:0,duration_unit:'months',amount:0,cat:'' };
+
+// ── TOAST ──
+function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+
+// ── PHOTO ──
+document.getElementById('inp-photo').addEventListener('change', function(){
+  const f = this.files[0]; if(!f) return;
+  if(f.size > 3*1024*1024){ showToast('Photo too large, max 3MB'); this.value=''; return; }
+  const r = new FileReader();
+  r.onload = e => {
+    S.photo = e.target.result;
+    const img = document.getElementById('photo-preview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+  };
+  r.readAsDataURL(f);
+});
+
+// ── STYLE & FEE ──
+function pickStyle(el,s){
+  document.querySelectorAll('.style-chip').forEach(c=>c.classList.remove('selected'));
+  if(el) el.classList.add('selected');
+  S.style = s;
+  document.getElementById('style-err').style.display = 'none';
+
+  const batch = document.getElementById('inp-batch');
+  if(s === 'Kids Dance' && !batch.value) batch.value = 'Monday to Friday — 5:00 PM Kids Batch (3 to 8 years)';
+  if(s === 'Zumba') batch.value = 'Monday to Friday — 5:00 PM to 6:00 PM Zumba';
+  if(s === 'Basic Hip-Hop') batch.value = 'Monday to Friday — 6:00 PM to 8:00 PM Basic Hip-Hop Batch';
+  if(s === 'Hip-Hop Advance') batch.value = 'Monday to Friday — 6:00 PM to 7:30 PM Hip-Hop Advance Batch';
+  if(s === 'Solo Choreography for Events / Competition') batch.value = 'Solo Choreography for Events / Competition Batch';
+  if(s === 'Duet & Group Choreography for Events / Competition') batch.value = 'Duet & Group Choreography for Events / Competition Batch';
+
+  updateCategoryAndFees();
+}
+function pickFee(el,amt,mo){
+  document.querySelectorAll('.fee-card').forEach(c=>c.classList.remove('selected'));
+  if(el) el.classList.add('selected');
+  S.amount = amt;
+  S.months = mo;
+  document.getElementById('fee-err').style.display='none';
+}
+
+function isAdultSelection(){
+  const batch = String(document.getElementById('inp-batch').value || '').toLowerCase();
+  const style = String(S.style || '').toLowerCase();
+  return S.age > 8 || batch.indexOf('zumba') >= 0 || batch.indexOf('hip-hop') >= 0 || style.indexOf('zumba') >= 0 || style.indexOf('hip-hop') >= 0 || style.indexOf('advance') >= 0;
+}
+
+function updateCategoryAndFees(){
+  const kidsFees = document.getElementById('kids-fees');
+  const adultFees = document.getElementById('adult-fees');
+  const soloFees = document.getElementById('solo-fees');
+  const duetFees = document.getElementById('duet-fees');
+  const catDisplay = document.getElementById('cat-display');
+  const feeErr = document.getElementById('fee-err');
+  if(feeErr) feeErr.style.display = 'none';
+
+  // Check if current style is a special fixed-fee routine
+  let specialObj = (admissionConfig.danceStyles || []).find(function(x){
+    return x.name === S.style && (x.type === 'special' || (Number(x.fee) > 0));
+  });
+
+  // Fallback check for built-in Solo / Duet if not in admissionConfig
+  if(!specialObj){
+    if(S.style && S.style.indexOf('Solo') >= 0){
+      specialObj = { name: S.style, icon: '⭐', fee: (admissionConfig.pricing && admissionConfig.pricing.solo) || 3000, type: 'special' };
+    } else if(S.style && S.style.indexOf('Duet') >= 0){
+      specialObj = { name: S.style, icon: '👥', fee: (admissionConfig.pricing && admissionConfig.pricing.duet) || 5000, type: 'special' };
+    }
+  }
+
+  if (specialObj) {
+    if(kidsFees) kidsFees.style.display = 'none';
+    if(adultFees) adultFees.style.display = 'none';
+    if(duetFees) duetFees.style.display = 'none';
+    
+    if(soloFees){
+      soloFees.style.display = 'block';
+      const fAmt = Number(specialObj.fee || 0);
+      const dVal = Number(specialObj.duration_val || 5);
+      const dUnit = specialObj.duration_unit || 'days';
+      const durLabel = dVal + ' ' + (dUnit === 'days' ? (dVal === 1 ? 'Day' : 'Days') : (dVal === 1 ? 'Month' : 'Months'));
+
+      soloFees.innerHTML = '<div class="fee-section">' +
+        '<h3 style="color:#f59e0b">' + (specialObj.icon || '⭐') + ' ' + esc(specialObj.name) + ' (' + durLabel + ')</h3>' +
+        '<div class="fee-grid" style="grid-template-columns:1fr">' +
+          '<div class="fee-card selected" id="dynamic-special-card" style="border:2px solid var(--accent);background:rgba(200,151,42,.08)">' +
+            '<div class="fee-dur" style="font-size:16px;font-weight:700;color:var(--accent)">' + (specialObj.icon || '⭐') + ' ' + esc(specialObj.name) + '</div>' +
+            '<div class="fee-amt" style="font-size:28px;margin:8px 0">₹' + fAmt.toLocaleString('en-IN') + '</div>' +
+            '<div class="fee-per" style="color:var(--text);font-weight:700">Validity: ' + durLabel + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+      
+      S.duration_val = dVal;
+      S.duration_unit = dUnit;
+      S.months = dUnit === 'months' ? dVal : (dVal >= 30 ? Math.round(dVal / 30) : 1);
+      pickFee(document.getElementById('dynamic-special-card'), fAmt, S.months);
+    }
+    S.cat = 'Fixed Course Routine';
+    if(catDisplay){
+      catDisplay.textContent = S.cat + ' (₹' + (specialObj.fee || 0) + ')';
+      catDisplay.style.color = '#f59e0b';
+    }
+    return;
+  }
+
+  // Regular monthly batches
+  if(soloFees) soloFees.style.display = 'none';
+  if(duetFees) duetFees.style.display = 'none';
+
+  if(!S.age) return;
+  const adult = isAdultSelection();
+  S.cat = adult ? 'Adult / Advance' : 'Kids (3-8 years)';
+  S.amount = 0;
+  S.months = 0;
+  document.querySelectorAll('.fee-card').forEach(c=>c.classList.remove('selected'));
+  if(catDisplay){
+    catDisplay.textContent = S.cat;
+    catDisplay.style.color = 'var(--text)';
+  }
+  if(kidsFees) kidsFees.style.display = adult ? 'none' : 'block';
+  if(adultFees) adultFees.style.display = adult ? 'block' : 'none';
+}
+
+// ── FIELD HELPER ──
+function validate(id, fn){
+  const el=document.getElementById('inp-'+id)||document.getElementById(id);
+  const fld=document.getElementById('f-'+id);
+  const ok=fn(el?el.value:'');
+  if(fld){ fld.classList.toggle('has-error',!ok); }
+  return ok;
+}
+
+// ── STEP 1 ──
+function step1Next(){
+  const ok = [
+    validate('name', v=>v.trim().length>1),
+    validate('age',  v=>parseInt(v)>1&&parseInt(v)<100),
+    validate('phone',v=>/^\d{10}$/.test(v.trim())),
+    validate('parent',v=>v.trim().length>1),
+    validate('address',v=>v.trim().length>3),
+  ].every(Boolean);
+  if(!ok){ showToast('Please fill all required fields'); return; }
+
+  S.name    = document.getElementById('inp-name').value.trim();
+  S.age     = parseInt(document.getElementById('inp-age').value);
+  S.phone   = document.getElementById('inp-phone').value.trim();
+  S.parent  = document.getElementById('inp-parent').value.trim();
+  S.address = document.getElementById('inp-address').value.trim();
+  updateCategoryAndFees();
+  goStep(2);
+}
+
+// ── STEP 2 ──
+function step2Next(){
+  let ok = true;
+  if(!S.style){ document.getElementById('style-err').style.display='block'; ok=false; } else { document.getElementById('style-err').style.display='none'; }
+  if(!document.getElementById('inp-batch').value){ document.getElementById('f-batch').classList.add('has-error'); ok=false; } else { document.getElementById('f-batch').classList.remove('has-error'); }
+  if(!S.amount){ document.getElementById('fee-err').style.display='block'; ok=false; }
+  if(!ok){ showToast('Please complete all selections'); return; }
+  S.batch = document.getElementById('inp-batch').value;
+
+  const durText = S.duration_val ? (S.duration_val + ' ' + (S.duration_unit === 'days' ? 'Days' : 'Months')) : (S.months + (S.months===1?' Month':' Months'));
+  const rows=[['Student',S.name],['Age',S.age+' yrs ('+S.cat+')'],['Phone',S.phone],['Parent',S.parent],['Address',S.address],['Style',S.style],['Batch',S.batch],['Duration / Validity', durText]];
+  document.getElementById('review-body').innerHTML =
+    '<div>'+rows.map(([l,v])=>`<div class="summary-row"><span class="lbl">${l}</span><span class="val">${v}</span></div>`).join('')+'</div>'+
+    `<div class="summary-total"><div><div class="t-label">Total Amount</div><div style="font-size:11px;color:#6a5a40;margin-top:2px">${durText} · ${S.style}</div></div><div class="t-amt">₹${S.amount.toLocaleString('en-IN')}</div></div>`;
+  goStep(3);
+}
+
+function goStep4(){
+  document.getElementById('pay-summary').innerHTML =
+    `<div class="summary-total" style="margin-bottom:14px"><div><div class="t-label">${S.name}</div><div style="font-size:11px;color:#6a5a40;margin-top:2px">${S.style} · ${S.months} month${S.months>1?'s':''}</div></div><div class="t-amt">₹${S.amount.toLocaleString('en-IN')}</div></div>`;
+  goStep(4);
+}
+
+// ── STEP NAV ──
+function goStep(n){
+  [1,2,3,4].forEach(i=>{
+    document.getElementById('step-'+i).classList.toggle('active',i===n);
+    const sc=document.getElementById('sc-'+i);
+    if(i<n){sc.className='step-circle done';sc.textContent='✓';}
+    else if(i===n){sc.className='step-circle active';sc.textContent=i;}
+    else{sc.className='step-circle';sc.textContent=i;}
+    if(i<4) document.getElementById('sl-'+i).classList.toggle('done',i<n);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── PAYMENT ──
+function doPayment(){
+  if(RAZORPAY_KEY==='YOUR_RAZORPAY_KEY_ADD_LATER'){
+    // Razorpay not set up yet — save student and redirect to payment page
+    saveStudent('PENDING').then(()=>{
+      window.open('https://razorpay.me/@creativeedgedancestudio','_blank');
+      showToast('Fill payment details on the page that opened');
+    });
+    return;
+  }
+  const btn=document.getElementById('pay-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Opening...';
+  const rzp=new Razorpay({
+    key:RAZORPAY_KEY, amount:S.amount*100, currency:'INR',
+    name:'Team Nartan Dance Studio',
+    description:S.style+' — '+S.months+' Month'+(S.months>1?'s':''),
+    prefill:{name:S.name,contact:'91'+S.phone},
+    theme:{color:'#c8972a'},
+    handler:r=>onPaid(r.razorpay_payment_id),
+    modal:{ondismiss:()=>{btn.disabled=false;btn.textContent='🔒 Pay Securely via Razorpay';}}
+  });
+  rzp.on('payment.failed',r=>{showToast('Payment failed: '+r.error.description);btn.disabled=false;btn.textContent='🔒 Pay Securely via Razorpay';});
+  rzp.open();
+}
+
+// ── SAVE TO SUPABASE ──
+async function saveStudent(paymentId, payMode){
+  if(!sb){ showToast('Database not connected!'); throw new Error('No Supabase'); }
+  var mode = payMode || (paymentId && paymentId.startsWith('CASH') ? 'Cash' : 'Razorpay Online');
+  var today = new Date().toISOString().split('T')[0];
+  var dueDate = new Date();
+  if(S.duration_unit === 'days' && S.duration_val > 0){
+    dueDate.setDate(dueDate.getDate() + Number(S.duration_val));
+  } else {
+    dueDate.setMonth(dueDate.getMonth() + (S.months || 1));
+  }
+  var nextDue = dueDate.toISOString().split('T')[0];
+  var planLabel = (S.duration_unit === 'days' && S.duration_val > 0) ? (S.duration_val + 'D') : ((S.months || 1) + 'M');
+  var planTitle = S.style + ' (' + (S.duration_unit === 'days' && S.duration_val > 0 ? (S.duration_val + ' Days Package') : (S.months + ' Month Package')) + ')';
+  var studentData = {
+    name: S.name,
+    age: S.age,
+    phone: S.phone,
+    parent_name: S.parent,
+    address: S.address,
+    dance_style: S.style,
+    batch: S.batch,
+    category: S.cat,
+    monthly_fee: S.months > 0 ? Math.round(S.amount / S.months) : S.amount,
+    duration_months: S.months,
+    enrolled_date: today,
+    last_paid_date: today,
+    next_due_date: nextDue,
+    payment_id: paymentId,
+    status: 'Active',
+    photo_base64: S.photo || null
+  };
+  var insertResult;
+  try {
+    insertResult = await sb.from('students').insert([studentData]).select();
+  } catch(networkError) {
+    console.error('Supabase network error:', networkError);
+    throw new Error('Cannot reach Supabase at ' + SUPABASE_URL + '. Check the Supabase Project URL and internet connection.');
+  }
+  if(insertResult.error){
+    console.warn('New schema insert failed, trying legacy schema:', insertResult.error.message);
+    var legacyStudentData = {
+      name: S.name,
+      phone: S.phone,
+      parent_name: S.parent,
+      age: S.age,
+      category: S.cat.indexOf('Kids') >= 0 ? 'kids' : 'adult',
+      batch: S.batch,
+      fee_plan: planLabel,
+      fee_amount: S.amount,
+      fee_status: 'pending_approval',
+      payment_method: mode === 'Cash' ? 'cash' : 'online',
+      payment_id: paymentId,
+      admission_date: today,
+      due_date: nextDue,
+      notes: 'Style: ' + S.style + '; Address: ' + S.address + '\n<!--PAY_START-->[' + JSON.stringify({
+        payment_id: paymentId,
+        amount: S.amount,
+        type: 'Admission Package',
+        title: planTitle,
+        date: today,
+        mode: mode,
+        duration_months: S.duration_unit === 'days' ? (S.duration_val / 30) : S.months
+      }) + ']<!--PAY_END-->'
+    };
+    try {
+      insertResult = await sb.from('students').insert([legacyStudentData]).select();
+    } catch(networkError) {
+      console.error('Supabase network error:', networkError);
+      throw new Error('Cannot reach Supabase at ' + SUPABASE_URL + '. Check the Supabase Project URL and internet connection.');
+    }
+    if(insertResult.error){
+      console.error('Student insert error:', insertResult.error);
+      var errMsg = insertResult.error.message || 'Unknown error';
+      if (errMsg.includes('Failed to fetch')) {
+        errMsg = 'Could not connect to database. Supabase project might be paused or blocked by an adblocker.';
+      }
+      showToast('Save error: ' + errMsg);
+      throw new Error(errMsg);
+    }
+  }
+  var saved = insertResult.data[0];
+  try {
+    var payResult = await sb.from('payments').insert([{
+      student_id: saved.id,
+      student_name: S.name,
+      amount: S.amount,
+      payment_date: today,
+      payment_id: paymentId,
+      mode: mode,
+      month_paid: today.substring(0, 7),
+      duration_months: S.months
+    }]);
+    if(payResult.error){ console.error('Payment insert error:', payResult.error.message); }
+  } catch(payErr) {
+    console.warn('Payment tracking insert failed (non-fatal):', payErr);
+  }
+  return saved;
+}
+
+async function onPaid(paymentId){
+  const btn=document.getElementById('pay-btn');
+  btn.innerHTML='<span class="spin"></span>Saving...';
+  try{
+    await saveStudent(paymentId);
+    document.getElementById('pay-id-show').textContent=paymentId;
+    const pEl = document.getElementById('success-phone-show'); if(pEl) pEl.textContent = S.phone;
+    [1,2,3,4].forEach(i=>document.getElementById('step-'+i).classList.remove('active'));
+    document.getElementById('success-page').classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){
+    showToast('Payment done! Save ID: '+paymentId);
+    btn.disabled=false; btn.textContent='🔒 Retry';
+  }
+}
+
+// ── PAYMENT METHOD SELECT ──
+function selectPayMethod(method){
+  const onlineEl = document.getElementById('pm-online');
+  const cashEl   = document.getElementById('pm-cash');
+  const accent    = '#c8972a';
+  if(method === 'online'){
+    onlineEl.style.borderColor = accent;
+    onlineEl.style.background  = 'rgba(200,151,42,.06)';
+    cashEl.style.borderColor   = 'var(--border)';
+    cashEl.style.background    = '';
+    document.getElementById('online-section').style.display = 'block';
+    document.getElementById('cash-section').style.display   = 'none';
+  } else {
+    cashEl.style.borderColor   = accent;
+    cashEl.style.background    = 'rgba(200,151,42,.06)';
+    onlineEl.style.borderColor = 'var(--border)';
+    onlineEl.style.background  = '';
+    document.getElementById('cash-section').style.display   = 'block';
+    document.getElementById('online-section').style.display = 'none';
+  }
+}
+
+// ── CASH OTP SYSTEM ──
+let currentOTP    = null;
+let otpTimerInt   = null;
+let otpExpireTime = null;
+
+function generateOTP(){
+  return String(Math.floor(1000 + Math.random() * 9000));
+}
+
+async function requestCashOTP(){
+  const btn = document.getElementById('otp-req-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Sending to staff...';
+
+  currentOTP    = generateOTP();
+  otpExpireTime = Date.now() + 15 * 60 * 1000; // 15 minutes
+  sessionStorage.setItem('cashOTP', currentOTP);
+  sessionStorage.setItem('cashOTPExpiry', String(otpExpireTime));
+
+  // Send OTP to owner via Telegram
+  const tgMsg =
+    'CASH PAYMENT OTP\n\n' +
+    'Student: ' + S.name + '\n' +
+    'Phone: ' + S.phone + '\n' +
+    'Style: ' + S.style + '\n' +
+    'Amount: Rs.' + S.amount + '\n' +
+    'Duration: ' + S.months + ' month(s)\n\n' +
+    'OTP: ' + currentOTP + '\n\n' +
+    'Valid for 15 minutes. Share OTP with student ONLY after receiving cash.';
+
+  try {
+    await fetch(
+      'https://api.telegram.org/bot8266966923:AAEn8emSbU7J05GDqsn7_UGoD-wFfAsBbHc/sendMessage',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: '735593509', text: tgMsg })
+      }
+    );
+  } catch(e){ console.log('Telegram notify failed', e); }
+
+  // Also send via CallMeBot WhatsApp
+  try {
+    await fetch(
+      'https://api.callmebot.com/whatsapp.php?phone=91' + S.phone +
+      '&text=' + encodeURIComponent('Team Nartan Dance Studio\n\nYour cash payment OTP is: ' + currentOTP + '\n\nValid for 15 minutes.') +
+      '&apikey=ChdoC5rR2WuN'
+    );
+  } catch(e){}
+
+  // Show OTP entry UI
+  document.getElementById('cash-request').style.display   = 'none';
+  document.getElementById('cash-otp-entry').style.display = 'block';
+  document.getElementById('otp-d1').focus();
+
+  // Start countdown timer
+  startOTPTimer();
+  btn.disabled = false;
+  btn.textContent = 'Generate OTP & Notify Staff';
+}
+
+function startOTPTimer(){
+  if(otpTimerInt) clearInterval(otpTimerInt);
+  otpTimerInt = setInterval(function(){
+    const remaining = otpExpireTime - Date.now();
+    if(remaining <= 0){
+      clearInterval(otpTimerInt);
+      currentOTP = null;
+      sessionStorage.removeItem('cashOTP');
+      sessionStorage.removeItem('cashOTPExpiry');
+      document.getElementById('otp-timer').textContent = 'OTP Expired! Request new one.';
+      document.getElementById('otp-timer').style.color = 'var(--error)';
+      resetCashOTP();
+      return;
+    }
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('otp-timer').textContent =
+      'Expires in ' + mins + ':' + (secs < 10 ? '0' : '') + secs;
+  }, 1000);
+}
+
+function resetCashOTP(){
+  document.getElementById('cash-request').style.display   = 'block';
+  document.getElementById('cash-otp-entry').style.display = 'none';
+  ['otp-d1','otp-d2','otp-d3','otp-d4'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('otp-error').style.display = 'none';
+  document.getElementById('otp-debug').style.display = 'none';
+  if(otpTimerInt) clearInterval(otpTimerInt);
+}
+
+function otpMove(el, nextId){
+  // Keep only last digit entered
+  el.value = el.value.replace(/[^0-9]/g,'').slice(-1);
+  if(el.value && nextId) document.getElementById(nextId).focus();
+}
+
+function otpBack(e, prevId){
+  if(e.key === 'Backspace' && !e.target.value && prevId){
+    document.getElementById(prevId).focus();
+  }
+}
+
+async function verifyCashOTP(){
+  var verifyBtn = document.getElementById('cash-verify-btn');
+  if(verifyBtn && verifyBtn.disabled) return;
+  const entered =
+    document.getElementById('otp-d1').value +
+    document.getElementById('otp-d2').value +
+    document.getElementById('otp-d3').value +
+    document.getElementById('otp-d4').value;
+
+  if(entered.trim().replace(/[^0-9]/g,'').length < 4){ showToast('Enter all 4 digits'); return; }
+
+  var storedOTP = currentOTP || sessionStorage.getItem('cashOTP');
+  var storedExpiry = otpExpireTime || Number(sessionStorage.getItem('cashOTPExpiry'));
+  var debugEl = document.getElementById('otp-debug');
+  if(debugEl) debugEl.style.display = 'none';
+
+  if(!storedOTP || !storedExpiry || Date.now() > storedExpiry){
+    document.getElementById('otp-error').textContent = 'OTP expired. Please request a new one.';
+    document.getElementById('otp-error').style.display = 'block';
+    return;
+  }
+
+  var enteredClean = entered.trim().replace(/[^0-9]/g,'');
+  var storedClean  = String(storedOTP).trim().replace(/[^0-9]/g,'');
+  console.log('Entered OTP:', enteredClean, 'Stored OTP:', storedClean);
+  if(enteredClean !== storedClean){
+    document.getElementById('otp-error').style.display = 'block';
+    document.getElementById('otp-error').textContent   = 'Incorrect OTP. Try again. (Entered: ' + enteredClean + ')';
+    ['otp-d1','otp-d2','otp-d3','otp-d4'].forEach(function(id){ document.getElementById(id).value=''; });
+    document.getElementById('otp-d1').focus();
+    return;
+  }
+
+  // OTP correct — save to Supabase as Cash payment
+  document.getElementById('otp-error').style.display = 'none';
+  if(verifyBtn){
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = '<span class="spin"></span>Saving...';
+  }
+  if(otpTimerInt) clearInterval(otpTimerInt);
+
+  try {
+    const cashPayId = 'CASH-' + Date.now();
+    await saveStudent(cashPayId, 'Cash');
+    currentOTP = null;
+    otpExpireTime = null;
+    sessionStorage.removeItem('cashOTP');
+    sessionStorage.removeItem('cashOTPExpiry');
+
+    // Notify owner on Telegram that cash payment confirmed
+    try {
+      await fetch(
+        'https://api.telegram.org/bot8266966923:AAEn8emSbU7J05GDqsn7_UGoD-wFfAsBbHc/sendMessage',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: '735593509',
+            text: 'CASH PAYMENT CONFIRMED\n\nStudent: ' + S.name + '\nPhone: ' + S.phone + '\nAmount: Rs.' + S.amount + '\nStyle: ' + S.style + '\nDuration: ' + S.months + ' month(s)\n\nPayment ID: ' + cashPayId + '\nAdded to database automatically.'
+          })
+        }
+      );
+    } catch(err) { console.warn('Telegram notify failed:', err); }
+
+    document.getElementById('pay-id-show').textContent = cashPayId;
+    const pEl2 = document.getElementById('success-phone-show'); if(pEl2) pEl2.textContent = S.phone;
+    [1,2,3,4].forEach(i=>document.getElementById('step-'+i).classList.remove('active'));
+    document.getElementById('success-page').classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  } catch(e){
+    console.error('Cash save failed:', e);
+    showToast('Save error: ' + (e.message || 'Contact staff.'));
+    var errEl = document.getElementById('otp-error');
+    errEl.textContent = 'Save error: ' + (e.message || 'Contact staff.');
+    errEl.style.display = 'block';
+    if(verifyBtn){
+      verifyBtn.disabled = false;
+      verifyBtn.textContent = 'Verify OTP & Confirm Payment';
+    }
+  }
+}
+</script>
+</body>
+</html>

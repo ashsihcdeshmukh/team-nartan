@@ -299,6 +299,17 @@
   ],
   "payments": [
     {
+      "id": "PAY-848863",
+      "studentId": "TN-2026-002",
+      "studentName": "Ananya Roy",
+      "amount": 5000,
+      "date": "2026-09-21",
+      "mode": "Online / Razorpay Demo",
+      "plan": "3 Months",
+      "status": "Success",
+      "ref": "ref_fhk5l15"
+    },
+    {
       "id": "PAY-134578",
       "studentId": "TN-2026-002",
       "studentName": "Ananya Roy",
@@ -378,6 +389,22 @@
     }
   ],
   "admissions": [
+    {
+      "id": "ADM-8898",
+      "name": "ASMBJS",
+      "phone": "5765765575",
+      "email": "1968@gmail.com",
+      "age": 21,
+      "gender": "Female",
+      "parentName": "STRTF",
+      "style": "Kathak",
+      "batchPreference": "Kathak Classical (Weekend)",
+      "feePlan": "6 Months",
+      "submittedAt": "2026-09-21T17:33:08.898Z",
+      "status": "Pending",
+      "priorExperience": "None",
+      "notes": ""
+    },
     {
       "id": "ADM-4142",
       "name": "Pooja Hegde",

@@ -1,0 +1,3891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Nartan Studio Manager</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#0b1020;color:#e5e7eb;font-family:Inter,Segoe UI,Arial,sans-serif}
+    button,input,select,textarea{font:inherit}
+    .app{min-height:100vh;display:grid;grid-template-columns:260px 1fr}
+    .sidebar{background:#10182b;border-right:1px solid #26314d;padding:18px;position:sticky;top:0;height:100vh}
+    .brand{font-size:19px;font-weight:900;line-height:1.2}
+    .brand span{display:block;color:#f59e0b}
+    .conn{display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px;margin:14px 0 22px}
+    .dot{width:10px;height:10px;border-radius:50%;background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.12)}
+    .dot.ok{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.12)}
+    .nav{display:grid;gap:7px}
+    .nav button{border:1px solid transparent;background:transparent;color:#cbd5e1;text-align:left;border-radius:10px;padding:11px 12px;cursor:pointer;font-weight:700}
+    .nav button.active,.nav button:hover{background:#17213a;border-color:#33415f;color:#fff}
+    .content{padding:22px;max-width:1380px;width:100%;margin:0 auto}
+    .topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+    h1{font-size:24px;margin:0}
+    .muted{color:#94a3b8}
+    .banner{display:none;background:#35151a;border:1px solid #7f1d1d;color:#fecaca;border-radius:12px;padding:12px;margin-bottom:14px;font-size:13px;white-space:pre-line}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:12px;margin-bottom:14px}
+    .stat{background:#121b31;border:1px solid #293755;border-radius:14px;padding:15px}
+    .stat b{display:block;font-size:25px;color:#f59e0b}
+    .stat span{font-size:12px;color:#94a3b8}
+    .panel{background:#121b31;border:1px solid #293755;border-radius:14px;overflow:hidden;margin-bottom:14px}
+    .panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px;border-bottom:1px solid #26314d;flex-wrap:wrap}
+    .panel-title{font-weight:900}
+    .tools{display:flex;gap:8px;flex-wrap:wrap}
+    input,select,textarea{background:#0b1020;border:1px solid #33415f;color:#fff;border-radius:10px;padding:10px 11px;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:#f59e0b}
+    textarea{width:100%;min-height:84px;resize:vertical}
+    .btn{border:0;border-radius:10px;padding:10px 12px;font-weight:900;cursor:pointer}
+    .btn-primary{background:#f59e0b;color:#111827}
+    .btn-soft{background:#24304b;color:#dbeafe}
+    .btn-wa{background:#22c55e;color:#052e16}
+    .btn-tg{background:#38bdf8;color:#082f49}
+    .btn-danger{background:#ef4444;color:#fff}
+    .att-actions{display:flex;gap:6px;flex-wrap:wrap}
+    .att-btn{border:1px solid #33415f;background:#17213a;color:#dbeafe;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900;cursor:pointer}
+    .att-btn.present,.att-pill.present{background:#12351f;color:#86efac;border-color:#166534}
+    .att-btn.absent,.att-pill.absent{background:#3b1418;color:#fca5a5;border-color:#7f1d1d}
+    .att-btn.leave,.att-pill.leave{background:#3b2a10;color:#facc15;border-color:#a16207}
+    .att-pill{display:inline-block;border:1px solid #33415f;background:#17213a;color:#94a3b8;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:900}
+    .scroll{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:920px}
+    th,td{padding:11px 12px;border-bottom:1px solid #26314d;text-align:left;font-size:13px;vertical-align:middle}
+    th{background:#0e1628;color:#94a3b8;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+    tr:hover td{background:#162039}
+    .photo{width:44px;height:44px;border-radius:10px;object-fit:cover;background:#26314d}
+    .badge{display:inline-block;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:900}
+    .badge-active{background:#12351f;color:#86efac}
+    .badge-due{background:#3b2a10;color:#facc15}
+    .badge-expired{background:#3b1418;color:#fca5a5}
+    .badge-cancelled{background:#1f2937;color:#cbd5e1}
+    .empty{padding:28px;text-align:center;color:#94a3b8}
+    .page{display:none}
+    .page.active{display:block}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+    .modal-backdrop.show{display:flex}
+    .modal{width:min(520px,100%);background:#121b31;border:1px solid #33415f;border-radius:16px;padding:18px}
+    .modal h2{font-size:19px;margin:0 0 12px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    label{display:block;font-size:12px;color:#94a3b8;margin:10px 0 5px;font-weight:800}
+    .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+    @media(max-width:860px){
+      .app{display:block}
+      .sidebar{position:relative;height:auto;border-right:0;border-bottom:1px solid #26314d}
+      .nav{grid-template-columns:repeat(3,1fr)}
+      .content{padding:14px}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .grid{grid-template-columns:1fr}
+    }
+    @media(max-width:520px){
+      .nav{grid-template-columns:repeat(2,1fr)}
+      .stats{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <!-- 🔐 MASTER PIN LOCK SCREEN -->
+  <div id="pin-lock-overlay" style="position:fixed;inset:0;background:#0b1020;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#121b31;border:1px solid #293755;border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.6)">
+      <div style="font-size:40px;margin-bottom:12px">🏢</div>
+      <h2 style="margin:0 0 6px;font-size:22px;color:#fff;font-weight:800">Studio Manager</h2>
+      <p style="margin:0 0 24px;font-size:13px;color:#94a3b8">Enter Master PIN to access studio dashboard</p>
+      
+      <input type="password" id="manager-pin-input" placeholder="Enter PIN (e.g. 7869)" maxlength="6" inputmode="numeric" 
+        style="width:100%;font-size:24px;letter-spacing:8px;text-align:center;padding:14px;border-radius:12px;border:1px solid #33415f;background:#0b1020;color:#f59e0b;margin-bottom:16px;outline:none"
+        onkeydown="if(event.key==='Enter') unlockStudioManager()">
+        
+      <div id="pin-error-msg" style="display:none;color:#fca5a5;font-size:12px;font-weight:700;margin-bottom:14px">Incorrect PIN. Please try again.</div>
+      
+      <button onclick="unlockStudioManager()" style="width:100%;background:#f59e0b;color:#111827;border:none;padding:14px;border-radius:12px;font-weight:900;font-size:15px;cursor:pointer">
+        Unlock Dashboard 🔓
+      </button>
+      
+      <div style="margin-top:16px;font-size:12px;color:#64748b;display:flex;align-items:center;justify-content:center;gap:6px">
+        <input type="checkbox" id="remember-pin-device" checked style="cursor:pointer">
+        <label for="remember-pin-device" style="color:#94a3b8;cursor:pointer;margin:0">Remember on this device</label>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Master PIN verification (Default: 7869 or 1234)
+    function unlockStudioManager(){
+      var input = document.getElementById('manager-pin-input').value.trim();
+      var err = document.getElementById('pin-error-msg');
+      if(input === '7869' || input === '1234' || input === '9340852788' || input === '8319707595'){
+        if(document.getElementById('remember-pin-device').checked){
+          localStorage.setItem('ce_manager_unlocked', 'true');
+        }
+        document.getElementById('pin-lock-overlay').style.display = 'none';
+        err.style.display = 'none';
+      } else {
+        err.style.display = 'block';
+        document.getElementById('manager-pin-input').value = '';
+        document.getElementById('manager-pin-input').focus();
+      }
+    }
+
+    // Check if already unlocked on this device
+    window.addEventListener('DOMContentLoaded', function(){
+      if(localStorage.getItem('ce_manager_unlocked') === 'true'){
+        var overlay = document.getElementById('pin-lock-overlay');
+        if(overlay) overlay.style.display = 'none';
+      } else {
+        var pInput = document.getElementById('manager-pin-input');
+        if(pInput) setTimeout(function(){ pInput.focus(); }, 200);
+      }
+    });
+  </script>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">Team Nartan <span>Studio Manager</span></div>
+      <div class="conn"><span class="dot" id="connDot"></span><span id="connText">Connecting to Supabase...</span></div>
+      <div class="nav">
+        <button class="active" onclick="showPage('dashboard',this)">Dashboard</button>
+        <button onclick="showPage('students',this)">Students</button>
+        <button onclick="showPage('payments',this)">Payments</button>
+        <button onclick="showPage('renewals',this)">Renewals</button>
+        <button onclick="showPage('reminders',this)">Reminders</button>
+        <button onclick="showPage('attendance',this)">Attendance</button>
+        <button onclick="showPage('cancelled',this)">Cancelled</button>
+        <button onclick="showPage('activity',this)">⚡ Studio Activity</button>
+        <button onclick="showPage('staff',this)">Staff & Salary</button>
+        <button onclick="showPage('expenses',this)">Expenses & Profit</button>
+        <button onclick="showPage('content',this)">App Content</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="topbar">
+        <div>
+          <h1 id="pageTitle">Dashboard</h1>
+          <div class="muted" id="lastUpdated">Loading students and payments...</div>
+        </div>
+        <div class="tools">
+          <button class="btn btn-soft" onclick="loadAll()">Refresh</button>
+          <button class="btn btn-soft" onclick="openOldStudent()">Add Old Student</button>
+          <button class="btn btn-primary" onclick="openManualPayment()">Record Payment</button>
+        </div>
+      </div>
+      <div class="banner" id="errorBanner"></div>
+
+      <section class="page active" id="page-dashboard">
+        <div class="stats">
+          <div class="stat"><b id="statTotal">0</b><span>Total students</span></div>
+          <div class="stat"><b id="statActive">0</b><span>Active students</span></div>
+          <div class="stat"><b id="statDue3">0</b><span>Due in 3 days</span></div>
+          <div class="stat"><b id="statRevenue">Rs.0</b><span>Total revenue</span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Due within 7 days</div></div>
+          <div class="scroll"><table>
+            <thead><tr><th>Name</th><th>Phone</th><th>Style</th><th>Fee</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="dashboardDueRows"></tbody>
+          </table></div>
+        </div>
+      
+        <!-- ⚡ LIVE ACTIVITY FEED ON DASHBOARD -->
+        <div class="panel" style="margin-top:16px;border:1px solid #33415f">
+          <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="panel-title">⚡ Today's Live Studio Activity & Audit Log</div>
+              <div class="muted">Real-time timeline of student payments, admissions, renewals, leaves, and cancellations</div>
+            </div>
+            <button class="btn btn-soft" onclick="showPage('activity')">View Full History →</button>
+          </div>
+          <div id="dashboardActivityFeed" style="padding:12px;display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+
+      </section>
+
+      <section class="page" id="page-students">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">All Students</div>
+            <input id="studentSearch" placeholder="Search name or phone" oninput="renderAll()">
+          </div>
+          <div class="scroll"><table>
+            <thead><tr><th>Photo</th><th>Name</th><th>Age</th><th>Phone</th><th>Dance Style</th><th>Batch</th><th>Monthly Fee</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="studentRows"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-payments">
+        <!-- 📊 REVENUE & BATCH ANALYTICS -->
+        <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+          <div class="stat"><b id="anHighestMonth" style="color:#f59e0b">—</b><span>🏆 Highest Revenue Month</span></div>
+          <div class="stat"><b id="anHighestBatch" style="color:#86efac">—</b><span>👥 Top Batch (Admissions)</span></div>
+          <div class="stat"><b id="anThisMonthRev" style="color:#38bdf8">₹0</b><span>📅 This Month Collection</span></div>
+          <div class="stat"><b id="anAvgRevPerStudent" style="color:#a78bfa">₹0</b><span>💰 Avg Rev / Student</span></div>
+        </div>
+
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="panel-title">📈 Monthly Revenue & Performance Breakdown</div>
+              <div class="muted">Summary of revenue collected per month across all batches & workshops</div>
+            </div>
+            <select id="anMonthFilter" onchange="filterPaymentsByMonth()" style="padding:6px 12px;border-radius:8px;background:#17223b;border:1px solid #33415f;color:#fff">
+              <option value="">All Months</option>
+            </select>
+          </div>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>Month</th><th>Total Revenue (₹)</th><th>Total Collections</th><th>Monthly Packages</th><th>Workshops / Events</th><th>Top Batch in Month</th></tr></thead>
+              <tbody id="monthlyRevenueRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center">
+            <div class="panel-title">All Payment Transactions</div>
+            <span class="badge badge-active" id="paymentTotalBadge">₹0 Total</span>
+          </div>
+          <div class="scroll"><table>
+            <thead><tr><th>Date</th><th>Student Name</th><th>Amount</th><th>Type / Desc</th><th>Mode</th><th>Payment ID</th></tr></thead>
+            <tbody id="paymentRows"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-renewals">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Renewals due or overdue</div></div>
+          <div class="scroll"><table>
+            <thead><tr><th>Name</th><th>Phone</th><th>Style</th><th>Fee</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="renewalRows"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-reminders">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Due reminders</div>
+            <div class="tools">
+              <button class="btn btn-wa" onclick="sendAllWhatsApp()">Send All WhatsApp</button>
+              <button class="btn btn-tg" onclick="sendAllTelegram()">Send All Telegram</button>
+            </div>
+          </div>
+          <div class="scroll"><table>
+            <thead><tr><th>Name</th><th>Phone</th><th>Fee</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="reminderRows"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-attendance">
+        <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+          <div class="stat"><b id="attStatTotal">0</b><span>Total Active Students</span></div>
+          <div class="stat"><b id="attStatPresent" style="color:#86efac">0</b><span>Present on Date</span></div>
+          <div class="stat"><b id="attStatAbsent" style="color:#fca5a5">0</b><span>Absent on Date</span></div>
+          <div class="stat"><b id="attStatRate" style="color:#facc15">0%</b><span>Date Attendance Rate</span></div>
+        </div>
+                <!-- 🌴 PENDING LEAVE REQUESTS PANEL -->
+        
+        <!-- 🛑 PENDING CANCELLATION REQUESTS PANEL -->
+        <div class="panel" id="pendingCancelPanel" style="display:none;border:1.5px solid #ef4444;background:#201115;margin-bottom:16px">
+          <div class="panel-head" style="background:rgba(239,68,68,.1);border-bottom:1px solid #451a23">
+            <div>
+              <div class="panel-title" style="color:#fca5a5;font-size:16px">🛑 Student Cancellation / Freeze Requests</div>
+              <div class="muted" style="font-size:12px">Students who requested admission freeze/cancellation from their app. Approving sets status to Cancelled.</div>
+            </div>
+            <span class="badge badge-expired" id="pendingCancelCount">0 Pending</span>
+          </div>
+          <div class="scroll"><table>
+            <thead><tr><th>Student</th><th>Phone</th><th>Reason</th><th>Requested On</th><th>Action</th></tr></thead>
+            <tbody id="pendingCancelRows"></tbody>
+          </table></div>
+        </div>
+
+        <div class="panel" id="pendingLeavePanel" style="display:none;border:1.5px solid #f59e0b;background:#171d33;margin-bottom:16px">
+          <div class="panel-head" style="background:rgba(245,158,11,.1);border-bottom:1px solid #33415f">
+            <div>
+              <div class="panel-title" style="color:#f59e0b;font-size:16px">🌴 Student Leave Requests (Pending Approval)</div>
+              <div class="muted" style="font-size:12px">Review leave applications from students. Approving marks leave attendance and automatically extends package due dates.</div>
+            </div>
+            <span class="badge badge-due" id="pendingLeaveCount">0 Pending</span>
+          </div>
+          <div class="scroll"><table>
+            <thead><tr><th>Student</th><th>Phone</th><th>Leave Dates</th><th>Class Days</th><th>Reason</th><th>Requested On</th><th>Action</th></tr></thead>
+            <tbody id="pendingLeaveRows"></tbody>
+          </table></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Daily Attendance & Total Classes Record</div>
+              <div class="muted" id="attendanceMode">Loading attendance storage...</div>
+            </div>
+            <div class="tools">
+              <select id="attendanceBatchFilter" onchange="renderAttendance()">
+                <option value="">All Batches</option>
+              </select>
+              <input id="attendanceDate" type="date" onchange="loadAttendanceForDate()">
+              <button class="btn btn-primary" onclick="openBulkAttendanceModal()" style="box-shadow:0 4px 14px rgba(245,158,11,.3)">📅 Multi-Day Marker / Backfill</button>
+              <button class="btn btn-soft" onclick="markAllAttendance('Present')">Mark Date Present</button>
+              <button class="btn btn-soft" onclick="markAllAttendance('Absent')">Mark Date Absent</button>
+            </div>
+          </div>
+          <div class="scroll"><table>
+            <thead><tr><th>Name</th><th>Phone</th><th>Batch</th><th>Attended</th><th>Leave Allowance</th><th>Extended Due Date</th><th>Status</th><th>Date Status</th><th>Mark Attendance</th></tr></thead>
+            <tbody id="attendanceRows"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-cancelled">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Cancelled / Removed Section</div></div>
+          <div class="scroll"><table>
+            <thead><tr><th>Name</th><th>Phone</th><th>Batch</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="cancelledRows"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-content">
+        <div class="panel">
+          <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <div>
+              <div class="panel-title">📱 Live App & Admission Form CMS Manager</div>
+              <div class="muted" id="contentMode">Configure Student Portal & Admission Form courses, batches, fees, and promos live.</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary" onclick="switchCMSTab('portal')" id="btnCmsPortal">📱 Student Portal</button>
+              <button class="btn btn-soft" onclick="switchCMSTab('admission')" id="btnCmsAdmission">📝 Admission Form</button>
+              <button class="btn btn-primary" onclick="saveAppContent()" style="box-shadow:0 4px 14px rgba(245,158,11,.3);background:linear-gradient(135deg,#10b981,#059669)">💾 Publish All Changes</button>
+            </div>
+          </div>
+
+          <!-- SUB-TAB 1: STUDENT PORTAL CONTENT -->
+          <div id="cmsPortalSection">
+            <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+              <!-- LEFT: HOME PROMO & COUPON -->
+              <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:16px">
+                <h3 style="margin-top:0;font-size:16px;color:#f59e0b;display:flex;align-items:center;gap:6px">🎉 Home Screen Promo Banner &amp; Coupons</h3>
+                <p class="muted" style="font-size:12px;margin-bottom:12px">Controls the glowing top card on the student app home screen.</p>
+                
+                <label>Promo Card Title / Headline</label>
+                <input id="cmsOfferTitle" type="text" placeholder="e.g. Special Monsoon Offer 🎉">
+
+                <label>Promo Description / Offer Message</label>
+                <textarea id="cmsOfferBody" rows="2" placeholder="e.g. Get ₹500 OFF on 3-Month, 6-Month &amp; Annual Packages!"></textarea>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                  <div>
+                    <label>Coupon Code</label>
+                    <input id="cmsCouponCode" type="text" placeholder="e.g. EDGE500">
+                  </div>
+                  <div>
+                    <label>Display Banner</label>
+                    <select id="cmsShowOffer">
+                      <option value="true">Show on Home Screen</option>
+                      <option value="false">Hide Banner</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RIGHT: WORKSHOPS & COMPETITION FEES -->
+              <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:16px">
+                <h3 style="margin-top:0;font-size:16px;color:#86efac;display:flex;align-items:center;gap:6px">🏆 Workshop &amp; Competition Fees</h3>
+                <p class="muted" style="font-size:12px;margin-bottom:12px">Controls events shown in "Workshops" and "Make Payment" tabs.</p>
+                
+                <div id="cmsWorkshopsList" style="display:flex;flex-direction:column;gap:10px;max-height:220px;overflow-y:auto;margin-bottom:12px"></div>
+                
+                <button class="btn btn-soft" style="width:100%;font-size:12px" onclick="openAddWorkshopModal()">+ Add New Workshop / Event</button>
+              </div>
+            </div>
+
+            <!-- FULL WIDTH: NOTICE BOARD -->
+            <div style="padding:0 16px 16px 16px">
+              <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:16px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                  <div>
+                    <h3 style="margin:0;font-size:16px;color:#38bdf8">📢 Notice Board Announcements</h3>
+                    <div class="muted" style="font-size:12px">Manage broadcasts and notices displayed on the student Notice Board.</div>
+                  </div>
+                  <button class="btn btn-soft" style="font-size:12px" onclick="openAddNoticeModal()">+ Add Notice</button>
+                </div>
+
+                <div id="cmsNoticesList" style="display:flex;flex-direction:column;gap:10px"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-TAB 2: ADMISSION FORM LIVE MANAGER -->
+          <div id="cmsAdmissionSection" style="display:none;padding:16px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+              <!-- DANCE STYLES / COURSES -->
+              <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:16px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                  <div>
+                    <h3 style="margin:0;font-size:16px;color:#f59e0b">💃 Dance Styles & Courses</h3>
+                    <div class="muted" style="font-size:12px">Options shown in Step 2 of Admission Form</div>
+                  </div>
+                  <button class="btn btn-soft" style="font-size:12px" onclick="openAddDanceStyleModal()">+ Add Style</button>
+                </div>
+                <div id="cmsDanceStylesList" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto"></div>
+              </div>
+
+              <!-- BATCHES & TIMINGS -->
+              <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:16px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                  <div>
+                    <h3 style="margin:0;font-size:16px;color:#38bdf8">⏰ Batches & Timing Options</h3>
+                    <div class="muted" style="font-size:12px">Dropdown options on the Admission Form</div>
+                  </div>
+                  <button class="btn btn-soft" style="font-size:12px" onclick="addCMSBatchOption()">+ Add Batch</button>
+                </div>
+                <div id="cmsBatchesList" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto"></div>
+              </div>
+            </div>
+
+            <!-- PRICING & FEE PACKAGES -->
+            <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:16px">
+              <h3 style="margin:0 0 4px 0;font-size:16px;color:#86efac">💰 Package Pricing (Admission Form & Renewals)</h3>
+              <div class="muted" style="font-size:12px;margin-bottom:16px">Configure 1M, 3M, 6M, 12M package fees and special event routine fees.</div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+                <!-- KIDS PACKAGES -->
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px">
+                  <div style="font-weight:700;font-size:13px;color:#cbd5e1;margin-bottom:10px">🧒 Kids Dance Packages (Age 3-8)</div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div><label style="font-size:11px">1 Month Fee (₹)</label><input type="number" id="feeKids1M" value="1200"></div>
+                    <div><label style="font-size:11px">3 Months Fee (₹)</label><input type="number" id="feeKids3M" value="3000"></div>
+                    <div><label style="font-size:11px">6 Months Fee (₹)</label><input type="number" id="feeKids6M" value="5500"></div>
+                    <div><label style="font-size:11px">12 Months Fee (₹)</label><input type="number" id="feeKids12M" value="9500"></div>
+                  </div>
+                </div>
+
+                <!-- ADULT / ADVANCE PACKAGES -->
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px">
+                  <div style="font-weight:700;font-size:13px;color:#cbd5e1;margin-bottom:10px">🧑 Adult / Advance Packages</div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div><label style="font-size:11px">1 Month Fee (₹)</label><input type="number" id="feeAdult1M" value="1500"></div>
+                    <div><label style="font-size:11px">3 Months Fee (₹)</label><input type="number" id="feeAdult3M" value="3500"></div>
+                    <div><label style="font-size:11px">6 Months Fee (₹)</label><input type="number" id="feeAdult6M" value="6500"></div>
+                    <div><label style="font-size:11px">12 Months Fee (₹)</label><input type="number" id="feeAdult12M" value="10500"></div>
+                  </div>
+                </div>
+
+                <!-- SPECIAL EVENT ROUTINES -->
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px">
+                  <div style="font-weight:700;font-size:13px;color:#cbd5e1;margin-bottom:10px">⭐ Special Event Routines</div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div><label style="font-size:11px">Solo Event Routine (₹)</label><input type="number" id="feeSoloChoreo" value="3000"></div>
+                    <div><label style="font-size:11px">Duet / Group Routine (₹)</label><input type="number" id="feeDuetChoreo" value="5000"></div>
+                    <div style="margin-top:6px;padding:10px;background:#0c1322;border-radius:8px;font-size:11px;color:#94a3b8">
+                      💡 These prices automatically sync live with the online Admission Form and Razorpay checkout!
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    
+            <!-- ⚡ FULL ACTIVITY LOG PAGE -->
+      <section class="page" id="page-activity">
+        <div class="panel">
+          <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+            <div>
+              <div class="panel-title">⚡ Studio Activity & Audit Log</div>
+              <div class="muted">Complete chronological audit record of all transactions, student actions, leaves, and expenses</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span class="badge badge-active" id="activityCountBadge" style="font-size:12px;padding:4px 12px">0 Events</span>
+              <span class="badge" id="activityAmountBadge" style="font-size:13px;font-weight:700;padding:4px 12px;background:#14532d;color:#86efac;border:1px solid #22c55e">💰 Total: ₹0</span>
+            </div>
+          </div>
+
+          <!-- 📅 DATE & CATEGORY CONTROLS BAR -->
+          <div style="padding:12px 16px;background:#0e1628;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">
+            <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+              <button class="btn btn-primary" id="btnActAll" onclick="setActivityDatePreset('all')" style="padding:5px 10px;font-size:12px">📅 All Time</button>
+              <button class="btn btn-soft" id="btnActToday" onclick="setActivityDatePreset('today')" style="padding:5px 10px;font-size:12px">🔥 Today</button>
+              <button class="btn btn-soft" id="btnActYesterday" onclick="setActivityDatePreset('yesterday')" style="padding:5px 10px;font-size:12px">🗓️ Yesterday</button>
+              <button class="btn btn-soft" id="btnActWeek" onclick="setActivityDatePreset('week')" style="padding:5px 10px;font-size:12px">📆 This Week</button>
+              <button class="btn btn-soft" id="btnActMonth" onclick="setActivityDatePreset('month')" style="padding:5px 10px;font-size:12px">📅 This Month</button>
+            </div>
+
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+              <div style="display:flex;align-items:center;gap:6px">
+                <span class="muted" style="font-size:12px">Pick Date:</span>
+                <input type="date" id="activityDatePicker" onchange="onActivityDatePicked()" style="padding:5px 10px;border-radius:8px;background:#17223b;border:1px solid #33415f;color:#fff;font-size:12px">
+              </div>
+
+              <select id="activityFilterType" onchange="renderActivityLog()" style="padding:6px 12px;border-radius:8px;background:#17223b;border:1px solid #33415f;color:#fff;font-size:12px">
+                <option value="">All Categories</option>
+                <option value="payment">💰 Payments & Renewals (Inflow)</option>
+                <option value="admission">📝 Admissions</option>
+                <option value="expense">🏢 Studio Expenses & Staff Salaries (Outflow)</option>
+                <option value="leave">🌴 Leave Requests</option>
+                <option value="cancel">🛑 Freezes & Cancels</option>
+              </select>
+
+              <input id="activitySearchInput" placeholder="Search name or type..." oninput="renderActivityLog()" style="padding:6px 12px;border-radius:8px;background:#17223b;border:1px solid #33415f;color:#fff;font-size:12px;width:160px">
+            </div>
+          </div>
+
+          <div id="fullActivityTimeline" style="padding:16px;display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+      </section>
+
+      <!-- 👨‍🏫 STAFF & SALARY MANAGEMENT -->
+      <section class="page" id="page-staff">
+        <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+          <div class="stat"><b id="staffStatTotal">0</b><span>Total Staff Members</span></div>
+          <div class="stat"><b id="staffStatPaid" style="color:#86efac">0</b><span>Salary Paid (This Month)</span></div>
+          <div class="stat"><b id="staffStatPending" style="color:#fca5a5">0</b><span>Salary Pending</span></div>
+          <div class="stat"><b id="staffStatExpense" style="color:#f59e0b">₹0</b><span>Total Monthly Payroll</span></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="panel-title">👨‍🏫 Staff Members & Monthly Salaries</div>
+              <div class="muted">Track instructors, assistant teachers, desk staff salaries and payment status.</div>
+            </div>
+            <button class="btn btn-primary" onclick="openAddStaffModal()">+ Add Staff Member</button>
+          </div>
+          <div class="scroll"><table>
+            <thead><tr><th>Name</th><th>Role</th><th>Phone</th><th>Monthly Salary</th><th>Status (Current Month)</th><th>Last Paid Date</th><th>Payment Mode</th><th>Actions</th></tr></thead>
+            <tbody id="staffRows"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+
+      <!-- 🏢 STUDIO RENT, EXPENSES & NET PROFIT -->
+      <section class="page" id="page-expenses">
+        <div class="stats" style="grid-template-columns:repeat(5,1fr);margin-bottom:14px">
+          <div class="stat"><b id="finGrossRevenue" style="color:#86efac">₹0</b><span>Total Revenue</span></div>
+          <div class="stat"><b id="finPayroll" style="color:#fca5a5">₹0</b><span>Staff Payroll</span></div>
+          <div class="stat"><b id="finRent" style="color:#fca5a5">₹0</b><span>Studio Rent</span></div>
+          <div class="stat"><b id="finBills" style="color:#fca5a5">₹0</b><span>Studio Expenses</span></div>
+          <div class="stat" style="border:1.5px solid #f59e0b;background:rgba(245,158,11,.08)"><b id="finNetProfit" style="color:#facc15">₹0</b><span>💎 Net Studio Profit</span></div>
+        </div>
+
+        <!-- STUDIO RENT CONFIG & STATUS -->
+        <div class="panel" style="margin-bottom:16px;border:1px solid #33415f">
+          <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="panel-title">🏢 Monthly Studio Rent</div>
+              <div class="muted">Manage monthly studio landlord rent and payment status.</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <span id="rentStatusBadge" class="badge badge-due">Pending for this month</span>
+              <button class="btn btn-primary" onclick="openPayRentModal()">Record Rent Payment</button>
+              <button class="btn btn-soft" onclick="openRentConfigModal()">⚙️ Set Rent Amount</button>
+            </div>
+          </div>
+          <div style="padding:16px;display:flex;gap:24px;background:#0c1322">
+            <div><div class="muted" style="font-size:12px">Monthly Rent:</div><div id="dispRentAmount" style="font-size:20px;font-weight:700;color:#f59e0b">₹20,000 / Month</div></div>
+            <div><div class="muted" style="font-size:12px">Due Day:</div><div id="dispRentDueDay" style="font-size:16px;font-weight:700;color:#cbd5e1">5th of every month</div></div>
+            <div><div class="muted" style="font-size:12px">Last Paid:</div><div id="dispRentLastPaid" style="font-size:16px;font-weight:700;color:#86efac">—</div></div>
+          </div>
+        </div>
+
+        <!-- EXPENSES TRACKER -->
+        <div class="panel">
+          <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="panel-title">📝 Studio Expenses & Bills Tracker</div>
+              <div class="muted">Track electricity, sound system, maintenance, props, marketing, and misc expenses.</div>
+            </div>
+            <button class="btn btn-primary" onclick="openAddExpenseModal()">+ Record Expense</button>
+          </div>
+          <div class="scroll"><table>
+            <thead><tr><th>Date</th><th>Category</th><th>Amount (₹)</th><th>Description / Vendor</th><th>Payment Mode</th><th>Receipt / Notes</th><th>Actions</th></tr></thead>
+            <tbody id="expenseRows"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+</main>
+  </div>
+
+  <!-- MULTI-DAY / BULK ATTENDANCE MODAL -->
+  <div class="modal-backdrop" id="bulkAttendanceModal">
+    <div class="modal" style="max-width:560px;width:100%">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h2 style="margin:0;font-size:20px;color:#f59e0b">📅 Multi-Day / Bulk Attendance Marker</h2>
+        <button onclick="closeModals()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+      </div>
+      <p class="muted" style="font-size:13px;margin-bottom:16px">Mark multiple dates at once for backfilling past attendance or batch updates. Cloud syncs immediately to student portal.</p>
+
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
+        <label>Select Target Student(s)</label>
+        <select id="bulkStudentSelect" onchange="updateBulkPreview()" style="width:100%;margin-bottom:10px">
+          <option value="ALL">👥 All Active Students</option>
+        </select>
+
+        <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label>From Date</label>
+            <input type="date" id="bulkStartDate" onchange="updateBulkPreview()">
+          </div>
+          <div>
+            <label>To Date (inclusive)</label>
+            <input type="date" id="bulkEndDate" onchange="updateBulkPreview()">
+          </div>
+        </div>
+
+        <label style="margin-top:10px">Weekdays to Include</label>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+          <label style="font-size:12px;font-weight:normal;display:flex;align-items:center;gap:4px"><input type="checkbox" id="bulkDay1" checked onchange="updateBulkPreview()"> Mon</label>
+          <label style="font-size:12px;font-weight:normal;display:flex;align-items:center;gap:4px"><input type="checkbox" id="bulkDay2" checked onchange="updateBulkPreview()"> Tue</label>
+          <label style="font-size:12px;font-weight:normal;display:flex;align-items:center;gap:4px"><input type="checkbox" id="bulkDay3" checked onchange="updateBulkPreview()"> Wed</label>
+          <label style="font-size:12px;font-weight:normal;display:flex;align-items:center;gap:4px"><input type="checkbox" id="bulkDay4" checked onchange="updateBulkPreview()"> Thu</label>
+          <label style="font-size:12px;font-weight:normal;display:flex;align-items:center;gap:4px"><input type="checkbox" id="bulkDay5" checked onchange="updateBulkPreview()"> Fri</label>
+          <label style="font-size:12px;font-weight:normal;display:flex;align-items:center;gap:4px"><input type="checkbox" id="bulkDay6" onchange="updateBulkPreview()"> Sat</label>
+          <label style="font-size:12px;font-weight:normal;display:flex;align-items:center;gap:4px"><input type="checkbox" id="bulkDay0" onchange="updateBulkPreview()"> Sun</label>
+        </div>
+
+        <label>Status to Mark</label>
+        <select id="bulkStatus" style="width:100%;margin-bottom:10px">
+          <option value="Present" style="color:#86efac;font-weight:bold">✅ Present</option>
+          <option value="Absent" style="color:#fca5a5;font-weight:bold">❌ Absent</option>
+          <option value="Leave" style="color:#facc15;font-weight:bold">🌴 Leave (Auto-extends expiry date)</option>
+        </select>
+      </div>
+
+      <div id="bulkPreviewSummary" style="font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:16px;text-align:center">
+        Calculating days...
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-soft" onclick="closeModals()">Cancel</button>
+        <button class="btn btn-primary" id="applyBulkBtn" onclick="applyBulkAttendance()">⚡ Apply &amp; Sync to Cloud</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="paymentModal">
+    <div class="modal">
+      <h2>Manual Payment</h2>
+      <label>Student</label>
+      <select id="manualStudent"></select>
+      <div class="grid">
+        <div><label>Amount</label><input id="manualAmount" type="number" min="1"></div>
+        <div><label>Payment Date</label><input id="manualDate" type="date"></div>
+        <div><label>Mode</label><select id="manualMode"><option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Razorpay</option></select></div>
+        <div><label>Duration</label><select id="manualDuration"><option value="1">1 month</option><option value="3">3 months</option><option value="6">6 months</option><option value="12">12 months</option></select></div>
+      </div>
+      <div class="actions"><button class="btn btn-soft" onclick="closeModals()">Cancel</button><button class="btn btn-primary" onclick="saveManualPayment()">Save Payment</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="renewModal">
+    <div class="modal">
+      <h2>Renew Student</h2>
+      <div class="muted" id="renewName">Student</div>
+      <div class="grid">
+        <div><label>Amount</label><input id="renewAmount" type="number" min="1"></div>
+        <div><label>Duration</label><select id="renewDuration"><option value="1">1 month</option><option value="3">3 months</option><option value="6">6 months</option><option value="12">12 months</option></select></div>
+        <div><label>Payment Date</label><input id="renewDate" type="date"></div>
+        <div><label>Mode</label><select id="renewMode"><option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Razorpay</option></select></div>
+      </div>
+      <div class="actions"><button class="btn btn-soft" onclick="closeModals()">Cancel</button><button class="btn btn-primary" onclick="saveRenewal()">Save Renewal</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="oldStudentModal">
+    <div class="modal">
+      <h2>Add Old Student</h2>
+      <div class="grid">
+        <div><label>Name</label><input id="oldName" type="text"></div>
+        <div><label>Phone</label><input id="oldPhone" type="tel" maxlength="10"></div>
+        <div><label>Age</label><input id="oldAge" type="number" min="2"></div>
+        <div><label>Parent / Guardian</label><input id="oldParent" type="text"></div>
+        <div><label>Category</label><select id="oldCategory"><option value="kids">Kids</option><option value="adult">Adult</option></select></div>
+        <div><label>Batch</label><input id="oldBatch" type="text" list="studioBatches" placeholder="Select studio batch"></div>
+        <datalist id="studioBatches">
+          <option value="Monday to Friday — 4:00 PM Kids Batch (2.5 to 6 years)"></option>
+          <option value="Monday to Friday — 5:00 PM Kids Batch (3 to 8 years)"></option>
+          <option value="Monday to Friday — 5:00 PM to 6:00 PM Zumba"></option>
+          <option value="Monday to Friday — 6:00 PM to 7:30 PM Hip-Hop Advance Batch"></option>
+          <option value="Monday to Friday — 6:00 PM to 8:00 PM Basic Hip-Hop Batch"></option>
+        </datalist>
+        <div><label>Fee Amount</label><input id="oldFee" type="number" min="0"></div>
+        <div><label>Fee Plan</label><select id="oldPlan"><option value="1M">1 Month</option><option value="3M">3 Months</option><option value="6M">6 Months</option><option value="12M">12 Months</option></select></div>
+        <div><label>Admission Date</label><input id="oldAdmission" type="date"></div>
+        <div><label>Due Date</label><input id="oldDue" type="date"></div>
+        <div><label>Payment Status</label><select id="oldFeeStatus"><option value="pending">Pending</option><option value="paid">Paid</option></select></div>
+        <div><label>Payment Method</label><select id="oldPaymentMethod"><option value="pending">Pending</option><option value="cash">Cash</option><option value="upi">UPI</option><option value="bank transfer">Bank Transfer</option><option value="razorpay">Razorpay</option></select></div>
+      </div>
+      <label>Notes</label><input id="oldNotes" type="text" placeholder="Optional old record note">
+      <div class="actions"><button class="btn btn-soft" onclick="closeModals()">Cancel</button><button class="btn btn-primary" onclick="saveOldStudent()">Save Student</button></div>
+    </div>
+  </div>
+
+  <script>
+    const sb = window.supabase.createClient(
+      'https://flzreearlfdultvspdmx.supabase.co',
+      'sb_publishable_vtHDcCNL1dMBScbVx-FhcA_CL_yyNsQ'
+    );
+    const TG_BOT_TOKEN = '8266966923:AAEn8emSbU7J05GDqsn7_UGoD-wFfAsBbHc';
+    const TG_OWNER_ID = '735593509';
+    const OWNER_PHONE = '917869240161';
+    let students = [];
+    let payments = [];
+    let attendanceRecords = {};
+    let allAttendanceRecords = [];
+    let studentAttendanceMap = {};
+    let paymentsTableAvailable = true;
+    let attendanceTableAvailable = true;
+    let selectedRenewStudentId = null;
+
+    function todayText(){return new Date().toISOString().slice(0,10)}
+    
+    function safeDate(dateText){
+      if(!dateText) return new Date();
+      const str = String(dateText).trim();
+      if(!str) return new Date();
+      const dateOnly = str.includes('T') ? str.slice(0,10) : (str.length >= 10 ? str.slice(0,10) : str);
+      const d = new Date(dateOnly + 'T00:00:00');
+      return isNaN(d.getTime()) ? new Date() : d;
+    }
+
+    function addMonths(dateText, months){
+      const d = safeDate(dateText);
+      d.setMonth(d.getMonth() + Number(months || 1));
+      return isNaN(d.getTime()) ? todayText() : d.toISOString().slice(0,10);
+    }
+
+    function addDays(dateText, days){
+      const d = safeDate(dateText);
+      d.setDate(d.getDate() + Number(days || 0));
+      return isNaN(d.getTime()) ? todayText() : d.toISOString().slice(0,10);
+    }
+
+    function daysUntil(dateText){
+      if(!dateText) return 9999;
+      const d = safeDate(dateText);
+      if(isNaN(d.getTime())) return 9999;
+      const t = safeDate(todayText());
+      return Math.round((d - t) / 86400000);
+    }
+    function money(n){return 'Rs.' + Number(n || 0).toLocaleString('en-IN')}
+    function esc(v){return String(v == null ? '' : v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+    function cleanPhone(p){let digits=String(p || '').replace(/\D/g,'');if(digits.startsWith('91') && digits.length===12)digits=digits.slice(2);return digits}
+    function planMonths(plan){
+      const m = String(plan || '').match(/\d+/);
+      return m ? Number(m[0]) : 1;
+    }
+    function normalizeStudent(s){
+      const months = Number(s.duration_months || planMonths(s.fee_plan) || 1);
+      // Prioritize the actual full package fee amount (e.g. 3500, 6500, 10500, 1500)
+      const totalFee = Number(s.fee_amount || s.monthly_fee || 0);
+      let style = s.dance_style || '';
+      if(!style && s.notes){
+        const match = String(s.notes).match(/Style:\s*([^;]+)/i);
+        if(match) style = match[1].trim();
+      }
+      if(!style) style = s.category === 'kids' ? 'Kids Dance' : 'Dance';
+      return Object.assign({}, s, {
+        dance_style: style,
+        monthly_fee: totalFee,
+        fee_amount: totalFee,
+        duration_months: months,
+        enrolled_date: s.enrolled_date || s.admission_date || s.created_at,
+        last_paid_date: s.last_paid_date || s.admission_date || s.created_at,
+        next_due_date: s.next_due_date || s.due_date,
+        status: (String(s.fee_status || '').toLowerCase() === 'cancelled' ? 'Cancelled' : 'Active'),
+        photo_base64: s.photo_base64 || null,
+        address: s.address || '',
+        parent_name: s.parent_name || ''
+      });
+    }
+    function studentFee(s){return Number(s.fee_amount || s.monthly_fee || 0)}
+    function studentFeeDisplay(s){
+      const fee = Number(s.fee_amount || s.monthly_fee || 0);
+      const months = Number(s.duration_months || 1);
+      if(months > 1){
+        return money(fee) + ' <span class="muted" style="font-size:11px">(' + months + 'M)</span>';
+      }
+      return money(fee);
+    }
+    function dueStudents(){return students.filter(function(s){return s.status !== 'Cancelled' && s.phone !== '9999999999' && s.category !== 'System' && daysUntil(s.next_due_date) <= 7})}
+    function attendanceKey(date){return 'creative-edge-attendance-' + date}
+    function localAttendance(date){
+      try{return JSON.parse(localStorage.getItem(attendanceKey(date)) || '{}')}catch(e){return {}}
+    }
+    function saveLocalAttendance(date, data){
+      localStorage.setItem(attendanceKey(date), JSON.stringify(data || {}));
+    }
+
+    function setConnection(ok, text){
+      document.getElementById('connDot').classList.toggle('ok', ok);
+      document.getElementById('connText').textContent = text;
+      document.getElementById('errorBanner').style.display = ok ? 'none' : 'block';
+      if(!ok) document.getElementById('errorBanner').textContent = text;
+    }
+
+    async function testConnection(){
+      try{
+        const result = await sb.from('students').select('id').limit(1);
+        if(result.error) throw result.error;
+        setConnection(true, 'Supabase connected');
+        return true;
+      }catch(e){
+        console.error('Supabase connection failed:', e);
+        setConnection(false, 'Supabase connection failed: ' + (e.message || e));
+        return false;
+      }
+    }
+
+    async function loadAll(){
+      document.getElementById('lastUpdated').textContent = 'Loading...';
+      const ok = await testConnection();
+      if(!ok){renderAll();return}
+      try{
+        const studentResult = await sb.from('students').select('*').order('created_at', { ascending:false });
+        if(studentResult.error) throw studentResult.error;
+        students = (studentResult.data || []).map(normalizeStudent);
+        const paymentResult = await sb.from('payments').select('*').order('created_at', { ascending:false });
+        if(paymentResult.error){
+          paymentsTableAvailable = false;
+          console.warn('Payments table unavailable:', paymentResult.error.message);
+          let allPays = [];
+          students.forEach(function(s){
+            const mPay = String(s.notes || '').match(/<!--PAY_START-->([\s\S]*?)<!--PAY_END-->/);
+            if(mPay){
+              try {
+                const parsed = JSON.parse(mPay[1]) || [];
+                parsed.forEach(function(p){
+                  allPays.push({
+                    student_id: s.id,
+                    student_name: s.name,
+                    amount: p.amount,
+                    payment_date: p.date || p.payment_date,
+                    payment_id: p.payment_id || ('PAY-' + Date.now()),
+                    mode: p.mode || 'Online',
+                    type: p.type || 'Fee',
+                    title: p.title || p.type || 'Fee Payment',
+                    duration_months: p.duration_months || 1
+                  });
+                });
+              } catch(e){}
+            }
+            if(s.fee_status === 'paid' || s.payment_id){
+              if(!allPays.find(function(x){ return x.student_id === s.id; })){
+                allPays.push({
+                  student_id: s.id,
+                  student_name: s.name,
+                  amount: s.fee_amount || s.monthly_fee || 1500,
+                  payment_date: s.last_paid_date || s.admission_date || s.created_at || todayText(),
+                  payment_id: s.payment_id || ('ADM-' + s.id),
+                  mode: s.payment_method || 'Admission',
+                  type: 'Admission Package',
+                  title: s.dance_style + ' (' + (s.fee_plan || '1M') + ')',
+                  duration_months: s.duration_months || 1
+                });
+              }
+            }
+          });
+          payments = allPays;
+        }else{
+          paymentsTableAvailable = true;
+          payments = paymentResult.data || [];
+        }
+        await loadAllAttendanceRecords();
+        await loadStudioFinancials();
+        try { await loadAppContent(); } catch(cmsErr){ console.warn(cmsErr); }
+        document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleString();
+        setConnection(true, 'Supabase Cloud Live & Synchronized');
+        renderAll();
+      }catch(e){
+        console.error('Load failed:', e);
+        setConnection(false, 'Could not load data: ' + (e.message || e));
+        renderAll();
+      }
+    }
+
+    
+    // ── LEAVE REQUESTS APPROVAL SYSTEM ──
+    function getPendingLeaveRequests(){
+      const list = [];
+      students.forEach(function(s){
+        if(s.notes && s.phone !== '9999999999'){
+          const m = String(s.notes).match(/<!--LEAVE_REQ_START-->([\s\S]*?)<!--LEAVE_REQ_END-->/);
+          if(m){
+            try{
+              const reqs = JSON.parse(m[1]) || [];
+              reqs.forEach(function(r){
+                if(r.status === 'pending'){
+                  list.push(Object.assign({}, r, { student: s }));
+                }
+              });
+            }catch(e){}
+          }
+        }
+      });
+      return list;
+    }
+
+    function renderPendingLeaves(){
+      const panel = document.getElementById('pendingLeavePanel');
+      const countEl = document.getElementById('pendingLeaveCount');
+      const tbody = document.getElementById('pendingLeaveRows');
+      if(!panel || !tbody) return;
+
+      const pending = getPendingLeaveRequests();
+      if(countEl) countEl.textContent = pending.length + ' Pending';
+
+      if(pending.length === 0){
+        panel.style.display = 'none';
+        tbody.innerHTML = '';
+        return;
+      }
+
+      panel.style.display = 'block';
+      tbody.innerHTML = pending.map(function(r){
+        const s = r.student;
+        const leaveInfo = calculateLeaveAndExtension(s);
+        const maxExtend = Math.min(r.days, leaveInfo.remaining);
+        const capTag = maxExtend < r.days 
+          ? '<span style="color:#fca5a5;font-size:11px;display:block">Max +' + maxExtend + 'd ext (Cap: ' + leaveInfo.cap + 'd)</span>'
+          : '<span style="color:#86efac;font-size:11px;display:block">+' + maxExtend + 'd extension</span>';
+
+        return '<tr>' +
+          '<td><strong onclick="openStudentDetailModal(\'' + s.id + '\')" style="color:#f59e0b;cursor:pointer;text-decoration:underline" title="Click to view & edit detailed profile">' + esc(s.name) + ' 🔍</strong></td>' +
+          '<td>' + esc(s.phone) + '</td>' +
+          '<td>' + esc(r.start) + ' to ' + esc(r.end) + '</td>' +
+          '<td><span class="badge badge-due">' + r.days + ' Days</span>' + capTag + '</td>' +
+          '<td>' + esc(r.reason || 'Leave') + '</td>' +
+          '<td>' + esc(r.created_at || 'Today') + '</td>' +
+          '<td>' +
+            '<button class="btn btn-primary" onclick="approveLeaveRequest(\'' + s.id + '\', \'' + r.id + '\')" style="padding:6px 12px;font-size:12px;margin-right:6px">✅ Approve & Extend (Max +' + maxExtend + 'd)</button>' +
+            '<button class="btn btn-danger" onclick="rejectLeaveRequest(\'' + s.id + '\', \'' + r.id + '\')" style="padding:6px 12px;font-size:12px">❌ Reject</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    async function approveLeaveRequest(studentId, reqId){
+      const s = students.find(function(x){ return x.id === studentId; });
+      if(!s) return;
+
+      let reqList = [];
+      const m = String(s.notes || '').match(/<!--LEAVE_REQ_START-->([\s\S]*?)<!--LEAVE_REQ_END-->/);
+      if(m){
+        try{ reqList = JSON.parse(m[1]) || []; }catch(e){}
+      }
+
+      const targetReq = reqList.find(function(r){ return r.id === reqId; });
+      if(!targetReq) return;
+
+      if(!confirm('Approve ' + targetReq.days + ' days leave for ' + s.name + ' and automatically extend expiry date?')) return;
+
+      // Mark the leave dates in attendance
+      const datesToMark = targetReq.dates || [targetReq.start];
+      datesToMark.forEach(function(d){
+        const existingIdx = allAttendanceRecords.findIndex(function(r){
+          return r.student_id === studentId && String(r.attendance_date).slice(0,10) === d;
+        });
+
+        if(existingIdx >= 0){
+          allAttendanceRecords[existingIdx].status = 'Leave';
+          allAttendanceRecords[existingIdx].note = targetReq.reason || 'Approved Leave';
+        } else {
+          allAttendanceRecords.push({
+            student_id: studentId,
+            student_name: s.name,
+            phone: s.phone,
+            attendance_date: d,
+            status: 'Leave',
+            note: targetReq.reason || 'Approved Leave'
+          });
+        }
+      });
+
+      // Update request status to approved
+      targetReq.status = 'approved';
+      targetReq.approved_at = new Date().toISOString().slice(0,10);
+
+      // Compute updated extension
+      const leaveInfo = calculateLeaveAndExtension(s);
+      s.next_due_date = leaveInfo.extendedDue;
+
+      // Prepare notes with updated attendance and leave requests
+      const studentRecords = allAttendanceRecords.filter(function(r){ return r.student_id === studentId; }).map(function(r){
+        return { d: String(r.attendance_date).slice(0,10), s: r.status, n: r.note || '' };
+      });
+
+      let cleanNote = String(s.notes || '').replace(/<!--ATT_START-->[\s\S]*?<!--ATT_END-->/g, '').replace(/<!--LEAVE_REQ_START-->[\s\S]*?<!--LEAVE_REQ_END-->/g, '').trim();
+      let updatedNote = cleanNote + (cleanNote ? '\n' : '') +
+        '<!--ATT_START-->' + JSON.stringify(studentRecords) + '<!--ATT_END-->' + '\n' +
+        '<!--LEAVE_REQ_START-->' + JSON.stringify(reqList) + '<!--LEAVE_REQ_END-->';
+
+      s.notes = updatedNote;
+
+      try {
+        await sb.from('students').update({
+          notes: updatedNote,
+          due_date: leaveInfo.extendedDue
+        }).eq('id', studentId);
+
+        // Telegram Notification
+        try {
+          const tgText = '✅ LEAVE APPROVED\n\nStudent: ' + s.name + '\nDates: ' + targetReq.start + ' to ' + targetReq.end + ' (' + targetReq.days + ' days)\nNew Expiry: ' + leaveInfo.extendedDue + ' (+' + leaveInfo.extensionDays + 'd extended)';
+          fetch('https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ chat_id: TG_OWNER_ID, text: tgText })
+          }).catch(function(){});
+        } catch(e){}
+
+        alert('Leave Approved for ' + s.name + '! Expiry date automatically extended to ' + leaveInfo.extendedDue + ' (' + targetReq.days + ' days).');
+        await loadAll();
+      } catch(err){
+        alert('Failed to save approval: ' + err.message);
+      }
+    }
+
+    async function rejectLeaveRequest(studentId, reqId){
+      const s = students.find(function(x){ return x.id === studentId; });
+      if(!s) return;
+
+      let reqList = [];
+      const m = String(s.notes || '').match(/<!--LEAVE_REQ_START-->([\s\S]*?)<!--LEAVE_REQ_END-->/);
+      if(m){
+        try{ reqList = JSON.parse(m[1]) || []; }catch(e){}
+      }
+
+      const targetReq = reqList.find(function(r){ return r.id === reqId; });
+      if(!targetReq) return;
+
+      if(!confirm('Reject leave request from ' + s.name + '?')) return;
+
+      targetReq.status = 'rejected';
+      targetReq.rejected_at = new Date().toISOString().slice(0,10);
+
+      let cleanNote = String(s.notes || '').replace(/<!--LEAVE_REQ_START-->[\s\S]*?<!--LEAVE_REQ_END-->/g, '').trim();
+      let updatedNote = cleanNote + (cleanNote ? '\n' : '') + '<!--LEAVE_REQ_START-->' + JSON.stringify(reqList) + '<!--LEAVE_REQ_END-->';
+      s.notes = updatedNote;
+
+      try {
+        await sb.from('students').update({ notes: updatedNote }).eq('id', studentId);
+        alert('Leave request marked as rejected.');
+        await loadAll();
+      } catch(err){
+        alert('Failed: ' + err.message);
+      }
+    }
+
+
+    
+    // ── STUDENT DETAILED PROFILE & EDIT MODAL ──
+    function openStudentDetailModal(studentId){
+      const s = students.find(function(x){ return x.id === studentId; });
+      if(!s) return;
+
+      document.getElementById('sdStudentId').value = s.id;
+      document.getElementById('sdName').value = s.name || '';
+      document.getElementById('sdPhone').value = s.phone || '';
+      document.getElementById('sdAge').value = s.age || '';
+      document.getElementById('sdParent').value = s.parent_name || '';
+      document.getElementById('sdStyle').value = s.dance_style || s.category || 'Dance';
+      document.getElementById('sdBatch').value = s.batch || '';
+      document.getElementById('sdFee').value = s.fee_amount || s.monthly_fee || '';
+      document.getElementById('sdPlan').value = (s.duration_months ? s.duration_months + 'M' : (s.fee_plan || '1M'));
+      document.getElementById('sdAdmission').value = s.enrolled_date || s.admission_date || s.created_at || '';
+      document.getElementById('sdDueDate').value = s.next_due_date || s.due_date || '';
+      
+      const cleanNote = String(s.notes || '')
+        .replace(/<!--ATT_START-->[\s\S]*?<!--ATT_END-->/g, '')
+        .replace(/<!--CMS_START-->[\s\S]*?<!--CMS_END-->/g, '')
+        .replace(/<!--LEAVE_REQ_START-->[\s\S]*?<!--LEAVE_REQ_END-->/g, '')
+        .replace(/<!--PAY_START-->[\s\S]*?<!--PAY_END-->/g, '')
+        .replace(/<!--CANCEL_REQ_START-->[\s\S]*?<!--CANCEL_REQ_END-->/g, '')
+        .trim();
+      document.getElementById('sdNotes').value = cleanNote;
+
+      // Attendance & Leave Stats
+      const leaveInfo = calculateLeaveAndExtension(s);
+      const cap = leaveInfo.cap;
+      const stuRecords = allAttendanceRecords.filter(function(r){ return r.student_id === s.id; });
+      const presentCount = stuRecords.filter(function(r){ return r.status === 'Present'; }).length;
+      const leaveCount = stuRecords.filter(function(r){ return r.status === 'Leave'; }).length;
+      const absentCount = stuRecords.filter(function(r){ return r.status === 'Absent'; }).length;
+
+      // Check Cap Violation
+      const alertBanner = document.getElementById('sdLeaveAlertBanner');
+      if(leaveCount > cap){
+        alertBanner.innerHTML = '<div style="background:#3b1418;border:1px solid #ef4444;color:#fca5a5;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-weight:700">🚨 LEAVE CAP VIOLATED: Student took ' + leaveCount + ' approved leaves (Package Allowance is ' + cap + ' Days). Exceeded by ' + (leaveCount - cap) + ' days!</div>';
+      } else {
+        alertBanner.innerHTML = '';
+      }
+
+      document.getElementById('sdAttStatsGrid').innerHTML =
+        '<div style="background:#121b31;padding:8px;border-radius:8px"><div style="font-size:11px;color:#94a3b8">Present</div><div style="font-size:18px;font-weight:700;color:#86efac">' + presentCount + '</div></div>' +
+        '<div style="background:#121b31;padding:8px;border-radius:8px"><div style="font-size:11px;color:#94a3b8">Leaves Taken</div><div style="font-size:18px;font-weight:700;color:#facc15">' + leaveCount + ' / ' + cap + 'd</div></div>' +
+        '<div style="background:#121b31;padding:8px;border-radius:8px"><div style="font-size:11px;color:#94a3b8">Remaining Cap</div><div style="font-size:18px;font-weight:700;color:' + (leaveInfo.remaining === 0 ? '#fca5a5' : '#86efac') + '">' + leaveInfo.remaining + ' Days</div></div>' +
+        '<div style="background:#121b31;padding:8px;border-radius:8px"><div style="font-size:11px;color:#94a3b8">Expiry Extension</div><div style="font-size:18px;font-weight:700;color:#86efac">+' + leaveInfo.extensionDays + ' Days</div></div>';
+
+      // Payment History for Student
+      const studentPays = payments.filter(function(p){ return p.student_id === s.id; });
+      const payTbody = document.getElementById('sdPaymentRows');
+      if(studentPays.length === 0){
+        payTbody.innerHTML = '<tr><td colspan="5" class="empty">No payments recorded yet.</td></tr>';
+      } else {
+        payTbody.innerHTML = studentPays.map(function(p){
+          return '<tr>' +
+            '<td>' + (p.payment_date || '—') + '</td>' +
+            '<td><strong style="color:#86efac">₹' + p.amount + '</strong></td>' +
+            '<td>' + esc(p.type || p.title || (p.duration_months ? p.duration_months + 'M Fee' : 'Fee')) + '</td>' +
+            '<td>' + esc(p.mode || 'Online') + '</td>' +
+            '<td><span class="muted" style="font-size:11px">' + esc(p.payment_id || '—') + '</span></td>' +
+          '</tr>';
+        }).join('');
+      }
+
+      document.getElementById('studentDetailModal').classList.add('show');
+    }
+
+    async function saveStudentDetailEdit(){
+      const id = document.getElementById('sdStudentId').value;
+      const s = students.find(function(x){ return x.id === id; });
+      if(!s) return;
+
+      const name = document.getElementById('sdName').value.trim();
+      const phone = cleanPhone(document.getElementById('sdPhone').value.trim());
+      const age = Number(document.getElementById('sdAge').value) || s.age;
+      const parent = document.getElementById('sdParent').value.trim();
+      const style = document.getElementById('sdStyle').value.trim();
+      const batch = document.getElementById('sdBatch').value.trim();
+      const fee = Number(document.getElementById('sdFee').value) || s.fee_amount;
+      const plan = document.getElementById('sdPlan').value;
+      const admission = document.getElementById('sdAdmission').value;
+      const due = document.getElementById('sdDueDate').value;
+      const noteInput = document.getElementById('sdNotes').value.trim();
+
+      // Preserve special tag blocks
+      let preservedNotes = String(s.notes || '');
+      const attMatch = preservedNotes.match(/<!--ATT_START-->[\s\S]*?<!--ATT_END-->/);
+      const leaveReqMatch = preservedNotes.match(/<!--LEAVE_REQ_START-->[\s\S]*?<!--LEAVE_REQ_END-->/);
+      const payMatch = preservedNotes.match(/<!--PAY_START-->[\s\S]*?<!--PAY_END-->/);
+      const cancelMatch = preservedNotes.match(/<!--CANCEL_REQ_START-->[\s\S]*?<!--CANCEL_REQ_END-->/);
+
+      let finalNote = noteInput;
+      if(attMatch) finalNote += '\n' + attMatch[0];
+      if(leaveReqMatch) finalNote += '\n' + leaveReqMatch[0];
+      if(payMatch) finalNote += '\n' + payMatch[0];
+      if(cancelMatch) finalNote += '\n' + cancelMatch[0];
+
+      try {
+        const res = await sb.from('students').update({
+          name: name,
+          phone: phone,
+          age: age,
+          parent_name: parent,
+          category: style,
+          batch: batch,
+          fee_amount: fee,
+          fee_plan: plan,
+          admission_date: admission,
+          due_date: due,
+          notes: finalNote
+        }).eq('id', id);
+
+        if(res.error) throw res.error;
+        alert('Student profile updated and synced successfully!');
+        closeModals();
+        await loadAll();
+      } catch(err){
+        alert('Failed to update student: ' + err.message);
+      }
+    }
+
+    function openStudentDirectPayment(){
+      const id = document.getElementById('sdStudentId').value;
+      closeModals();
+      openManualPayment();
+      document.getElementById('manualStudent').value = id;
+    }
+
+    // ── CANCEL REQUESTS APPROVAL ──
+    function getPendingCancelRequests(){
+      const list = [];
+      students.forEach(function(s){
+        if(s.notes && s.phone !== '9999999999'){
+          const m = String(s.notes).match(/<!--CANCEL_REQ_START-->([\s\S]*?)<!--CANCEL_REQ_END-->/);
+          if(m){
+            try {
+              const reqs = JSON.parse(m[1]) || [];
+              reqs.forEach(function(r){
+                if(r.status === 'pending'){
+                  list.push(Object.assign({}, r, { student: s }));
+                }
+              });
+            } catch(e){}
+          }
+        }
+      });
+      return list;
+    }
+
+    function renderPendingCancels(){
+      const panel = document.getElementById('pendingCancelPanel');
+      const countEl = document.getElementById('pendingCancelCount');
+      const tbody = document.getElementById('pendingCancelRows');
+      if(!panel || !tbody) return;
+
+      const pending = getPendingCancelRequests();
+      if(countEl) countEl.textContent = pending.length + ' Pending';
+
+      if(pending.length === 0){
+        panel.style.display = 'none';
+        tbody.innerHTML = '';
+        return;
+      }
+
+      panel.style.display = 'block';
+      tbody.innerHTML = pending.map(function(r){
+        const s = r.student;
+        return '<tr>' +
+          '<td><strong onclick="openStudentDetailModal(\'' + s.id + '\')" style="color:#f59e0b;cursor:pointer;text-decoration:underline" title="Click to view & edit detailed profile">' + esc(s.name) + ' 🔍</strong></td>' +
+          '<td>' + esc(s.phone) + '</td>' +
+          '<td>' + esc(r.reason || 'Freeze Request') + '</td>' +
+          '<td>' + esc(r.requested_at || 'Today') + '</td>' +
+          '<td>' +
+            '<button class="btn btn-danger" onclick="approveCancelRequest(\'' + s.id + '\', \'' + r.id + '\')" style="padding:6px 12px;font-size:12px;margin-right:6px">🛑 Approve Freeze / Cancel</button>' +
+            '<button class="btn btn-soft" onclick="rejectCancelRequest(\'' + s.id + '\', \'' + r.id + '\')" style="padding:6px 12px;font-size:12px">Dismiss</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    async function approveCancelRequest(studentId, reqId){
+      const s = students.find(function(x){ return x.id === studentId; });
+      if(!s) return;
+
+      if(!confirm('Approve admission freeze / cancellation for ' + s.name + '? They will keep app access and can renew anytime.')) return;
+
+      let reqList = [];
+      const m = String(s.notes || '').match(/<!--CANCEL_REQ_START-->([\s\S]*?)<!--CANCEL_REQ_END-->/);
+      if(m){
+        try{ reqList = JSON.parse(m[1]) || []; }catch(e){}
+      }
+      const targetReq = reqList.find(function(r){ return r.id === reqId; });
+      if(targetReq){
+        targetReq.status = 'approved';
+        targetReq.approved_at = todayText();
+      }
+
+      let cleanNote = String(s.notes || '').replace(/<!--CANCEL_REQ_START-->[\s\S]*?<!--CANCEL_REQ_END-->/g, '').trim();
+      let updatedNote = cleanNote + (cleanNote ? '\n' : '') + '<!--CANCEL_REQ_START-->' + JSON.stringify(reqList) + '<!--CANCEL_REQ_END-->';
+
+      try {
+        await sb.from('students').update({
+          fee_status: 'cancelled',
+          notes: updatedNote
+        }).eq('id', studentId);
+
+        alert('Admission cancelled / frozen for ' + s.name + '. Student can renew anytime in app.');
+        await loadAll();
+      } catch(err){
+        alert('Failed: ' + err.message);
+      }
+    }
+
+    async function rejectCancelRequest(studentId, reqId){
+      const s = students.find(function(x){ return x.id === studentId; });
+      if(!s) return;
+
+      let reqList = [];
+      const m = String(s.notes || '').match(/<!--CANCEL_REQ_START-->([\s\S]*?)<!--CANCEL_REQ_END-->/);
+      if(m){
+        try{ reqList = JSON.parse(m[1]) || []; }catch(e){}
+      }
+      const targetReq = reqList.find(function(r){ return r.id === reqId; });
+      if(targetReq){
+        targetReq.status = 'rejected';
+      }
+
+      let cleanNote = String(s.notes || '').replace(/<!--CANCEL_REQ_START-->[\s\S]*?<!--CANCEL_REQ_END-->/g, '').trim();
+      let updatedNote = cleanNote + (cleanNote ? '\n' : '') + '<!--CANCEL_REQ_START-->' + JSON.stringify(reqList) + '<!--CANCEL_REQ_END-->';
+
+      try {
+        await sb.from('students').update({ notes: updatedNote }).eq('id', studentId);
+        alert('Request dismissed.');
+        await loadAll();
+      } catch(err){
+        alert('Failed: ' + err.message);
+      }
+    }
+
+
+    
+    // ── FINANCIAL & STAFF ENGINE ──
+    let studioStaff = [
+      { id: 'st_1', name: 'Ashish Deshmukh', role: 'Lead Choreographer', phone: '7869240161', salary: 35000, joining: '2025-01-01', salaryHistory: [] },
+      { id: 'st_2', name: 'Assistant Instructor', role: 'Assistant Instructor', phone: '9009953870', salary: 15000, joining: '2025-06-01', salaryHistory: [] }
+    ];
+
+    let studioRentConfig = { amount: 20000, dueDay: 5, landlord: 'Studio Landlord', payments: [] };
+    let studioExpenses = [];
+
+    // Load & Save Financial Data in Cloud
+    async function loadStudioFinancials(){
+      try {
+        const local = localStorage.getItem('ce_financials');
+        if(local){
+          const parsed = JSON.parse(local);
+          if(parsed.staff) studioStaff = parsed.staff;
+          if(parsed.rent) studioRentConfig = parsed.rent;
+          if(parsed.expenses) studioExpenses = parsed.expenses;
+        }
+      } catch(e){}
+
+      try {
+        const res = await sb.from('students').select('notes').eq('phone', '9999999999').maybeSingle();
+        if(res && res.data && res.data.notes){
+          const m = String(res.data.notes).match(/<!--FINANCE_START-->([\s\S]*?)<!--FINANCE_END-->/);
+          if(m){
+            const cloudFin = JSON.parse(m[1]);
+            if(cloudFin.staff) studioStaff = cloudFin.staff;
+            if(cloudFin.rent) studioRentConfig = cloudFin.rent;
+            if(cloudFin.expenses) studioExpenses = cloudFin.expenses;
+            localStorage.setItem('ce_financials', JSON.stringify(cloudFin));
+          }
+        }
+      } catch(e){}
+    }
+
+    async function saveStudioFinancials(){
+      const payload = { staff: studioStaff, rent: studioRentConfig, expenses: studioExpenses };
+      localStorage.setItem('ce_financials', JSON.stringify(payload));
+
+      try {
+        const notePayload = '<!--FINANCE_START-->' + JSON.stringify(payload) + '<!--FINANCE_END-->';
+        const res = await sb.from('students').select('id,notes').eq('phone', '9999999999').maybeSingle();
+        if(res && res.data && res.data.id){
+          let rawNotes = res.data.notes || '';
+          let cleanNote = rawNotes.replace(/<!--FINANCE_START-->[\s\S]*?<!--FINANCE_END-->/g, '').trim();
+          let updated = cleanNote + (cleanNote ? '\n' : '') + notePayload;
+          await sb.from('students').update({ notes: updated }).eq('id', res.data.id);
+        }
+      } catch(e){
+        console.warn('Could not sync financials to cloud:', e);
+      }
+    }
+
+    // ── REVENUE & BATCH ANALYTICS ──
+    let selectedAnalyticsMonth = '';
+
+    function computeAndRenderAnalytics(){
+      const monthMap = {}; // 'YYYY-MM': { total: 0, count: 0, packages: 0, workshops: 0, batches: {} }
+      const batchMap = {}; // 'BatchName': { count: 0, revenue: 0 }
+
+      // Aggregate all student admissions & fee plans
+      students.forEach(function(s){
+        if(s.phone === '9999999999' || s.category === 'System') return;
+        const b = s.batch || 'General Batch';
+        if(!batchMap[b]) batchMap[b] = { count: 0, revenue: 0 };
+        batchMap[b].count++;
+        batchMap[b].revenue += Number(s.fee_amount || s.monthly_fee || 0);
+      });
+
+      // Aggregate payments
+      let totalGross = 0;
+      payments.forEach(function(p){
+        const amt = Number(p.amount || 0);
+        totalGross += amt;
+        const d = String(p.payment_date || todayText()).slice(0,7); // 'YYYY-MM'
+        if(!monthMap[d]) monthMap[d] = { total: 0, count: 0, packages: 0, workshops: 0, batches: {} };
+        monthMap[d].total += amt;
+        monthMap[d].count++;
+        if(String(p.type || '').toLowerCase().includes('workshop') || String(p.title || '').toLowerCase().includes('competition')){
+          monthMap[d].workshops += amt;
+        } else {
+          monthMap[d].packages += amt;
+        }
+
+        const stu = students.find(function(x){ return x.id === p.student_id; });
+        if(stu && stu.batch){
+          monthMap[d].batches[stu.batch] = (monthMap[d].batches[stu.batch] || 0) + amt;
+        }
+      });
+
+      // Find highest revenue month
+      let highestMonth = '—', highestMonthRev = 0;
+      Object.keys(monthMap).forEach(function(m){
+        if(monthMap[m].total > highestMonthRev){
+          highestMonthRev = monthMap[m].total;
+          highestMonth = m;
+        }
+      });
+
+      // Find top batch
+      let topBatch = '—', topBatchCount = 0;
+      Object.keys(batchMap).forEach(function(b){
+        if(batchMap[b].count > topBatchCount){
+          topBatchCount = batchMap[b].count;
+          topBatch = b.replace('Monday to Friday — ', '').slice(0,25) + '...';
+        }
+      });
+
+      // Current month revenue
+      const currentMonthKey = todayText().slice(0,7);
+      const thisMonthRev = (monthMap[currentMonthKey] ? monthMap[currentMonthKey].total : 0);
+
+      // Average revenue per student
+      const validStudentCount = students.filter(function(s){ return s.phone !== '9999999999' && s.category !== 'System'; }).length;
+      const avgRev = validStudentCount > 0 ? Math.round(totalGross / validStudentCount) : 0;
+
+      // Update Analytics Header Cards
+      if(document.getElementById('anHighestMonth')) document.getElementById('anHighestMonth').textContent = highestMonth !== '—' ? (highestMonth + ' (₹' + highestMonthRev.toLocaleString('en-IN') + ')') : '—';
+      if(document.getElementById('anHighestBatch')) document.getElementById('anHighestBatch').textContent = topBatch !== '—' ? (topBatch + ' (' + topBatchCount + ' std)') : '—';
+      if(document.getElementById('anThisMonthRev')) document.getElementById('anThisMonthRev').textContent = '₹' + thisMonthRev.toLocaleString('en-IN');
+      if(document.getElementById('anAvgRevPerStudent')) document.getElementById('anAvgRevPerStudent').textContent = '₹' + avgRev.toLocaleString('en-IN');
+      if(document.getElementById('paymentTotalBadge')) document.getElementById('paymentTotalBadge').textContent = '₹' + totalGross.toLocaleString('en-IN') + ' Total';
+
+      // Fill Month Filter Dropdown
+      const mFilter = document.getElementById('anMonthFilter');
+      if(mFilter){
+        const sortedMonths = Object.keys(monthMap).sort().reverse();
+        mFilter.innerHTML = '<option value="">All Months</option>' + sortedMonths.map(function(m){
+          return '<option value="' + m + '" ' + (selectedAnalyticsMonth === m ? 'selected' : '') + '>' + m + ' (₹' + monthMap[m].total.toLocaleString('en-IN') + ')</option>';
+        }).join('');
+      }
+
+      // Render Monthly Breakdown Table
+      const mRows = document.getElementById('monthlyRevenueRows');
+      if(mRows){
+        const sortedMonths = Object.keys(monthMap).sort().reverse();
+        if(sortedMonths.length === 0){
+          mRows.innerHTML = '<tr><td colspan="6" class="empty">No monthly transactions recorded yet.</td></tr>';
+        } else {
+          mRows.innerHTML = sortedMonths.map(function(m){
+            const data = monthMap[m];
+            let topBatchInMonth = '—', maxBatchAmt = 0;
+            Object.keys(data.batches).forEach(function(bName){
+              if(data.batches[bName] > maxBatchAmt){
+                maxBatchAmt = data.batches[bName];
+                topBatchInMonth = bName.replace('Monday to Friday — ', '');
+              }
+            });
+
+            return '<tr style="cursor:pointer" onclick="selectMonthForPayments(\'' + m + '\')">' +
+              '<td><strong style="color:#f59e0b">' + m + '</strong></td>' +
+              '<td><strong style="color:#86efac;font-size:15px">₹' + data.total.toLocaleString('en-IN') + '</strong></td>' +
+              '<td>' + data.count + ' transactions</td>' +
+              '<td>₹' + data.packages.toLocaleString('en-IN') + '</td>' +
+              '<td>₹' + data.workshops.toLocaleString('en-IN') + '</td>' +
+              '<td><span class="muted" style="font-size:12px">' + esc(topBatchInMonth) + '</span></td>' +
+            '</tr>';
+          }).join('');
+        }
+      }
+
+      renderFinancialSummary(totalGross);
+    }
+
+    function selectMonthForPayments(monthKey){
+      selectedAnalyticsMonth = monthKey;
+      const mFilter = document.getElementById('anMonthFilter');
+      if(mFilter) mFilter.value = monthKey;
+      renderPayments();
+    }
+
+    function filterPaymentsByMonth(){
+      selectedAnalyticsMonth = document.getElementById('anMonthFilter').value;
+      renderPayments();
+    }
+
+    // ── STAFF & SALARIES ──
+    function renderStaff(){
+      const tbody = document.getElementById('staffRows');
+      if(!tbody) return;
+
+      const currentMonth = todayText().slice(0,7);
+      let totalSalary = 0, paidCount = 0, pendingCount = 0;
+
+      studioStaff.forEach(function(st){
+        totalSalary += Number(st.salary || 0);
+        const hasPaidThisMonth = (st.salaryHistory || []).find(function(h){ return h.month === currentMonth; });
+        if(hasPaidThisMonth) paidCount++; else pendingCount++;
+      });
+
+      if(document.getElementById('staffStatTotal')) document.getElementById('staffStatTotal').textContent = studioStaff.length;
+      if(document.getElementById('staffStatPaid')) document.getElementById('staffStatPaid').textContent = paidCount;
+      if(document.getElementById('staffStatPending')) document.getElementById('staffStatPending').textContent = pendingCount;
+      if(document.getElementById('staffStatExpense')) document.getElementById('staffStatExpense').textContent = '₹' + totalSalary.toLocaleString('en-IN');
+
+      if(studioStaff.length === 0){
+        tbody.innerHTML = '<tr><td colspan="8" class="empty">No staff members added yet. Click "+ Add Staff Member" to add instructors & staff.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = studioStaff.map(function(st){
+        const history = st.salaryHistory || [];
+        const thisMonthRecord = history.find(function(h){ return h.month === currentMonth; });
+        const isPaid = !!thisMonthRecord;
+        const lastPaid = history.length > 0 ? history[history.length - 1].date : '—';
+        const lastMode = history.length > 0 ? history[history.length - 1].mode : '—';
+
+        const statusBadge = isPaid
+          ? '<span class="badge badge-active">Paid for ' + currentMonth + '</span>'
+          : '<span class="badge badge-expired">Pending for ' + currentMonth + '</span>';
+
+        return '<tr>' +
+          '<td><strong>' + esc(st.name) + '</strong></td>' +
+          '<td><span class="muted">' + esc(st.role) + '</span></td>' +
+          '<td>' + esc(st.phone) + '</td>' +
+          '<td><strong style="color:#f59e0b">₹' + Number(st.salary).toLocaleString('en-IN') + '</strong></td>' +
+          '<td>' + statusBadge + '</td>' +
+          '<td>' + lastPaid + '</td>' +
+          '<td>' + esc(lastMode) + '</td>' +
+          '<td>' +
+            '<button class="btn btn-primary" onclick="openPaySalaryModal(\'' + st.id + '\')" style="padding:6px 12px;font-size:12px;margin-right:6px">💵 Pay Salary</button>' +
+            '<button class="btn btn-danger" onclick="removeStaffMember(\'' + st.id + '\')" style="padding:6px 10px;font-size:11px">Remove</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function openAddStaffModal(){
+      document.getElementById('staffEditId').value = '';
+      document.getElementById('staffName').value = '';
+      document.getElementById('staffPhone').value = '';
+      document.getElementById('staffSalary').value = '';
+      document.getElementById('staffJoining').value = todayText();
+      document.getElementById('staffModal').classList.add('show');
+    }
+
+    async function saveStaffMember(){
+      const name = document.getElementById('staffName').value.trim();
+      const phone = cleanPhone(document.getElementById('staffPhone').value);
+      const role = document.getElementById('staffRole').value;
+      const salary = Number(document.getElementById('staffSalary').value || 0);
+      const joining = document.getElementById('staffJoining').value || todayText();
+
+      if(!name){ alert('Please enter staff member name'); return; }
+      if(!salary){ alert('Please enter monthly salary'); return; }
+
+      const newStaff = {
+        id: 'st_' + Date.now(),
+        name: name,
+        phone: phone,
+        role: role,
+        salary: salary,
+        joining: joining,
+        salaryHistory: []
+      };
+
+      studioStaff.push(newStaff);
+      await saveStudioFinancials();
+      closeModals();
+      renderStaff();
+      computeAndRenderAnalytics();
+      alert('Staff member ' + name + ' added successfully!');
+    }
+
+    function openPaySalaryModal(staffId){
+      const st = studioStaff.find(function(x){ return x.id === staffId; });
+      if(!st) return;
+
+      document.getElementById('paySalaryStaffId').value = st.id;
+      document.getElementById('paySalaryStaffName').textContent = st.name;
+      document.getElementById('paySalaryStaffRole').textContent = st.role;
+      document.getElementById('paySalaryMonth').value = todayText().slice(0,7);
+      document.getElementById('paySalaryAmount').value = st.salary;
+      document.getElementById('paySalaryDate').value = todayText();
+      document.getElementById('paySalaryRef').value = '';
+      document.getElementById('paySalaryModal').classList.add('show');
+    }
+
+    async function saveSalaryPayment(){
+      const staffId = document.getElementById('paySalaryStaffId').value;
+      const st = studioStaff.find(function(x){ return x.id === staffId; });
+      if(!st) return;
+
+      const month = document.getElementById('paySalaryMonth').value || todayText().slice(0,7);
+      const amount = Number(document.getElementById('paySalaryAmount').value || st.salary);
+      const date = document.getElementById('paySalaryDate').value || todayText();
+      const mode = document.getElementById('paySalaryMode').value;
+      const ref = document.getElementById('paySalaryRef').value.trim();
+
+      if(!st.salaryHistory) st.salaryHistory = [];
+      st.salaryHistory.push({
+        id: 'sal_' + Date.now(),
+        month: month,
+        amount: amount,
+        date: date,
+        mode: mode,
+        ref: ref
+      });
+
+      await saveStudioFinancials();
+      closeModals();
+      renderStaff();
+      computeAndRenderAnalytics();
+      alert('Salary of ₹' + amount + ' recorded for ' + st.name + ' (' + month + ')!');
+    }
+
+    async function removeStaffMember(staffId){
+      if(!confirm('Remove this staff member?')) return;
+      studioStaff = studioStaff.filter(function(x){ return x.id !== staffId; });
+      await saveStudioFinancials();
+      renderStaff();
+      computeAndRenderAnalytics();
+    }
+
+    // ── RENT & EXPENSES ──
+    function renderExpensesAndRent(){
+      // Rent Overview
+      const currentMonth = todayText().slice(0,7);
+      const isRentPaid = (studioRentConfig.payments || []).find(function(p){ return p.month === currentMonth; });
+      const lastRentPay = (studioRentConfig.payments || []).slice(-1)[0];
+
+      if(document.getElementById('dispRentAmount')) document.getElementById('dispRentAmount').textContent = '₹' + Number(studioRentConfig.amount || 20000).toLocaleString('en-IN') + ' / Month';
+      if(document.getElementById('dispRentDueDay')) document.getElementById('dispRentDueDay').textContent = (studioRentConfig.dueDay || 5) + 'th of every month';
+      if(document.getElementById('dispRentLastPaid')) document.getElementById('dispRentLastPaid').textContent = lastRentPay ? (lastRentPay.date + ' (₹' + lastRentPay.amount + ')') : '—';
+      if(document.getElementById('rentStatusBadge')){
+        document.getElementById('rentStatusBadge').className = 'badge ' + (isRentPaid ? 'badge-active' : 'badge-expired');
+        document.getElementById('rentStatusBadge').textContent = isRentPaid ? ('Rent Paid for ' + currentMonth + ' ✅') : ('Rent Pending for ' + currentMonth + ' ⏳');
+      }
+
+      // Expenses Table
+      const tbody = document.getElementById('expenseRows');
+      if(!tbody) return;
+
+      if(studioExpenses.length === 0){
+        tbody.innerHTML = '<tr><td colspan="7" class="empty">No expenses recorded yet. Click "+ Record Expense" to track bills, maintenance, props, etc.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = studioExpenses.slice().reverse().map(function(ex){
+        return '<tr>' +
+          '<td>' + (ex.date || '—') + '</td>' +
+          '<td><span class="badge badge-due">' + esc(ex.category) + '</span></td>' +
+          '<td><strong style="color:#fca5a5">₹' + Number(ex.amount).toLocaleString('en-IN') + '</strong></td>' +
+          '<td>' + esc(ex.vendor || '—') + '</td>' +
+          '<td>' + esc(ex.mode || 'UPI') + '</td>' +
+          '<td><span class="muted">' + esc(ex.notes || '—') + '</span></td>' +
+          '<td><button class="btn btn-danger" onclick="deleteStudioExpense(\'' + ex.id + '\')" style="padding:4px 8px;font-size:11px">Delete</button></td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function openRentConfigModal(){
+      document.getElementById('rentConfigAmount').value = studioRentConfig.amount || 20000;
+      document.getElementById('rentConfigDay').value = studioRentConfig.dueDay || 5;
+      document.getElementById('rentConfigLandlord').value = studioRentConfig.landlord || '';
+      document.getElementById('rentConfigModal').classList.add('show');
+    }
+
+    async function saveRentConfig(){
+      studioRentConfig.amount = Number(document.getElementById('rentConfigAmount').value || 20000);
+      studioRentConfig.dueDay = Number(document.getElementById('rentConfigDay').value || 5);
+      studioRentConfig.landlord = document.getElementById('rentConfigLandlord').value.trim();
+      await saveStudioFinancials();
+      closeModals();
+      renderExpensesAndRent();
+      computeAndRenderAnalytics();
+      alert('Studio Rent settings updated!');
+    }
+
+    function openPayRentModal(){
+      document.getElementById('payRentMonth').value = todayText().slice(0,7);
+      document.getElementById('payRentAmount').value = studioRentConfig.amount || 20000;
+      document.getElementById('payRentDate').value = todayText();
+      document.getElementById('payRentRef').value = '';
+      document.getElementById('payRentModal').classList.add('show');
+    }
+
+    async function saveRentPayment(){
+      const month = document.getElementById('payRentMonth').value || todayText().slice(0,7);
+      const amount = Number(document.getElementById('payRentAmount').value || studioRentConfig.amount);
+      const date = document.getElementById('payRentDate').value || todayText();
+      const mode = document.getElementById('payRentMode').value;
+      const ref = document.getElementById('payRentRef').value.trim();
+
+      if(!studioRentConfig.payments) studioRentConfig.payments = [];
+      studioRentConfig.payments.push({
+        id: 'rent_' + Date.now(),
+        month: month,
+        amount: amount,
+        date: date,
+        mode: mode,
+        ref: ref
+      });
+
+      await saveStudioFinancials();
+      closeModals();
+      renderExpensesAndRent();
+      computeAndRenderAnalytics();
+      alert('Studio Rent of ₹' + amount + ' recorded for ' + month + '!');
+    }
+
+    function openAddExpenseModal(){
+      document.getElementById('expAmount').value = '';
+      document.getElementById('expDate').value = todayText();
+      document.getElementById('expVendor').value = '';
+      document.getElementById('expNotes').value = '';
+      document.getElementById('expenseModal').classList.add('show');
+    }
+
+    async function saveStudioExpense(){
+      const category = document.getElementById('expCategory').value;
+      const amount = Number(document.getElementById('expAmount').value || 0);
+      const date = document.getElementById('expDate').value || todayText();
+      const vendor = document.getElementById('expVendor').value.trim();
+      const mode = document.getElementById('expMode').value;
+      const notes = document.getElementById('expNotes').value.trim();
+
+      if(!amount){ alert('Please enter expense amount'); return; }
+
+      const newExpense = {
+        id: 'exp_' + Date.now(),
+        category: category,
+        amount: amount,
+        date: date,
+        vendor: vendor,
+        mode: mode,
+        notes: notes
+      };
+
+      studioExpenses.push(newExpense);
+      await saveStudioFinancials();
+      closeModals();
+      renderExpensesAndRent();
+      computeAndRenderAnalytics();
+      alert('Expense of ₹' + amount + ' (' + category + ') recorded!');
+    }
+
+    async function deleteStudioExpense(expId){
+      if(!confirm('Delete this expense entry?')) return;
+      studioExpenses = studioExpenses.filter(function(x){ return x.id !== expId; });
+      await saveStudioFinancials();
+      renderExpensesAndRent();
+      computeAndRenderAnalytics();
+    }
+
+    function renderFinancialSummary(totalGrossRevenue){
+      let totalStaffPaid = 0;
+      studioStaff.forEach(function(st){
+        (st.salaryHistory || []).forEach(function(h){ totalStaffPaid += Number(h.amount || 0); });
+      });
+
+      let totalRentPaid = 0;
+      (studioRentConfig.payments || []).forEach(function(p){ totalRentPaid += Number(p.amount || 0); });
+
+      let totalOtherExpenses = 0;
+      studioExpenses.forEach(function(ex){ totalOtherExpenses += Number(ex.amount || 0); });
+
+      const totalOutflow = totalStaffPaid + totalRentPaid + totalOtherExpenses;
+      const netProfit = totalGrossRevenue - totalOutflow;
+
+      if(document.getElementById('finGrossRevenue')) document.getElementById('finGrossRevenue').textContent = '₹' + totalGrossRevenue.toLocaleString('en-IN');
+      if(document.getElementById('finPayroll')) document.getElementById('finPayroll').textContent = '₹' + totalStaffPaid.toLocaleString('en-IN');
+      if(document.getElementById('finRent')) document.getElementById('finRent').textContent = '₹' + totalRentPaid.toLocaleString('en-IN');
+      if(document.getElementById('finBills')) document.getElementById('finBills').textContent = '₹' + totalOtherExpenses.toLocaleString('en-IN');
+
+      const profitEl = document.getElementById('finNetProfit');
+      if(profitEl){
+        profitEl.textContent = '₹' + netProfit.toLocaleString('en-IN');
+        profitEl.style.color = netProfit >= 0 ? '#facc15' : '#fca5a5';
+      }
+    }
+
+
+    
+    // ── LIVE STUDIO ACTIVITY ENGINE ──
+    function buildStudioActivityLog(){
+      const events = [];
+
+      // 1. Payment & Renewal Events
+      payments.forEach(function(p){
+        const amt = Number(p.amount || 0);
+        events.push({
+          type: 'payment',
+          icon: '💰',
+          badge: 'Payment Received',
+          badgeColor: '#86efac',
+          title: (p.student_name || 'Student') + ' paid ₹' + amt.toLocaleString('en-IN'),
+          desc: (p.title || p.type || 'Fee Payment') + ' via ' + (p.mode || 'Online') + ' · ID: ' + (p.payment_id || '—'),
+          date: p.payment_date || todayText(),
+          amount: amt,
+          direction: 'in',
+          time: 'Recorded'
+        });
+      });
+
+      // 2. Student Admission Events (Enrollment audit log - money is counted via Payment Event to avoid double counting)
+      students.forEach(function(s){
+        if(s.phone === '9999999999' || s.category === 'System') return;
+        const amt = Number(s.fee_amount || s.monthly_fee || 0);
+        events.push({
+          type: 'admission',
+          icon: '📝',
+          badge: 'Admission',
+          badgeColor: '#38bdf8',
+          title: s.name + ' enrolled in ' + (s.dance_style || s.category || 'Dance'),
+          desc: 'Batch: ' + (s.batch || 'General') + ' · Phone: ' + s.phone + ' · Plan: ' + (s.fee_plan || '1M') + (amt > 0 ? (' · Fee: ₹' + amt.toLocaleString('en-IN')) : ''),
+          date: s.enrolled_date || s.admission_date || s.created_at || todayText(),
+          amount: 0,
+          direction: 'none',
+          time: 'Enrolled'
+        });
+
+        // 3. Leave Request Events from notes
+        if(s.notes){
+          const mLeave = String(s.notes).match(/<!--LEAVE_REQ_START-->([\s\S]*?)<!--LEAVE_REQ_END-->/);
+          if(mLeave){
+            try {
+              const reqs = JSON.parse(mLeave[1]) || [];
+              reqs.forEach(function(r){
+                events.push({
+                  type: 'leave',
+                  icon: '🌴',
+                  badge: r.status === 'approved' ? 'Leave Approved' : 'Leave Requested',
+                  badgeColor: r.status === 'approved' ? '#86efac' : '#facc15',
+                  title: s.name + (r.status === 'approved' ? ' granted ' : ' requested ') + r.days + ' days leave',
+                  desc: 'Dates: ' + r.start + ' to ' + r.end + ' · Reason: ' + (r.reason || 'Leave'),
+                  date: r.approved_at || r.created_at || todayText(),
+                  amount: 0,
+                  direction: 'none',
+                  time: r.status === 'approved' ? 'Approved' : 'Pending'
+                });
+              });
+            } catch(e){}
+          }
+
+          // 4. Cancellation & Freeze Events
+          const mCancel = String(s.notes).match(/<!--CANCEL_REQ_START-->([\s\S]*?)<!--CANCEL_REQ_END-->/);
+          if(mCancel){
+            try {
+              const cReqs = JSON.parse(mCancel[1]) || [];
+              cReqs.forEach(function(cr){
+                events.push({
+                  type: 'cancel',
+                  icon: '🛑',
+                  badge: cr.status === 'approved' ? 'Membership Frozen' : 'Freeze Requested',
+                  badgeColor: '#fca5a5',
+                  title: s.name + (cr.status === 'approved' ? ' membership frozen' : ' requested freeze / cancellation'),
+                  desc: 'Reason: ' + (cr.reason || 'Student Request'),
+                  date: cr.approved_at || cr.requested_at || todayText(),
+                  amount: 0,
+                  direction: 'none',
+                  time: cr.status === 'approved' ? 'Approved' : 'Pending'
+                });
+              });
+            } catch(e){}
+          }
+        }
+      });
+
+      // 5. Staff Salary Events
+      studioStaff.forEach(function(st){
+        (st.salaryHistory || []).forEach(function(sh){
+          const amt = Number(sh.amount || 0);
+          events.push({
+            type: 'salary',
+            icon: '👨‍🏫',
+            badge: 'Salary Paid',
+            badgeColor: '#a78bfa',
+            title: 'Paid ₹' + amt.toLocaleString('en-IN') + ' salary to ' + st.name,
+            desc: 'Role: ' + st.role + ' · Month: ' + sh.month + ' · Mode: ' + (sh.mode || 'Bank Transfer'),
+            date: sh.date || todayText(),
+            amount: amt,
+            direction: 'out',
+            time: 'Payroll'
+          });
+        });
+      });
+
+      // 6. Studio Rent & Expense Events
+      (studioRentConfig.payments || []).forEach(function(rp){
+        const amt = Number(rp.amount || 0);
+        events.push({
+          type: 'expense',
+          icon: '🏢',
+          badge: 'Rent Paid',
+          badgeColor: '#f59e0b',
+          title: 'Paid Studio Rent ₹' + amt.toLocaleString('en-IN'),
+          desc: 'Month: ' + rp.month + ' · Mode: ' + (rp.mode || 'UPI'),
+          date: rp.date || todayText(),
+          amount: amt,
+          direction: 'out',
+          time: 'Studio Rent'
+        });
+      });
+
+      studioExpenses.forEach(function(ex){
+        const amt = Number(ex.amount || 0);
+        events.push({
+          type: 'expense',
+          icon: '📝',
+          badge: 'Studio Expense',
+          badgeColor: '#fca5a5',
+          title: 'Expense: ₹' + amt.toLocaleString('en-IN') + ' (' + ex.category + ')',
+          desc: 'Vendor: ' + (ex.vendor || '—') + ' · Notes: ' + (ex.notes || '—'),
+          date: ex.date || todayText(),
+          amount: amt,
+          direction: 'out',
+          time: 'Expense'
+        });
+      });
+
+      // Sort chronological descending
+      events.sort(function(a,b){ return new Date(b.date) - new Date(a.date); });
+      return events;
+    }
+
+    let selectedActivityPreset = 'all';
+
+    function setActivityDatePreset(preset){
+      selectedActivityPreset = preset;
+      if(document.getElementById('activityDatePicker')) document.getElementById('activityDatePicker').value = '';
+      
+      const btns = ['btnActAll', 'btnActToday', 'btnActYesterday', 'btnActWeek', 'btnActMonth'];
+      btns.forEach(function(bId){
+        const el = document.getElementById(bId);
+        if(el) el.className = 'btn btn-soft';
+      });
+      const activeBtnMap = { 'all': 'btnActAll', 'today': 'btnActToday', 'yesterday': 'btnActYesterday', 'week': 'btnActWeek', 'month': 'btnActMonth' };
+      if(activeBtnMap[preset] && document.getElementById(activeBtnMap[preset])){
+        document.getElementById(activeBtnMap[preset]).className = 'btn btn-primary';
+      }
+      renderActivityLog();
+    }
+
+    function onActivityDatePicked(){
+      const val = document.getElementById('activityDatePicker').value;
+      if(val){
+        selectedActivityPreset = 'custom';
+        const btns = ['btnActAll', 'btnActToday', 'btnActYesterday', 'btnActWeek', 'btnActMonth'];
+        btns.forEach(function(bId){
+          const el = document.getElementById(bId);
+          if(el) el.className = 'btn btn-soft';
+        });
+      }
+      renderActivityLog();
+    }
+
+    function renderActivityLog(){
+      const events = buildStudioActivityLog();
+      const filterType = document.getElementById('activityFilterType') ? document.getElementById('activityFilterType').value : '';
+      const customDate = document.getElementById('activityDatePicker') ? document.getElementById('activityDatePicker').value : '';
+      const searchTxt = document.getElementById('activitySearchInput') ? document.getElementById('activitySearchInput').value.trim().toLowerCase() : '';
+
+      const today = todayText();
+      const yDate = new Date(); yDate.setDate(yDate.getDate() - 1);
+      const yesterday = yDate.toISOString().slice(0,10);
+      
+      const wDate = new Date(); wDate.setDate(wDate.getDate() - 7);
+      const weekAgo = wDate.toISOString().slice(0,10);
+
+      const thisMonth = today.slice(0,7);
+
+      // Filter events
+      let filtered = events.filter(function(ev){
+        const evDate = String(ev.date || '');
+
+        // 1. Date Filter
+        if(selectedActivityPreset === 'today' && evDate !== today) return false;
+        if(selectedActivityPreset === 'yesterday' && evDate !== yesterday) return false;
+        if(selectedActivityPreset === 'week' && evDate < weekAgo) return false;
+        if(selectedActivityPreset === 'month' && !evDate.startsWith(thisMonth)) return false;
+        if(selectedActivityPreset === 'custom' && customDate && evDate !== customDate) return false;
+
+        // 2. Type Filter (Merge expenses & staff salaries under 'expense')
+        if(filterType){
+          if(filterType === 'expense'){
+            if(ev.type !== 'expense' && ev.type !== 'salary') return false;
+          } else {
+            if(ev.type !== filterType) return false;
+          }
+        }
+
+        // 3. Search Filter
+        if(searchTxt){
+          const combined = (ev.title + ' ' + ev.desc + ' ' + ev.badge + ' ' + ev.date).toLowerCase();
+          if(!combined.includes(searchTxt)) return false;
+        }
+
+        return true;
+      });
+
+      let totalInflow = 0, totalOutflow = 0;
+      filtered.forEach(function(ev){
+        if(ev.direction === 'in') totalInflow += Number(ev.amount || 0);
+        if(ev.direction === 'out') totalOutflow += Number(ev.amount || 0);
+      });
+
+      if(document.getElementById('activityCountBadge')){
+        document.getElementById('activityCountBadge').textContent = filtered.length + ' Events Found';
+      }
+
+      const amtBadge = document.getElementById('activityAmountBadge');
+      if(amtBadge){
+        amtBadge.style.display = 'inline-block';
+        if(filterType === 'payment'){
+          amtBadge.style.background = '#14532d';
+          amtBadge.style.color = '#86efac';
+          amtBadge.style.borderColor = '#22c55e';
+          amtBadge.textContent = '💰 Total Payments Collected: ₹' + totalInflow.toLocaleString('en-IN');
+        } else if(filterType === 'expense'){
+          amtBadge.style.background = '#450a0a';
+          amtBadge.style.color = '#fca5a5';
+          amtBadge.style.borderColor = '#ef4444';
+          amtBadge.textContent = '🔻 Total Studio Expenses & Salaries: ₹' + totalOutflow.toLocaleString('en-IN');
+        } else if(filterType === 'admission' || filterType === 'leave' || filterType === 'cancel'){
+          amtBadge.style.display = 'none';
+        } else {
+          amtBadge.style.background = 'rgba(245,158,11,.15)';
+          amtBadge.style.color = '#facc15';
+          amtBadge.style.borderColor = '#f59e0b';
+          amtBadge.textContent = '💰 Collections: ₹' + totalInflow.toLocaleString('en-IN') + (totalOutflow > 0 ? (' | 🔻 Outflow: ₹' + totalOutflow.toLocaleString('en-IN')) : '');
+        }
+      }
+
+      // ── Dashboard Feed (Top 5 items) ──
+      const dashFeed = document.getElementById('dashboardActivityFeed');
+      if(dashFeed){
+        const top5 = events.slice(0, 5);
+        if(top5.length === 0){
+          dashFeed.innerHTML = '<div class="empty">No recent activity recorded yet.</div>';
+        } else {
+          dashFeed.innerHTML = top5.map(function(ev){
+            return '<div style="background:#0e1628;border:1px solid #26314d;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">' +
+              '<div style="display:flex;gap:12px;align-items:center">' +
+                '<span style="font-size:20px">' + ev.icon + '</span>' +
+                '<div>' +
+                  '<div style="font-weight:700;font-size:13px;color:#f8fafc">' + esc(ev.title) + '</div>' +
+                  '<div class="muted" style="font-size:11px">' + esc(ev.desc) + '</div>' +
+                '</div>' +
+              '</div>' +
+              '<div style="text-align:right">' +
+                '<span style="background:rgba(255,255,255,.06);border:1px solid ' + ev.badgeColor + ';color:' + ev.badgeColor + ';font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">' + esc(ev.badge) + '</span>' +
+                '<div class="muted" style="font-size:10px;margin-top:2px">' + esc(ev.date) + '</div>' +
+              '</div>' +
+            '</div>';
+          }).join('');
+        }
+      }
+
+      // ── Full Activity Page with Date Groupings ──
+      const fullTimeline = document.getElementById('fullActivityTimeline');
+      if(fullTimeline){
+        if(filtered.length === 0){
+          fullTimeline.innerHTML = '<div class="empty">No activity found for the selected date and filter criteria.</div>';
+        } else {
+          // Group by Date
+          const groups = {};
+          filtered.forEach(function(ev){
+            const d = ev.date || 'Unknown Date';
+            if(!groups[d]) groups[d] = [];
+            groups[d].push(ev);
+          });
+
+          const sortedDates = Object.keys(groups).sort().reverse();
+          let htmlOut = '';
+
+          sortedDates.forEach(function(dStr){
+            let dayLabel = dStr;
+            if(dStr === today) dayLabel = '🔥 Today — ' + dStr;
+            else if(dStr === yesterday) dayLabel = '🗓️ Yesterday — ' + dStr;
+            else {
+              try {
+                const dateObj = new Date(dStr + 'T00:00:00');
+                dayLabel = '📅 ' + dateObj.toLocaleDateString('en-IN', { weekday:'short', day:'2-digit', month:'short', year:'numeric' });
+              } catch(e){}
+            }
+
+            htmlOut += '<div style="margin-bottom:8px">' +
+              '<div style="font-weight:800;font-size:13px;color:#f59e0b;padding:4px 0 6px 0;display:flex;align-items:center;gap:6px">' +
+                '<span>' + dayLabel + '</span>' +
+                '<span style="font-size:11px;font-weight:400;color:#94a3b8">(' + groups[dStr].length + ' events)</span>' +
+              '</div>' +
+              '<div style="display:flex;flex-direction:column;gap:8px">';
+
+            groups[dStr].forEach(function(ev){
+              htmlOut += '<div style="background:#0c1322;border:1px solid #26314d;border-radius:12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">' +
+                '<div style="display:flex;gap:14px;align-items:center">' +
+                  '<div style="width:40px;height:40px;border-radius:10px;background:#17223b;display:flex;align-items:center;justify-content:center;font-size:20px">' + ev.icon + '</div>' +
+                  '<div>' +
+                    '<div style="font-weight:700;font-size:14px;color:#f8fafc">' + esc(ev.title) + '</div>' +
+                    '<div class="muted" style="font-size:12px;margin-top:2px">' + esc(ev.desc) + '</div>' +
+                  '</div>' +
+                '</div>' +
+                '<div style="text-align:right">' +
+                  '<span style="background:rgba(255,255,255,.06);border:1px solid ' + ev.badgeColor + ';color:' + ev.badgeColor + ';font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px">' + esc(ev.badge) + '</span>' +
+                  '<div class="muted" style="font-size:11px;margin-top:4px">' + esc(ev.date) + '</div>' +
+                '</div>' +
+              '</div>';
+            });
+
+            htmlOut += '</div></div>';
+          });
+
+          fullTimeline.innerHTML = htmlOut;
+        }
+      }
+    }
+
+
+    
+    // ── ADMISSION APPROVAL ENGINE ──
+    function renderPendingAdmissions(){
+      const box = document.getElementById('pendingAdmissionsBox');
+      const rowsEl = document.getElementById('pendingAdmissionsRows');
+      const badge = document.getElementById('pendingAdmCountBadge');
+      if(!box || !rowsEl) return;
+
+      const pendingList = students.filter(function(s){
+        return s.fee_status === 'pending_approval' || s.fee_status === 'paid_pending_approval' || s.status === 'Pending Approval';
+      });
+
+      if(badge) badge.textContent = pendingList.length + ' Pending';
+
+      if(pendingList.length === 0){
+        box.style.display = 'none';
+        rowsEl.innerHTML = '';
+        return;
+      }
+
+      box.style.display = 'block';
+      rowsEl.innerHTML = pendingList.map(function(s){
+        const amt = Number(s.fee_amount || s.monthly_fee || 0);
+        return '<tr>' +
+          '<td><strong>' + esc(s.name) + '</strong><div class="muted" style="font-size:11px">Age: ' + esc(s.age || '—') + ' · Parent: ' + esc(s.parent_name || '—') + '</div></td>' +
+          '<td><a href="tel:' + esc(s.phone) + '" style="color:#38bdf8;text-decoration:none">' + esc(s.phone) + '</a></td>' +
+          '<td><span class="badge" style="background:#1e293b;color:#facc15;border:1px solid #f59e0b">' + esc(s.dance_style || s.category || 'Dance') + '</span></td>' +
+          '<td>' + esc(s.batch || 'General') + '</td>' +
+          '<td><strong style="color:#86efac">₹' + amt.toLocaleString('en-IN') + '</strong></td>' +
+          '<td><code style="font-size:11px;color:#cbd5e1">' + esc(s.payment_id || 'Online') + '</code></td>' +
+          '<td><div style="display:flex;gap:6px">' +
+            '<button class="btn btn-primary" style="padding:6px 12px;font-size:12px;background:linear-gradient(135deg,#10b981,#059669)" onclick="approveAdmission(\'' + s.id + '\')">✅ Approve & Send Login</button>' +
+            '<button class="btn btn-danger" style="padding:6px 10px;font-size:12px" onclick="rejectAdmission(\'' + s.id + '\')">✕</button>' +
+          '</div></td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    async function approveAdmission(id){
+      const s = students.find(function(x){ return x.id === id; });
+      if(!s) return;
+
+      if(!confirm('Approve admission for ' + s.name + ' and generate student portal login access?')) return;
+
+      try {
+        const res = await sb.from('students').update({
+          fee_status: 'paid',
+          status: 'Active'
+        }).eq('id', id);
+
+        if(res.error){
+          alert('Failed to approve: ' + res.error.message);
+          return;
+        }
+
+        // WhatsApp greeting with direct student login portal link
+        const loginUrl = 'https://team-nartan-student.web.app';
+        const msg = '🎉 *Welcome to Team Nartan Dance Studio, ' + s.name + '!*\n\n' +
+          'Your admission for *' + (s.dance_style || 'Dance') + '* (' + (s.batch || 'Batch') + ') has been *APPROVED*! ✅\n\n' +
+          '📱 *Access your Student Portal here:*\n' + loginUrl + '\n\n' +
+          '🔑 *Login with your registered phone:* ' + s.phone + '\n\n' +
+          'You can now view your daily class schedule, track attendance, download receipts, and request leave allowances.\n\n' +
+          'See you in class! 💃✨';
+
+        // Pre-compose WhatsApp
+        window.open('https://wa.me/91' + cleanPhone(s.phone) + '?text=' + encodeURIComponent(msg), '_blank');
+
+        alert('✅ ' + s.name + ' is now APPROVED and Active! WhatsApp window opened with student login link.');
+        await loadAll();
+      } catch(err){
+        alert('Approval error: ' + err.message);
+      }
+    }
+
+    async function rejectAdmission(id){
+      const s = students.find(function(x){ return x.id === id; });
+      if(!s) return;
+      if(!confirm('Reject admission application for ' + s.name + '?')) return;
+      try {
+        await sb.from('students').delete().eq('id', id);
+        alert('Admission rejected & application removed.');
+        await loadAll();
+      } catch(err){
+        alert('Rejection error: ' + err.message);
+      }
+    }
+
+
+    function renderAll(){
+      renderActivityLog();
+      computeAndRenderAnalytics();
+      renderStaff();
+      renderExpensesAndRent();
+      renderPendingCancels();
+      renderPendingLeaves();
+      renderStats();
+      renderPendingAdmissions();
+      renderDashboardDue();
+      renderStudents();
+      renderPayments();
+      renderRenewals();
+      renderReminders();
+      populateAttendanceBatchFilter();
+      renderAttendance();
+      renderCancelled();
+      fillStudentDropdowns();
+    }
+
+    function renderStats(){
+      const active = students.filter(function(s){return s.status !== 'Cancelled' && s.phone !== '9999999999' && s.category !== 'System'});
+      const due3 = active.filter(function(s){return daysUntil(s.next_due_date) === 3});
+      const revenue = payments.length
+        ? payments.reduce(function(sum,p){return sum + Number(p.amount || 0)},0)
+        : students.filter(function(s){return s.fee_status === 'paid'}).reduce(function(sum,s){return sum + Number(s.fee_amount || s.monthly_fee || 0)},0);
+      document.getElementById('statTotal').textContent = students.length;
+      document.getElementById('statActive').textContent = active.length;
+      document.getElementById('statDue3').textContent = due3.length;
+      document.getElementById('statRevenue').textContent = money(revenue);
+    }
+
+    function statusBadge(s){
+      if(s.status === 'Cancelled') return '<span class="badge badge-cancelled">Cancelled</span>';
+      const d = daysUntil(s.next_due_date);
+      if(d < 0) return '<span class="badge badge-expired">Expired</span>';
+      if(d <= 7) return '<span class="badge badge-due">Due Soon</span>';
+      return '<span class="badge badge-active">Active</span>';
+    }
+
+    function actionButtons(s){
+      const base = "<button class=\"btn btn-wa\" onclick=\"sendWhatsApp('" + s.id + "')\">WhatsApp</button> " +
+        "<button class=\"btn btn-tg\" onclick=\"sendTelegram('" + s.id + "')\">Telegram</button> " +
+        "<button class=\"btn btn-primary\" onclick=\"openRenew('" + s.id + "')\">Renew</button> ";
+      const cancel = s.status === 'Cancelled'
+        ? "<button class=\"btn btn-soft\" onclick=\"restoreStudent('" + s.id + "')\">Restore</button> "
+        : "<button class=\"btn btn-soft\" onclick=\"cancelStudent('" + s.id + "')\">Cancel</button> ";
+      return base + cancel + "<button class=\"btn btn-danger\" onclick=\"deleteStudent('" + s.id + "')\">Remove</button>";
+    }
+
+    function studentRow(s, compact){
+      if(compact){
+        return '<tr><td>'+esc(s.name)+'</td><td>'+esc(s.phone)+'</td><td>'+esc(s.dance_style)+'</td><td>'+studentFeeDisplay(s)+'</td><td>'+esc(s.next_due_date)+'</td><td>'+statusBadge(s)+'</td><td>'+actionButtons(s)+'</td></tr>';
+      }
+      const img = s.photo_base64 ? '<img class="photo" src="'+s.photo_base64+'" alt="photo">' : '<div class="photo"></div>';
+      return '<tr><td>'+img+'</td><td><strong>'+esc(s.name)+'</strong><div class="muted">'+esc(s.parent_name)+'</div></td><td>'+esc(s.age)+'</td><td>'+esc(s.phone)+'</td><td>'+esc(s.dance_style)+'</td><td>'+esc(s.batch)+'</td><td>'+studentFeeDisplay(s)+'</td><td>'+esc(s.next_due_date)+'</td><td>'+statusBadge(s)+'</td><td>'+actionButtons(s)+'</td></tr>';
+    }
+
+    function renderDashboardDue(){
+      const rows = dueStudents().map(function(s){return studentRow(s,true)}).join('');
+      document.getElementById('dashboardDueRows').innerHTML = rows || '<tr><td colspan="7" class="empty">No students due within 7 days.</td></tr>';
+    }
+
+    function renderStudents(){
+      const q = String(document.getElementById('studentSearch').value || '').toLowerCase();
+      const list = students.filter(function(s){return s.status !== 'Cancelled' && s.phone !== '9999999999' && s.category !== 'System'}).filter(function(s){return !q || String(s.name || '').toLowerCase().includes(q) || String(s.phone || '').includes(q)});
+      document.getElementById('studentRows').innerHTML = list.map(function(s){return studentRow(s,false)}).join('') || '<tr><td colspan="10" class="empty">No students found.</td></tr>';
+    }
+
+    function renderCancelled(){
+      const el = document.getElementById('cancelledRows');
+      if(!el) return;
+      const list = students.filter(function(s){return s.status === 'Cancelled'});
+      el.innerHTML = list.map(function(s){
+        return '<tr><td>'+esc(s.name)+'</td><td>'+esc(s.phone)+'</td><td>'+esc(s.batch)+'</td><td>'+esc(s.next_due_date)+'</td><td>'+statusBadge(s)+'</td><td>'+actionButtons(s)+'</td></tr>';
+      }).join('') || '<tr><td colspan="6" class="empty">No cancelled students.</td></tr>';
+    }
+
+    function renderPayments(){
+      if(!paymentsTableAvailable){
+        document.getElementById('paymentRows').innerHTML = payments.map(function(p){
+          return '<tr><td>'+esc(p.payment_date || p.created_at)+'</td><td>'+esc(p.student_name)+'</td><td>'+money(p.amount)+'</td><td>'+esc(p.mode)+'</td><td>'+esc(p.payment_id)+'</td></tr>';
+        }).join('') || '<tr><td colspan="5" class="empty">Payments table does not exist yet. Legacy paid students will appear here after payment data is available.</td></tr>';
+        return;
+      }
+      document.getElementById('paymentRows').innerHTML = payments.map(function(p){
+        return '<tr><td>'+esc(p.payment_date || p.created_at)+'</td><td>'+esc(p.student_name)+'</td><td>'+money(p.amount)+'</td><td>'+esc(p.mode)+'</td><td>'+esc(p.payment_id)+'</td></tr>';
+      }).join('') || '<tr><td colspan="5" class="empty">No payments found.</td></tr>';
+    }
+
+    function renderRenewals(){
+      document.getElementById('renewalRows').innerHTML = dueStudents().map(function(s){return studentRow(s,true)}).join('') || '<tr><td colspan="7" class="empty">No renewals due.</td></tr>';
+    }
+
+    function renderReminders(){
+      document.getElementById('reminderRows').innerHTML = dueStudents().map(function(s){
+        return '<tr><td>'+esc(s.name)+'</td><td>'+esc(s.phone)+'</td><td>'+money(studentFee(s))+'</td><td>'+esc(s.next_due_date)+'</td><td>'+statusBadge(s)+'</td><td>'+actionButtons(s)+'</td></tr>';
+      }).join('') || '<tr><td colspan="6" class="empty">No reminders due.</td></tr>';
+    }
+
+    function reminderMessage(s){
+      const months = Number(s.duration_months || 1);
+      const planText = months > 1 ? ' (' + months + '-Month Plan)' : '';
+      return 'Hi ' + (s.name || 'Student') + '!\n\nReminder from Team Nartan Dance Studio.\n\nYour fee of Rs.' + studentFee(s) + planText + ' is due on ' + (s.next_due_date || '') + '.\n\nPlease pay to continue your classes.\n\nAccepted: Cash, UPI, Bank Transfer.\n\nThank you!';
+    }
+
+    function sendWhatsApp(id){
+      const s = students.find(function(x){return x.id === id});
+      if(!s)return;
+      window.open('https://wa.me/91' + cleanPhone(s.phone) + '?text=' + encodeURIComponent(reminderMessage(s)), '_blank');
+    }
+
+    async function sendTelegram(id){
+      const s = students.find(function(x){return x.id === id});
+      if(!s)return;
+      await sendTelegramText(reminderMessage(s));
+      alert('Telegram sent to owner.');
+    }
+
+    async function sendTelegramText(text){
+      const url = 'https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage';
+      try{
+        await fetch(url, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_OWNER_ID,text:text})});
+      }catch(e){
+        window.open(url + '?chat_id=' + encodeURIComponent(TG_OWNER_ID) + '&text=' + encodeURIComponent(text), '_blank');
+      }
+    }
+
+    function sendAllWhatsApp(){dueStudents().forEach(function(s){sendWhatsApp(s.id)})}
+    async function sendAllTelegram(){
+      const list = dueStudents();
+      const text = list.length ? list.map(function(s){return s.name + ' - ' + s.phone + ' - ' + s.next_due_date + ' - ' + money(studentFee(s))}).join('\n') : 'No students due within 7 days.';
+      await sendTelegramText('Team Nartan due reminders:\n\n' + text);
+      alert('Telegram summary sent.');
+    }
+
+    function fillStudentDropdowns(){
+      const options = students.filter(function(s){return s.status !== 'Cancelled' && s.phone !== '9999999999' && s.category !== 'System'}).map(function(s){return '<option value="'+s.id+'">'+esc(s.name)+' - '+esc(s.phone)+'</option>'}).join('');
+      document.getElementById('manualStudent').innerHTML = options || '<option value="">No students</option>';
+    }
+
+    async function setStudentCancelled(id, cancelled){
+      const s = students.find(function(x){return x.id === id});
+      if(!s) return;
+      if(!confirm((cancelled ? 'Cancel admission for ' : 'Restore admission for ') + s.name + '?')) return;
+      let result = await sb.from('students').update({fee_status: cancelled ? 'cancelled' : 'paid'}).eq('id', id);
+      if(result.error){alert('Update failed: ' + result.error.message);return}
+      await loadAll();
+    }
+
+    function cancelStudent(id){setStudentCancelled(id, true)}
+    function restoreStudent(id){setStudentCancelled(id, false)}
+
+    async function deleteStudent(id){
+      const s = students.find(function(x){return x.id === id});
+      if(!s) return;
+      if(!confirm('Permanently remove ' + s.name + ' from active database?\n(All past payments & revenue will be safely preserved in Total Revenue & Accounting!)')) return;
+
+      // Extract and archive all payments from this student so total revenue is NEVER deducted
+      try {
+        const studentPays = payments.filter(function(p){ return p.student_id === id; });
+        if(studentPays.length > 0){
+          const res = await sb.from('students').select('id,notes').eq('phone', '9999999999').maybeSingle();
+          if(res && res.data && res.data.id){
+            let rawNotes = res.data.notes || '';
+            let existingArchive = [];
+            const mArch = rawNotes.match(/<!--ARCHIVE_PAYS_START-->([\s\S]*?)<!--ARCHIVE_PAYS_END-->/);
+            if(mArch){
+              try { existingArchive = JSON.parse(mArch[1]) || []; } catch(e){}
+            }
+            existingArchive = existingArchive.concat(studentPays);
+            let cleanNote = rawNotes.replace(/<!--ARCHIVE_PAYS_START-->[\s\S]*?<!--ARCHIVE_PAYS_END-->/g, '').trim();
+            let updated = cleanNote + (cleanNote ? '\n' : '') + '<!--ARCHIVE_PAYS_START-->' + JSON.stringify(existingArchive) + '<!--ARCHIVE_PAYS_END-->';
+            await sb.from('students').update({ notes: updated }).eq('id', res.data.id);
+          }
+        }
+      } catch(archErr){
+        console.warn('Payment archiving warning:', archErr);
+      }
+
+      try{await sb.from('attendance').delete().eq('student_id', id)}catch(e){}
+      const result = await sb.from('students').delete().eq('id', id);
+      if(result.error){alert('Remove failed: ' + result.error.message);return}
+      alert(s.name + ' removed. All historical payments & total revenue permanently preserved! 💰');
+      await loadAll();
+    }
+
+        // ── FULL STUDENT APP CONTENT MANAGER ──
+    let studioCMSData = defaultAppContent();
+
+    function defaultAppContent(){
+      return {
+        offerTitle: 'Special Workshop & Fee Offer 🎉',
+        offer: 'Join Saturday-Sunday Choreography & Shoot Batch! Use Code for Fee Discount:',
+        couponCode: 'EDGE500',
+        showOffer: true,
+        workshops: [
+          {
+            id: 'w1',
+            title: 'Saturday-Sunday Workshop',
+            subtitle: 'Choreography & Shoot',
+            fee: 500,
+            icon: '🎭',
+            bg: 'linear-gradient(135deg,#2d1b4e,#4a235a)',
+            tags: ['Saturday & Sunday', 'Choreography + Shoot', 'App Register'],
+            open: true
+          },
+          {
+            id: 'w2',
+            title: 'Dance Championship',
+            subtitle: 'Choreography Fee',
+            fee: 3000,
+            icon: '🏆',
+            bg: 'linear-gradient(135deg,#1a2a4a,#2d4a7a)',
+            tags: ['Competition', 'Choreography Fee', 'Championship'],
+            open: true
+          }
+        ],
+        notices: [
+          {
+            id: 'n1',
+            type: 'event',
+            tag: 'Workshop',
+            title: 'SATURDAY-SUNDAY Workshop',
+            body: 'Special workshop on EVERY SATURDAY & SUNDAY from 6:00 PM to 8:00 PM. Open to all students. Registration required THROUGH APP ONLY. (Choreography + Shoot)',
+            date: 'Active'
+          },
+          {
+            id: 'n2',
+            type: 'info',
+            tag: 'Competition',
+            title: 'Inter-Studio Dance Competition — Coming Soon',
+            body: 'Upcoming championship details, registration dates, and auditions will be announced soon. Stay tuned!',
+            date: 'Coming Soon'
+          },
+          {
+            id: 'n3',
+            type: 'important',
+            tag: 'Important',
+            title: 'Fee Due Reminder',
+            body: 'Please ensure your monthly fee is paid on time to avoid class suspension. Contact studio desk for any questions.',
+            date: '18 Jul 2026'
+          },
+          {
+            id: 'n4',
+            type: 'info',
+            tag: 'Notice',
+            title: 'Studio Batches',
+            body: 'Team Nartan runs Monday to Friday batches for Kids Dance, Zumba, Basic Hip-Hop, and Hip-Hop Advance. For inquiries, contact 7869240161.',
+            date: '1 Jul 2026'
+          }
+        ],
+        admission: {
+          danceStyles: [
+            { id: 's1', name: 'Kids Dance', icon: '🧒', type: 'regular' },
+            { id: 's2', name: 'Zumba', icon: '💃', type: 'regular' },
+            { id: 's3', name: 'Basic Hip-Hop', icon: '🧢', type: 'regular' },
+            { id: 's4', name: 'Hip-Hop Advance', icon: '🔥', type: 'regular' },
+            { id: 's5', name: 'Solo Choreography for Events / Competition', icon: '⭐', fee: 3000, type: 'special' },
+            { id: 's6', name: 'Duet & Group Choreography for Events / Competition', icon: '👥', fee: 5000, type: 'special' }
+          ],
+          batches: [
+            'Monday to Friday — 4:00 PM Kids Batch (2.5 to 6 years)',
+            'Monday to Friday — 5:00 PM Kids Batch (3 to 8 years)',
+            'Monday to Friday — 5:00 PM to 6:00 PM Zumba',
+            'Monday to Friday — 6:00 PM to 7:30 PM Hip-Hop Advance Batch',
+            'Monday to Friday — 6:00 PM to 8:00 PM Basic Hip-Hop Batch',
+            'Solo Choreography for Events / Competition Batch',
+            'Duet & Group Choreography for Events / Competition Batch'
+          ],
+          pricing: {
+            kids: { '1M': 1200, '3M': 3000, '6M': 5500, '12M': 9500 },
+            adult: { '1M': 1500, '3M': 3500, '6M': 6500, '12M': 10500 },
+            solo: 3000,
+            duet: 5000
+          }
+        }
+      };
+    }
+
+        // ── CMS WORKSHOPS & NOTICES FUNCTIONS ──
+    
+    // ── ADMISSION FORM CMS HANDLERS ──
+    function switchCMSTab(tab){
+      const pSec = document.getElementById('cmsPortalSection');
+      const aSec = document.getElementById('cmsAdmissionSection');
+      const pBtn = document.getElementById('btnCmsPortal');
+      const aBtn = document.getElementById('btnCmsAdmission');
+
+      if(tab === 'portal'){
+        if(pSec) pSec.style.display = 'block';
+        if(aSec) aSec.style.display = 'none';
+        if(pBtn) pBtn.className = 'btn btn-primary';
+        if(aBtn) aBtn.className = 'btn btn-soft';
+      } else {
+        if(pSec) pSec.style.display = 'none';
+        if(aSec) aSec.style.display = 'block';
+        if(pBtn) pBtn.className = 'btn btn-soft';
+        if(aBtn) aBtn.className = 'btn btn-primary';
+        renderCMSAdmission();
+      }
+    }
+
+    function renderCMSAdmission(){
+      if(!studioCMSData.admission){
+        studioCMSData.admission = defaultAppContent().admission;
+      }
+      const adm = studioCMSData.admission;
+
+      // 1. Render Dance Styles
+      const stylesListEl = document.getElementById('cmsDanceStylesList');
+      if(stylesListEl){
+        stylesListEl.innerHTML = (adm.danceStyles || []).map(function(st, idx){
+          return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center">' +
+            '<div>' +
+              '<strong>' + esc(st.icon || '💃') + ' ' + esc(st.name) + '</strong> ' +
+              (st.fee ? ('<span style="color:#86efac;font-size:12px;font-weight:700">(₹' + st.fee + ' · ' + (st.duration_val || 5) + ' ' + (st.duration_unit || 'days') + ')</span>') : '') +
+            '</div>' +
+            '<div style="display:flex;gap:6px">' +
+              '<button class="btn btn-soft" style="padding:2px 8px;font-size:11px" onclick="editCMSDanceStyle(' + idx + ')">Edit</button>' +
+              '<button class="btn btn-soft" style="padding:2px 8px;font-size:11px;color:#fca5a5" onclick="deleteCMSDanceStyle(' + idx + ')">✕</button>' +
+            '</div>' +
+          '</div>';
+        }).join('') || '<div class="empty">No dance styles configured.</div>';
+      }
+
+      // 2. Render Batches
+      const batchesListEl = document.getElementById('cmsBatchesList');
+      if(batchesListEl){
+        batchesListEl.innerHTML = (adm.batches || []).map(function(b, idx){
+          return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center">' +
+            '<div style="font-size:13px;color:var(--text)">⏰ ' + esc(b) + '</div>' +
+            '<div style="display:flex;gap:6px">' +
+              '<button class="btn btn-soft" style="padding:2px 8px;font-size:11px" onclick="editCMSBatchOption(' + idx + ')">Edit</button>' +
+              '<button class="btn btn-soft" style="padding:2px 8px;font-size:11px;color:#fca5a5" onclick="deleteCMSBatchOption(' + idx + ')">✕</button>' +
+            '</div>' +
+          '</div>';
+        }).join('') || '<div class="empty">No batches configured.</div>';
+      }
+
+      // 3. Fill Pricing Form Fields
+      const pr = adm.pricing || defaultAppContent().admission.pricing;
+      if(document.getElementById('feeKids1M')) document.getElementById('feeKids1M').value = (pr.kids && pr.kids['1M']) || 1200;
+      if(document.getElementById('feeKids3M')) document.getElementById('feeKids3M').value = (pr.kids && pr.kids['3M']) || 3000;
+      if(document.getElementById('feeKids6M')) document.getElementById('feeKids6M').value = (pr.kids && pr.kids['6M']) || 5500;
+      if(document.getElementById('feeKids12M')) document.getElementById('feeKids12M').value = (pr.kids && pr.kids['12M']) || 9500;
+
+      if(document.getElementById('feeAdult1M')) document.getElementById('feeAdult1M').value = (pr.adult && pr.adult['1M']) || 1500;
+      if(document.getElementById('feeAdult3M')) document.getElementById('feeAdult3M').value = (pr.adult && pr.adult['3M']) || 3500;
+      if(document.getElementById('feeAdult6M')) document.getElementById('feeAdult6M').value = (pr.adult && pr.adult['6M']) || 6500;
+      if(document.getElementById('feeAdult12M')) document.getElementById('feeAdult12M').value = (pr.adult && pr.adult['12M']) || 10500;
+
+      if(document.getElementById('feeSoloChoreo')) document.getElementById('feeSoloChoreo').value = pr.solo || 3000;
+      if(document.getElementById('feeDuetChoreo')) document.getElementById('feeDuetChoreo').value = pr.duet || 5000;
+    }
+
+
+    function openAddDanceStyleModal(){
+      document.getElementById('editStyleIdx').value = '-1';
+      document.getElementById('styleModalTitle').textContent = '💃 Add Dance Style / Course';
+      document.getElementById('styleInpName').value = '';
+      document.getElementById('styleInpIcon').value = '💃';
+      document.getElementById('styleInpType').value = 'regular';
+      document.getElementById('styleInpFee').value = '';
+      document.getElementById('styleInpDurationVal').value = '5';
+      document.getElementById('styleInpDurationUnit').value = 'days';
+      toggleStyleFeeType();
+      document.getElementById('modalDanceStyle').style.display = 'flex';
+    }
+
+    function editCMSDanceStyle(idx){
+      if(!studioCMSData.admission) studioCMSData.admission = defaultAppContent().admission;
+      const st = studioCMSData.admission.danceStyles[idx];
+      if(!st) return;
+
+      document.getElementById('editStyleIdx').value = String(idx);
+      document.getElementById('styleModalTitle').textContent = '✏️ Edit Dance Style / Course';
+      document.getElementById('styleInpName').value = st.name || '';
+      document.getElementById('styleInpIcon').value = st.icon || '💃';
+      document.getElementById('styleInpType').value = (st.type === 'special' || (st.fee && Number(st.fee) > 0)) ? 'special' : 'regular';
+      document.getElementById('styleInpFee').value = st.fee || '';
+      document.getElementById('styleInpDurationVal').value = st.duration_val || 5;
+      document.getElementById('styleInpDurationUnit').value = st.duration_unit || 'days';
+      toggleStyleFeeType();
+      document.getElementById('modalDanceStyle').style.display = 'flex';
+    }
+
+    function closeDanceStyleModal(){
+      document.getElementById('modalDanceStyle').style.display = 'none';
+    }
+
+    function toggleStyleFeeType(){
+      const t = document.getElementById('styleInpType').value;
+      const box = document.getElementById('styleFixedFeeBox');
+      if(box) box.style.display = (t === 'special') ? 'block' : 'none';
+    }
+
+    function saveCMSDanceStyleModal(){
+      const name = document.getElementById('styleInpName').value.trim();
+      const icon = document.getElementById('styleInpIcon').value.trim() || '💃';
+      const type = document.getElementById('styleInpType').value;
+      const feeVal = Number(document.getElementById('styleInpFee').value || 0);
+
+      if(!name){
+        alert('Please enter course / style name.');
+        return;
+      }
+
+      if(type === 'special' && feeVal <= 0){
+        alert('Please enter a valid fixed fee amount (e.g. ₹2, ₹500, ₹3000).');
+        return;
+      }
+
+      if(!studioCMSData.admission) studioCMSData.admission = defaultAppContent().admission;
+      const idx = parseInt(document.getElementById('editStyleIdx').value);
+
+      const durVal = Number(document.getElementById('styleInpDurationVal').value || 1);
+      const durUnit = document.getElementById('styleInpDurationUnit').value || 'days';
+
+      const styleObj = {
+        id: idx >= 0 ? studioCMSData.admission.danceStyles[idx].id : ('s_' + Date.now()),
+        name: name,
+        icon: icon,
+        type: type,
+        fee: type === 'special' ? feeVal : null,
+        duration_val: type === 'special' ? durVal : null,
+        duration_unit: type === 'special' ? durUnit : null
+      };
+
+      if(idx >= 0){
+        studioCMSData.admission.danceStyles[idx] = styleObj;
+      } else {
+        studioCMSData.admission.danceStyles.push(styleObj);
+      }
+
+      closeDanceStyleModal();
+      renderCMSAdmission();
+      alert('Course style saved! Click "💾 Publish All Changes" in the top bar to make it live instantly on the admission form.');
+    }
+    
+
+    function editCMSDanceStyle(idx){
+      const st = studioCMSData.admission.danceStyles[idx];
+      if(!st) return;
+      const newName = prompt('Edit Dance Style Name:', st.name);
+      if(newName) st.name = newName.trim();
+      const newIcon = prompt('Edit Icon / Emoji:', st.icon || '💃');
+      if(newIcon) st.icon = newIcon.trim();
+      if(st.type === 'special'){
+        const newFee = prompt('Edit Routine Fee (₹):', st.fee || 3000);
+        if(newFee) st.fee = Number(newFee);
+      }
+      renderCMSAdmission();
+    }
+
+    function deleteCMSDanceStyle(idx){
+      if(!confirm('Delete this dance style?')) return;
+      studioCMSData.admission.danceStyles.splice(idx, 1);
+      renderCMSAdmission();
+    }
+
+    function addCMSBatchOption(){
+      const b = prompt('Enter Batch Timing (e.g. Monday to Friday — 7:00 PM Bollywood Batch):');
+      if(!b) return;
+      if(!studioCMSData.admission) studioCMSData.admission = defaultAppContent().admission;
+      studioCMSData.admission.batches.push(b.trim());
+      renderCMSAdmission();
+    }
+
+    function editCMSBatchOption(idx){
+      const cur = studioCMSData.admission.batches[idx];
+      const edited = prompt('Edit Batch Timing:', cur);
+      if(edited) studioCMSData.admission.batches[idx] = edited.trim();
+      renderCMSAdmission();
+    }
+
+    function deleteCMSBatchOption(idx){
+      if(!confirm('Delete this batch option?')) return;
+      studioCMSData.admission.batches.splice(idx, 1);
+      renderCMSAdmission();
+    }
+
+
+    function renderCMSWorkshops(){
+      const el = document.getElementById('cmsWorkshopsList');
+      if(!el) return;
+      el.innerHTML = (studioCMSData.workshops || []).map(function(w, idx){
+        return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+          '<div>' +
+            '<div style="font-weight:700;font-size:14px;color:var(--text)">' + esc(w.icon || '🏆') + ' ' + esc(w.title) + '</div>' +
+            '<div class="muted" style="font-size:12px;margin-top:2px">' + esc(w.subtitle) + ' · <strong style="color:#86efac">Rs.' + w.fee + '</strong></div>' +
+          '</div>' +
+          '<div style="display:flex;gap:6px">' +
+            '<button class="btn btn-soft" style="padding:4px 10px;font-size:12px" onclick="editCMSWorkshop(' + idx + ')">Edit</button>' +
+            '<button class="btn btn-soft" style="padding:4px 10px;font-size:12px;color:#fca5a5" onclick="deleteCMSWorkshop(' + idx + ')">✕</button>' +
+          '</div>' +
+        '</div>';
+      }).join('') || '<div class="muted" style="font-size:13px;text-align:center;padding:12px">No workshops configured. Click "+ Add New Workshop" to create one.</div>';
+    }
+
+    function addCMSWorkshop(){
+      const title = prompt('Enter Workshop / Competition Title (e.g. Saturday-Sunday Workshop):');
+      if(!title) return;
+      const subtitle = prompt('Enter Subtitle / Description (e.g. Choreography & Shoot):', 'Choreography & Shoot');
+      const fee = Number(prompt('Enter Fee Amount (Rs.):', '500') || 500);
+      const icon = prompt('Enter Icon (Emoji):', '🏆') || '🏆';
+
+      if(!studioCMSData.workshops) studioCMSData.workshops = [];
+      studioCMSData.workshops.push({
+        id: 'w_' + Date.now(),
+        title: title.trim(),
+        subtitle: (subtitle || '').trim(),
+        fee: fee,
+        icon: icon,
+        bg: 'linear-gradient(135deg,#2d1b4e,#4a235a)',
+        tags: [title.trim(), 'Workshop', 'Rs.' + fee],
+        open: true
+      });
+      renderCMSWorkshops();
+    }
+
+    function editCMSWorkshop(idx){
+      const w = (studioCMSData.workshops || [])[idx];
+      if(!w) return;
+      const title = prompt('Edit Workshop Title:', w.title);
+      if(!title) return;
+      const subtitle = prompt('Edit Subtitle:', w.subtitle || '');
+      const fee = Number(prompt('Edit Fee Amount (Rs.):', String(w.fee)) || w.fee);
+      const icon = prompt('Edit Icon (Emoji):', w.icon || '🏆') || '🏆';
+
+      w.title = title.trim();
+      w.subtitle = (subtitle || '').trim();
+      w.fee = fee;
+      w.icon = icon;
+      renderCMSWorkshops();
+    }
+
+    function deleteCMSWorkshop(idx){
+      if(confirm('Are you sure you want to delete this workshop?')){
+        studioCMSData.workshops.splice(idx, 1);
+        renderCMSWorkshops();
+      }
+    }
+
+    function renderCMSNotices(){
+      const el = document.getElementById('cmsNoticesList');
+      if(!el) return;
+      el.innerHTML = (studioCMSData.notices || []).map(function(n, idx){
+        return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center">' +
+            '<div><span class="badge badge-active" style="font-size:11px">' + esc(n.tag || 'Notice') + '</span> <strong style="font-size:13px;margin-left:6px">' + esc(n.title) + '</strong></div>' +
+            '<div style="display:flex;gap:6px">' +
+              '<button class="btn btn-soft" style="padding:3px 8px;font-size:11px" onclick="editCMSNotice(' + idx + ')">Edit</button>' +
+              '<button class="btn btn-soft" style="padding:3px 8px;font-size:11px;color:#fca5a5" onclick="deleteCMSNotice(' + idx + ')">✕</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="muted" style="font-size:12px;margin-top:6px;line-height:1.4">' + esc(n.body) + '</div>' +
+          '<div style="font-size:11px;color:var(--muted);margin-top:4px">' + esc(n.date || 'Active') + '</div>' +
+        '</div>';
+      }).join('') || '<div class="muted" style="font-size:13px;text-align:center;padding:12px">No notices configured. Click "+ Add Notice" to broadcast an announcement.</div>';
+    }
+
+    function addCMSNotice(){
+      const title = prompt('Enter Notice Title:');
+      if(!title) return;
+      const tag = prompt('Enter Tag (e.g. Workshop, Competition, Notice, Important):', 'Notice') || 'Notice';
+      const body = prompt('Enter Notice Message / Announcement Body:');
+      if(!body) return;
+      const date = prompt('Enter Date Label:', 'Active') || 'Active';
+
+      if(!studioCMSData.notices) studioCMSData.notices = [];
+      studioCMSData.notices.push({
+        id: 'n_' + Date.now(),
+        type: tag.toLowerCase() === 'important' ? 'important' : (tag.toLowerCase() === 'workshop' ? 'event' : 'info'),
+        tag: tag.trim(),
+        title: title.trim(),
+        body: body.trim(),
+        date: date.trim()
+      });
+      renderCMSNotices();
+    }
+
+    function editCMSNotice(idx){
+      const n = (studioCMSData.notices || [])[idx];
+      if(!n) return;
+      const title = prompt('Edit Notice Title:', n.title);
+      if(!title) return;
+      const tag = prompt('Edit Tag:', n.tag || 'Notice') || 'Notice';
+      const body = prompt('Edit Message Body:', n.body);
+      if(!body) return;
+      const date = prompt('Edit Date Label:', n.date || 'Active') || 'Active';
+
+      n.title = title.trim();
+      n.tag = tag.trim();
+      n.body = body.trim();
+      n.date = date.trim();
+      n.type = tag.toLowerCase() === 'important' ? 'important' : (tag.toLowerCase() === 'workshop' ? 'event' : 'info');
+      renderCMSNotices();
+    }
+
+    function deleteCMSNotice(idx){
+      if(confirm('Are you sure you want to delete this notice?')){
+        studioCMSData.notices.splice(idx, 1);
+        renderCMSNotices();
+      }
+    }
+
+    async function loadAppContent(){
+      studioCMSData = defaultAppContent();
+      try{
+        const local = JSON.parse(localStorage.getItem('creative-edge-app-content') || '{}');
+        if(local && (local.workshops || local.notices || local.offer)) studioCMSData = Object.assign(studioCMSData, local);
+      }catch(e){}
+
+      try{
+        const res = await sb.from('students').select('notes').eq('phone', '9999999999').maybeSingle();
+        if(res && res.data && res.data.notes){
+          const m = String(res.data.notes).match(/<!--CMS_START-->([\s\S]*?)<!--CMS_END-->/);
+          if(m){
+            studioCMSData = Object.assign(studioCMSData, JSON.parse(m[1]));
+          }
+        }
+      }catch(e){
+        console.warn('Could not fetch cloud CMS:', e);
+      }
+
+      document.getElementById('cmsOfferTitle').value = studioCMSData.offerTitle || '';
+      document.getElementById('cmsOfferBody').value = studioCMSData.offer || '';
+      document.getElementById('cmsCouponCode').value = studioCMSData.couponCode || '';
+      document.getElementById('cmsShowOffer').value = String(studioCMSData.showOffer !== false);
+
+      renderCMSWorkshops();
+      renderCMSNotices();
+    }
+
+    async function saveAppContent(){
+      studioCMSData.offerTitle = document.getElementById('cmsOfferTitle').value.trim();
+      studioCMSData.offer = document.getElementById('cmsOfferBody').value.trim();
+      studioCMSData.couponCode = document.getElementById('cmsCouponCode').value.trim();
+      studioCMSData.showOffer = document.getElementById('cmsShowOffer').value === 'true';
+
+      localStorage.setItem('creative-edge-app-content', JSON.stringify(studioCMSData));
+
+      let synced = false;
+      const noteContent = '<!--CMS_START-->' + JSON.stringify(studioCMSData) + '<!--CMS_END-->';
+
+      try{
+        const check = await sb.from('students').select('id').eq('phone', '9999999999').maybeSingle();
+        if(check && check.data && check.data.id){
+          const upd = await sb.from('students').update({ notes: noteContent }).eq('id', check.data.id);
+          synced = !upd.error;
+        } else {
+          const ins = await sb.from('students').insert([{
+            name: 'STUDIO_CMS_CONFIG',
+            phone: '9999999999',
+            category: 'System',
+            fee_status: 'Paid',
+            notes: noteContent
+          }]);
+          synced = !ins.error;
+        }
+      }catch(e){
+        console.warn('CMS sync error:', e);
+      }
+
+      const modeEl = document.getElementById('contentMode');
+      if(modeEl){
+        modeEl.textContent = synced ? '✅ Published to Supabase Cloud & Student Portal Live!' : '⚠️ Saved locally in browser.';
+      }
+      alert('App Content successfully saved and published to Supabase Cloud! Student Portal will now show your latest changes.');
+    }
+
+    function openManualPayment(){
+      document.getElementById('manualDate').value = todayText();
+      document.getElementById('paymentModal').classList.add('show');
+    }
+
+    function openOldStudent(){
+      document.getElementById('oldName').value = '';
+      document.getElementById('oldPhone').value = '';
+      document.getElementById('oldAge').value = '';
+      document.getElementById('oldParent').value = '';
+      document.getElementById('oldCategory').value = 'kids';
+      document.getElementById('oldBatch').value = '';
+      document.getElementById('oldFee').value = '';
+      document.getElementById('oldPlan').value = '1M';
+      document.getElementById('oldAdmission').value = todayText();
+      document.getElementById('oldDue').value = todayText();
+      document.getElementById('oldFeeStatus').value = 'pending';
+      document.getElementById('oldPaymentMethod').value = 'pending';
+      document.getElementById('oldNotes').value = '';
+      document.getElementById('oldStudentModal').classList.add('show');
+    }
+
+    function openRenew(id){
+      const s = students.find(function(x){return x.id === id});
+      if(!s)return;
+      selectedRenewStudentId = id;
+      document.getElementById('renewName').textContent = s.name + ' - ' + s.phone;
+      document.getElementById('renewAmount').value = studentFee(s);
+      document.getElementById('renewDuration').value = String(s.duration_months || 1);
+      document.getElementById('renewDate').value = todayText();
+      document.getElementById('renewModal').classList.add('show');
+    }
+
+    function closeModals(){
+      document.querySelectorAll('.modal-backdrop').forEach(function(m){
+        m.classList.remove('show');
+      });
+    }
+
+    async function saveOldStudent(){
+      const name = document.getElementById('oldName').value.trim();
+      const phone = cleanPhone(document.getElementById('oldPhone').value);
+      const age = Number(document.getElementById('oldAge').value || 0);
+      const feeAmount = Number(document.getElementById('oldFee').value || 0);
+      if(!name){alert('Enter student name');return}
+      if(phone.length !== 10){alert('Enter 10 digit phone');return}
+      const payload = {
+        name: name,
+        phone: phone,
+        parent_name: document.getElementById('oldParent').value.trim() || null,
+        age: age || null,
+        category: document.getElementById('oldCategory').value,
+        batch: document.getElementById('oldBatch').value.trim(),
+        fee_plan: document.getElementById('oldPlan').value,
+        fee_amount: feeAmount,
+        fee_status: document.getElementById('oldFeeStatus').value,
+        payment_method: document.getElementById('oldPaymentMethod').value,
+        admission_date: document.getElementById('oldAdmission').value || todayText(),
+        due_date: document.getElementById('oldDue').value || todayText(),
+        notes: document.getElementById('oldNotes').value.trim()
+      };
+      try{
+        const result = await sb.from('students').insert([payload]);
+        if(result.error) throw result.error;
+        closeModals();
+        await loadAll();
+      }catch(e){
+        alert('Could not add student: ' + (e.message || e));
+      }
+    }
+
+            function extractAttendanceFromNotes(s){
+      if(!s || !s.notes) return [];
+      const match = String(s.notes).match(/<!--ATT_START-->([\s\S]*?)<!--ATT_END-->/);
+      if(!match) return [];
+      try{
+        const parsed = JSON.parse(match[1]);
+        return (Array.isArray(parsed) ? parsed : []).map(function(item){
+          return {
+            student_id: s.id,
+            student_name: s.name,
+            phone: s.phone,
+            attendance_date: item.d,
+            status: item.s,
+            note: item.n || ''
+          };
+        });
+      }catch(e){ return []; }
+    }
+
+    // ── LEAVE & AUTO-EXTENSION POLICY ──
+    function getPackageLeaveCap(s){
+      const months = Number(s.duration_months || planMonths(s.fee_plan) || 1);
+      if(months >= 12) return 60; // 12M -> 60 days (2 months)
+      if(months >= 6) return 30;  // 6M -> 30 days (1 month)
+      if(months >= 3) return 15;  // 3M -> 15 days
+      return 5;                   // 1M -> 5 days
+    }
+
+    function addDays(dateText, days){
+      if(!dateText) return todayText();
+      const d = new Date(String(dateText).slice(0,10) + 'T00:00:00');
+      d.setDate(d.getDate() + Number(days || 0));
+      return d.toISOString().slice(0,10);
+    }
+
+    function getStudentCycleStart(s){
+      let cycleStart = s.admission_date || s.enrolled_date || s.created_at || '2020-01-01';
+      const pays = (payments || []).filter(function(p){ return p.student_id === s.id; });
+      if(pays.length > 0){
+        const sortedPays = pays.slice().sort(function(a,b){ return new Date(b.payment_date) - new Date(a.payment_date); });
+        if(sortedPays[0].payment_date) cycleStart = sortedPays[0].payment_date;
+      }
+      return cycleStart;
+    }
+
+    function calculateLeaveAndExtension(s, studentRecords){
+      const cap = getPackageLeaveCap(s);
+      const cycleStart = getStudentCycleStart(s);
+      const records = studentRecords || allAttendanceRecords.filter(function(r){ return r.student_id === s.id; });
+      
+      // Filter records strictly for the active current package cycle!
+      const currentCycleRecords = records.filter(function(r){
+        const rDate = String(r.attendance_date || r.d || '').slice(0,10);
+        return rDate >= cycleStart;
+      });
+
+      const absentOrLeaveCount = currentCycleRecords.filter(function(r){
+        return r.status === 'Absent' || r.status === 'Leave' || r.s === 'Absent' || r.s === 'Leave';
+      }).length;
+
+      const extensionDays = Math.min(absentOrLeaveCount, cap);
+      const currentDue = s.next_due_date || s.due_date || todayText();
+      const remainingLeave = Math.max(0, cap - absentOrLeaveCount);
+      
+      return {
+        cap: cap,
+        used: absentOrLeaveCount,
+        extensionDays: extensionDays,
+        remaining: remainingLeave,
+        baseDue: currentDue,
+        extendedDue: currentDue,
+        cycleStart: cycleStart,
+        isCapped: absentOrLeaveCount >= cap
+      };
+    }
+
+    async function loadAllAttendanceRecords(){
+      allAttendanceRecords = [];
+      try{
+        const result = await sb.from('attendance').select('*');
+        if(!result.error && result.data && result.data.length > 0){
+          attendanceTableAvailable = true;
+          allAttendanceRecords = result.data;
+        }else{
+          students.forEach(function(s){
+            const fromNote = extractAttendanceFromNotes(s);
+            allAttendanceRecords = allAttendanceRecords.concat(fromNote);
+          });
+        }
+      }catch(e){
+        students.forEach(function(s){
+          const fromNote = extractAttendanceFromNotes(s);
+          allAttendanceRecords = allAttendanceRecords.concat(fromNote);
+        });
+      }
+      computeStudentAttendanceStats();
+    }
+
+    function computeStudentAttendanceStats(){
+      studentAttendanceMap = {};
+      students.forEach(function(s){
+        studentAttendanceMap[s.id] = { present: 0, absent: 0, total: 0, rate: 0 };
+      });
+      allAttendanceRecords.forEach(function(r){
+        if(!studentAttendanceMap[r.student_id]){
+          studentAttendanceMap[r.student_id] = { present: 0, absent: 0, total: 0, rate: 0 };
+        }
+        if(r.status === 'Present'){
+          studentAttendanceMap[r.student_id].present++;
+        } else if(r.status === 'Absent'){
+          studentAttendanceMap[r.student_id].absent++;
+        }
+        studentAttendanceMap[r.student_id].total++;
+      });
+      Object.keys(studentAttendanceMap).forEach(function(id){
+        const st = studentAttendanceMap[id];
+        st.rate = st.total > 0 ? Math.round((st.present / st.total) * 100) : 0;
+      });
+    }
+
+    async function loadAttendanceForDate(){
+      const date = document.getElementById('attendanceDate').value || todayText();
+      document.getElementById('attendanceDate').value = date;
+      attendanceRecords = localAttendance(date);
+      
+      allAttendanceRecords.forEach(function(r){
+        if(String(r.attendance_date).slice(0,10) === date){
+          attendanceRecords[r.student_id] = { status: r.status, note: r.note || '', id: r.id };
+        }
+      });
+
+      try{
+        const result = await sb.from('attendance').select('*').eq('attendance_date', date);
+        if(!result.error && result.data){
+          result.data.forEach(function(r){
+            attendanceRecords[r.student_id] = { status: r.status, note: r.note || '', id: r.id };
+          });
+        }
+      }catch(e){}
+      populateAttendanceBatchFilter();
+      renderAttendance();
+    }
+
+    function renderAttendanceStats(){
+      const activeStudents = students.filter(function(s){return s.status !== 'Cancelled' && s.phone !== '9999999999' && s.category !== 'System'});
+      const batchFilter = (document.getElementById('attendanceBatchFilter') || {}).value || '';
+      const list = activeStudents.filter(function(s){ return !batchFilter || s.batch === batchFilter; });
+      
+      let presentToday = 0;
+      let absentToday = 0;
+      list.forEach(function(s){
+        const rec = attendanceRecords[s.id];
+        if(rec && rec.status === 'Present') presentToday++;
+        else if(rec && rec.status === 'Absent') absentToday++;
+      });
+      const marked = presentToday + absentToday;
+      const rate = marked > 0 ? Math.round((presentToday / marked) * 100) : 0;
+      
+      if(document.getElementById('attStatTotal')) document.getElementById('attStatTotal').textContent = list.length;
+      if(document.getElementById('attStatPresent')) document.getElementById('attStatPresent').textContent = presentToday;
+      if(document.getElementById('attStatAbsent')) document.getElementById('attStatAbsent').textContent = absentToday;
+      if(document.getElementById('attStatRate')) document.getElementById('attStatRate').textContent = rate + '%';
+    }
+
+        
+    function populateAttendanceBatchFilter(){
+      const sel = document.getElementById('attendanceBatchFilter');
+      if(!sel) return;
+      const currentVal = sel.value;
+      
+      const activeStudents = students.filter(function(s){
+        return s.status !== 'Cancelled' && s.phone !== '9999999999' && s.category !== 'System';
+      });
+
+      const batchCounts = {};
+      activeStudents.forEach(function(s){
+        const b = (s.batch || 'Unassigned Batch').trim();
+        if(b) batchCounts[b] = (batchCounts[b] || 0) + 1;
+      });
+
+      // Also ensure standard studio batches appear
+      const standardBatches = [
+        'Monday to Friday — 4:00 PM Kids Batch (2.5 to 6 years)',
+        'Monday to Friday — 5:00 PM Kids Batch (3 to 8 years)',
+        'Monday to Friday — 5:00 PM to 6:00 PM Zumba',
+        'Monday to Friday — 6:00 PM to 7:30 PM Hip-Hop Advance Batch',
+        'Monday to Friday — 6:00 PM to 8:00 PM Basic Hip-Hop Batch',
+        'Solo Choreography for Events / Competition Batch',
+        'Duet & Group Choreography for Events / Competition Batch'
+      ];
+
+      standardBatches.forEach(function(sbName){
+        if(!batchCounts.hasOwnProperty(sbName)) batchCounts[sbName] = 0;
+      });
+
+      let html = '<option value="">👥 All Batches (' + activeStudents.length + ' Students)</option>';
+      Object.keys(batchCounts).sort().forEach(function(bName){
+        const count = batchCounts[bName];
+        html += '<option value="' + esc(bName) + '">⏰ ' + esc(bName) + ' (' + count + ' ' + (count === 1 ? 'Student' : 'Students') + ')</option>';
+      });
+
+      sel.innerHTML = html;
+      if(currentVal && batchCounts.hasOwnProperty(currentVal)){
+        sel.value = currentVal;
+      }
+    }
+
+    function renderAttendance(){
+      const el = document.getElementById('attendanceRows');
+      if(!el) return;
+      const date = document.getElementById('attendanceDate').value || todayText();
+      const modeEl = document.getElementById('attendanceMode');
+      if(modeEl){
+        modeEl.textContent = 'Cloud Sync Active (Auto Due Date Extension Policy Enabled)';
+      }
+      
+      const batchFilter = (document.getElementById('attendanceBatchFilter') || {}).value || '';
+      const activeList = students.filter(function(s){return s.status !== 'Cancelled' && s.phone !== '9999999999' && s.category !== 'System'}).filter(function(s){
+        return !batchFilter || s.batch === batchFilter;
+      });
+
+      // Update button labels dynamically for filtered batch
+      const pBtn = document.querySelector('#page-attendance button[onclick*="Present"]');
+      const aBtn = document.querySelector('#page-attendance button[onclick*="Absent"]');
+      if(pBtn && pBtn.getAttribute('onclick') === "markAllAttendance('Present')"){
+        pBtn.textContent = batchFilter ? 'Mark ' + (batchFilter.length > 20 ? batchFilter.slice(0,18)+'...' : batchFilter) + ' Present' : 'Mark Date Present';
+      }
+      if(aBtn && aBtn.getAttribute('onclick') === "markAllAttendance('Absent')"){
+        aBtn.textContent = batchFilter ? 'Mark ' + (batchFilter.length > 20 ? batchFilter.slice(0,18)+'...' : batchFilter) + ' Absent' : 'Mark Date Absent';
+      }
+
+      el.innerHTML = activeList.map(function(s){
+        const record = attendanceRecords[s.id] || {};
+        const value = record.status || 'Not Marked';
+        const pillClass = value === 'Present' ? 'present' : value === 'Absent' ? 'absent' : value === 'Leave' ? 'leave' : '';
+        
+        const stats = studentAttendanceMap[s.id] || { present: 0, absent: 0, total: 0, rate: 0 };
+        const badgeColorClass = stats.rate >= 75 ? 'badge-active' : (stats.rate >= 50 ? 'badge-due' : (stats.total > 0 ? 'badge-expired' : ''));
+        const attSummaryBadge = stats.total > 0
+          ? '<span class="badge ' + badgeColorClass + '">' + stats.present + ' / ' + stats.total + ' (' + stats.rate + '%)</span>'
+          : '<span class="muted" style="font-size:12px">0 classes</span>';
+
+        const leaveInfo = calculateLeaveAndExtension(s);
+        const leaveBadge = '<span class="badge ' + (leaveInfo.isCapped ? 'badge-due' : 'badge-active') + '">' +
+          leaveInfo.used + ' / ' + leaveInfo.cap + ' Days (' + leaveInfo.remaining + 'd left)</span>';
+
+        const dueDateDisplay = '<strong style="color:#86efac">' + esc(s.next_due_date || s.due_date || '—') + '</strong>';
+
+        return '<tr>' +
+          '<td><strong onclick="openStudentDetailModal(\'' + s.id + '\')" style="color:#f59e0b;cursor:pointer;text-decoration:underline" title="Click to view & edit detailed profile">' + esc(s.name) + ' 🔍</strong></td>' +
+          '<td>' + esc(s.phone) + '</td>' +
+          '<td>' + esc(s.batch) + '</td>' +
+          '<td>' + attSummaryBadge + '</td>' +
+          '<td>' + leaveBadge + '</td>' +
+          '<td>' + dueDateDisplay + '</td>' +
+          '<td>' + statusBadge(s) + '</td>' +
+          '<td><span class="att-pill ' + pillClass + '">' + esc(value) + '</span></td>' +
+          '<td><div class="att-actions">' +
+            '<button class="att-btn present" onclick="markAttendance(\'' + s.id + '\',\'Present\')">Present</button>' +
+            '<button class="att-btn absent" onclick="markAttendance(\'' + s.id + '\',\'Absent\')">Absent</button>' +
+            '<button class="att-btn leave" onclick="markAttendance(\'' + s.id + '\',\'Leave\')">Leave</button>' +
+            '<button class="btn btn-soft" style="padding:4px 8px;font-size:11px" onclick="openBulkAttendanceForStudent(\'' + s.id + '\')">📅 Multi-Day</button>' +
+          '</div></td>' +
+        '</tr>';
+      }).join('') || '<tr><td colspan="9" class="empty">No students found for attendance.</td></tr>';
+
+      renderAttendanceStats();
+    }
+
+        // ── MULTI-DAY / BULK ATTENDANCE FUNCTIONS ──
+    function openBulkAttendanceModal(preselectedStudentId){
+      const sel = document.getElementById('bulkStudentSelect');
+      if(sel){
+        const activeStudents = students.filter(function(s){return s.status !== 'Cancelled' && s.phone !== '9999999999' && s.category !== 'System'});
+        const batchMap = {};
+        activeStudents.forEach(function(s){
+          const b = (s.batch || 'Unassigned Batch').trim();
+          if(!batchMap[b]) batchMap[b] = [];
+          batchMap[b].push(s);
+        });
+
+        let opts = '<option value="ALL">👥 All Active Students (' + activeStudents.length + ')</option>';
+        Object.keys(batchMap).sort().forEach(function(bName){
+          opts += '<option value="BATCH:' + esc(bName) + '">⏰ Entire Batch: ' + esc(bName) + ' (' + batchMap[bName].length + ')</option>';
+        });
+        opts += '<optgroup label="Individual Students">';
+        activeStudents.forEach(function(s){
+          opts += '<option value="' + s.id + '">' + esc(s.name) + ' (' + esc(s.batch || s.phone) + ')</option>';
+        });
+        opts += '</optgroup>';
+
+        sel.innerHTML = opts;
+        if(preselectedStudentId) {
+          sel.value = preselectedStudentId;
+        } else {
+          const curBatchFilter = (document.getElementById('attendanceBatchFilter') || {}).value || '';
+          if(curBatchFilter && batchMap.hasOwnProperty(curBatchFilter)){
+            sel.value = 'BATCH:' + curBatchFilter;
+          }
+        }
+      }
+      
+      const today = todayText();
+      const startOfCurrentMonth = today.slice(0,8) + '01';
+      const startEl = document.getElementById('bulkStartDate');
+      const endEl = document.getElementById('bulkEndDate');
+      if(startEl) startEl.value = startOfCurrentMonth;
+      if(endEl) endEl.value = today;
+      
+      updateBulkPreview();
+      const modal = document.getElementById('bulkAttendanceModal');
+      if(modal) modal.classList.add('show');
+    }
+
+    function openBulkAttendanceForStudent(studentId){
+      openBulkAttendanceModal(studentId);
+    }
+
+    function getSelectedBulkDates(){
+      const startEl = document.getElementById('bulkStartDate');
+      const endEl = document.getElementById('bulkEndDate');
+      if(!startEl || !startEl.value) return [];
+      
+      const startStr = startEl.value;
+      const endStr = (endEl && endEl.value) ? endEl.value : startStr;
+      
+      const allowedDays = {
+        0: (document.getElementById('bulkDay0') || {}).checked, // Sun
+        1: (document.getElementById('bulkDay1') || {}).checked, // Mon
+        2: (document.getElementById('bulkDay2') || {}).checked, // Tue
+        3: (document.getElementById('bulkDay3') || {}).checked, // Wed
+        4: (document.getElementById('bulkDay4') || {}).checked, // Thu
+        5: (document.getElementById('bulkDay5') || {}).checked, // Fri
+        6: (document.getElementById('bulkDay6') || {}).checked  // Sat
+      };
+
+      const dates = [];
+      const cur = new Date(startStr + 'T00:00:00');
+      const end = new Date(endStr + 'T00:00:00');
+
+      while(cur <= end){
+        const dayOfWeek = cur.getDay();
+        if(allowedDays[dayOfWeek]){
+          dates.push(cur.toISOString().slice(0,10));
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+      return dates;
+    }
+
+    function updateBulkPreview(){
+      const targetSel = document.getElementById('bulkStudentSelect');
+      const target = targetSel ? targetSel.value : 'ALL';
+      const dates = getSelectedBulkDates();
+      const statusEl = document.getElementById('bulkStatus');
+      const status = statusEl ? statusEl.value : 'Present';
+      const targetCount = target === 'ALL' ? students.filter(function(s){return s.status !== 'Cancelled' && s.phone !== '9999999999' && s.category !== 'System'}).length : 1;
+      const targetName = target === 'ALL' ? (targetCount + ' Active Students') : (students.find(function(s){return s.id === target}) || {}).name || 'Student';
+
+      const previewEl = document.getElementById('bulkPreviewSummary');
+      if(previewEl){
+        if(dates.length === 0){
+          previewEl.innerHTML = '<span style="color:#fca5a5">⚠️ No dates selected in this date range. Please check at least one weekday.</span>';
+        } else {
+          const color = status === 'Present' ? '#86efac' : (status === 'Leave' ? '#facc15' : '#fca5a5');
+          previewEl.innerHTML = '⚡ Will mark <strong>' + dates.length + ' class dates</strong> as <strong style="color:' + color + '">' + status + '</strong> for <strong>' + esc(targetName) + '</strong> (' + (dates.length * targetCount) + ' total entries).';
+        }
+      }
+    }
+
+    async function applyBulkAttendance(){
+      const targetSel = document.getElementById('bulkStudentSelect');
+      const target = targetSel ? targetSel.value : 'ALL';
+      const dates = getSelectedBulkDates();
+      const statusEl = document.getElementById('bulkStatus');
+      const status = statusEl ? statusEl.value : 'Present';
+      
+      if(dates.length === 0){
+        alert('Please select at least one valid date.');
+        return;
+      }
+
+      const targetStudents = target === 'ALL' 
+        ? students.filter(function(s){return s.status !== 'Cancelled' && s.phone !== '9999999999' && s.category !== 'System'})
+        : (String(target).startsWith('BATCH:')
+            ? students.filter(function(s){return s.status !== 'Cancelled' && s.phone !== '9999999999' && s.category !== 'System' && s.batch === target.replace('BATCH:', '')})
+            : students.filter(function(s){return s.id === target}));
+
+      if(targetStudents.length === 0){
+        alert('No students found to mark.');
+        return;
+      }
+
+      const btn = document.getElementById('applyBulkBtn');
+      if(btn){
+        btn.disabled = true;
+        btn.textContent = 'Saving to Cloud...';
+      }
+
+      let totalUpdated = 0;
+      const curSelectedDate = (document.getElementById('attendanceDate') || {}).value || todayText();
+
+      for(let i=0; i<targetStudents.length; i++){
+        const s = targetStudents[i];
+        const studentId = s.id;
+
+        // Process all dates for this student
+        dates.forEach(function(date){
+          const existingIdx = allAttendanceRecords.findIndex(function(r){
+            return r.student_id === studentId && String(r.attendance_date).slice(0,10) === date;
+          });
+
+          if(existingIdx >= 0){
+            allAttendanceRecords[existingIdx].status = status;
+            allAttendanceRecords[existingIdx].note = status === 'Leave' ? 'Student Leave' : '';
+          } else {
+            allAttendanceRecords.push({
+              student_id: studentId,
+              student_name: s.name,
+              phone: s.phone,
+              attendance_date: date,
+              status: status,
+              note: status === 'Leave' ? 'Student Leave' : ''
+            });
+          }
+
+          if(date === curSelectedDate){
+            attendanceRecords[studentId] = { status: status, note: status === 'Leave' ? 'Student Leave' : '' };
+          }
+          totalUpdated++;
+        });
+
+        // Compute updated leave cap and auto-extended due date
+        const leaveInfo = calculateLeaveAndExtension(s);
+        s.next_due_date = leaveInfo.extendedDue;
+
+        // Sync to Supabase students.notes (persists full history for student portal)
+        try {
+          const studentRecords = allAttendanceRecords.filter(function(r){ return r.student_id === studentId; }).map(function(r){
+            return { d: String(r.attendance_date).slice(0,10), s: r.status, n: r.note || '' };
+          });
+          const cleanNote = String(s.notes || '').replace(/<!--ATT_START-->[\s\S]*?<!--ATT_END-->/g, '').trim();
+          const updatedNote = cleanNote + (cleanNote ? '\n' : '') + '<!--ATT_START-->' + JSON.stringify(studentRecords) + '<!--ATT_END-->';
+          s.notes = updatedNote;
+          await sb.from('students').update({ notes: updatedNote, due_date: leaveInfo.extendedDue }).eq('id', studentId);
+        } catch(err){
+          console.warn('Sync student failed:', err);
+        }
+      }
+
+      computeStudentAttendanceStats();
+      saveLocalAttendance(curSelectedDate, attendanceRecords);
+      populateAttendanceBatchFilter();
+      renderAttendance();
+      renderStats();
+      renderStudents();
+
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = '⚡ Apply & Sync to Cloud';
+      }
+      closeModals();
+      alert('Successfully recorded ' + totalUpdated + ' attendance entries across ' + targetStudents.length + ' student(s)! Synced to Supabase cloud and Student Portal.');
+    }
+
+    async function markAttendance(studentId, status, customNote){
+      const date = document.getElementById('attendanceDate').value || todayText();
+      const s = students.find(function(x){return x.id === studentId});
+      if(!s) return;
+      
+      const note = customNote || (status === 'Leave' ? 'Student Leave' : '');
+      attendanceRecords[studentId] = {status: status, note: note};
+      saveLocalAttendance(date, attendanceRecords);
+
+      const existingIdx = allAttendanceRecords.findIndex(function(r){
+        return r.student_id === studentId && String(r.attendance_date).slice(0,10) === date;
+      });
+      if(existingIdx >= 0){
+        allAttendanceRecords[existingIdx].status = status;
+        allAttendanceRecords[existingIdx].note = note;
+      }else{
+        allAttendanceRecords.push({
+          student_id: studentId,
+          student_name: s.name,
+          phone: s.phone,
+          attendance_date: date,
+          status: status,
+          note: note
+        });
+      }
+      computeStudentAttendanceStats();
+
+      // Recalculate auto-extended due date based on package cap!
+      const leaveInfo = calculateLeaveAndExtension(s);
+      s.next_due_date = leaveInfo.extendedDue;
+
+      populateAttendanceBatchFilter();
+      renderAttendance();
+      renderStats();
+      renderStudents();
+
+      // Realtime Cloud Sync via students table (updates notes array + next_due_date)
+      try {
+        const studentRecords = allAttendanceRecords.filter(function(r){ return r.student_id === studentId; }).map(function(r){
+          return { d: String(r.attendance_date).slice(0,10), s: r.status, n: r.note || '' };
+        });
+        const cleanNote = String(s.notes || '').replace(/<!--ATT_START-->[\s\S]*?<!--ATT_END-->/g, '').trim();
+        const updatedNote = cleanNote + (cleanNote ? '\n' : '') + '<!--ATT_START-->' + JSON.stringify(studentRecords) + '<!--ATT_END-->';
+        s.notes = updatedNote;
+        await sb.from('students').update({ notes: updatedNote, due_date: leaveInfo.extendedDue }).eq('id', studentId);
+      } catch(err) {
+        console.warn('Sync to students table failed:', err);
+      }
+
+      // Also try dedicated attendance table
+      try{
+        const existing = await sb.from('attendance').select('id').eq('student_id', studentId).eq('attendance_date', date).maybeSingle();
+        if(existing && existing.data){
+          await sb.from('attendance').update({status: status, student_name: s.name, phone: s.phone, note: note}).eq('id', existing.data.id);
+        }else{
+          await sb.from('attendance').insert([{
+            student_id: studentId,
+            student_name: s.name,
+            phone: s.phone,
+            attendance_date: date,
+            status: status,
+            note: note
+          }]);
+        }
+      }catch(e){}
+    }
+
+async function markAllAttendance(status){
+      const activeStudents = students.filter(function(s){return s.status !== 'Cancelled' && s.phone !== '9999999999' && s.category !== 'System'});
+      const batchFilter = (document.getElementById('attendanceBatchFilter') || {}).value || '';
+      const list = activeStudents.filter(function(s){ return !batchFilter || s.batch === batchFilter; });
+      for(let i=0; i<list.length; i++){
+        await markAttendance(list[i].id, status);
+      }
+    }
+
+    async function insertPaymentAndUpdate(studentId, amount, date, mode, duration){
+      const s = students.find(function(x){return x.id === studentId});
+      if(!s) throw new Error('Student not found');
+      const paymentId = mode.toUpperCase().replace(/\s/g,'-') + '-' + Date.now();
+      const nextDue = addMonths(date, duration);
+      if(paymentsTableAvailable){
+        const paymentInsert = await sb.from('payments').insert([{
+          student_id: studentId,
+          student_name: s.name,
+          amount: Number(amount),
+          payment_date: date,
+          payment_id: paymentId,
+          mode: mode,
+          month_paid: String(date).slice(0,7),
+          duration_months: Number(duration)
+        }]);
+        if(paymentInsert.error) throw paymentInsert.error;
+      }
+      let studentUpdate = await sb.from('students').update({
+        monthly_fee: Number(amount),
+        duration_months: Number(duration),
+        last_paid_date: date,
+        next_due_date: nextDue,
+        payment_id: paymentId,
+        status: 'Active'
+      }).eq('id', studentId);
+      if(studentUpdate.error){
+        studentUpdate = await sb.from('students').update({
+          fee_amount: Number(amount),
+          fee_plan: String(duration) + 'M',
+          fee_status: 'paid',
+          payment_method: String(mode).toLowerCase(),
+          payment_id: paymentId,
+          due_date: nextDue
+        }).eq('id', studentId);
+      }
+      if(studentUpdate.error) throw studentUpdate.error;
+    }
+
+    async function saveManualPayment(){
+      try{
+        await insertPaymentAndUpdate(
+          document.getElementById('manualStudent').value,
+          document.getElementById('manualAmount').value,
+          document.getElementById('manualDate').value || todayText(),
+          document.getElementById('manualMode').value,
+          document.getElementById('manualDuration').value
+        );
+        closeModals();
+        await loadAll();
+      }catch(e){alert('Save failed: ' + (e.message || e))}
+    }
+
+    async function saveRenewal(){
+      try{
+        await insertPaymentAndUpdate(
+          selectedRenewStudentId,
+          document.getElementById('renewAmount').value,
+          document.getElementById('renewDate').value || todayText(),
+          document.getElementById('renewMode').value,
+          document.getElementById('renewDuration').value
+        );
+        closeModals();
+        await loadAll();
+      }catch(e){alert('Renewal failed: ' + (e.message || e))}
+    }
+
+    function showPage(name, btn){
+      document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+      const pg = document.getElementById('page-' + name);
+      if(pg) pg.classList.add('active');
+      
+      document.querySelectorAll('.nav button').forEach(function(b){b.classList.remove('active')});
+      if(btn && btn.classList) {
+        btn.classList.add('active');
+      } else {
+        const matchingBtn = document.querySelector('.nav button[onclick*="' + name + '"]');
+        if(matchingBtn) matchingBtn.classList.add('active');
+      }
+      
+      document.getElementById('pageTitle').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+      if(name === 'attendance') loadAttendanceForDate();
+      if(name === 'content') loadAppContent();
+      if(name === 'activity') renderActivityLog();
+      if(name === 'staff') renderStaff();
+      if(name === 'expenses') renderExpensesAndRent();
+      if(name === 'payments') computeAndRenderAnalytics();
+      if(name === 'dashboard') { renderStats(); renderActivityLog(); }
+    }
+
+    function setupRealtime(){
+      sb.channel('studio-manager-realtime')
+        .on('postgres_changes', {event:'*', schema:'public', table:'students'}, function(){loadAll()})
+        .on('postgres_changes', {event:'*', schema:'public', table:'payments'}, function(){loadAll()})
+        .on('postgres_changes', {event:'*', schema:'public', table:'attendance'}, function(){if(document.getElementById('page-attendance').classList.contains('active')) loadAttendanceForDate()})
+        .subscribe(function(status){console.log('Realtime:', status)});
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      document.getElementById('attendanceDate').value = todayText();
+      loadAll();
+      setupRealtime();
+    });
+  </script>
+
+  <!-- 👤 STUDENT DETAILED PROFILE & EDIT MODAL -->
+  <div class="modal-backdrop" id="studentDetailModal">
+    <div class="modal" style="width:min(720px,100%);max-height:90vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h2 id="sdModalTitle" style="margin:0;color:#f59e0b">👤 Student Profile & Details</h2>
+        <button onclick="closeModals()" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer">✕</button>
+      </div>
+
+      <div id="sdLeaveAlertBanner"></div>
+
+      <!-- BASIC DETAILS EDIT -->
+      <div style="background:#0e1628;border:1px solid #26314d;border-radius:12px;padding:14px;margin-bottom:14px">
+        <div style="font-weight:700;color:#cbd5e1;margin-bottom:10px;font-size:14px">📝 Edit Basic Information & Package</div>
+        <input id="sdStudentId" type="hidden">
+        <div class="grid">
+          <div><label>Full Name</label><input id="sdName" type="text"></div>
+          <div><label>Phone Number</label><input id="sdPhone" type="text"></div>
+        </div>
+        <div class="grid">
+          <div><label>Age</label><input id="sdAge" type="number"></div>
+          <div><label>Parent / Guardian</label><input id="sdParent" type="text"></div>
+        </div>
+        <div class="grid">
+          <div><label>Dance Style / Category</label><input id="sdStyle" type="text"></div>
+          <div><label>Batch</label><input id="sdBatch" type="text"></div>
+        </div>
+        <div class="grid">
+          <div><label>Fee Amount (₹)</label><input id="sdFee" type="number"></div>
+          <div><label>Fee Plan</label>
+            <select id="sdPlan">
+              <option value="1M">1 Month (5d leave cap)</option>
+              <option value="3M">3 Months (15d leave cap)</option>
+              <option value="6M">6 Months (30d leave cap)</option>
+              <option value="12M">12 Months (60d leave cap)</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid">
+          <div><label>Admission Date</label><input id="sdAdmission" type="date"></div>
+          <div><label>Package Expiry / Due Date</label><input id="sdDueDate" type="date" style="border-color:#f59e0b;color:#f59e0b"></div>
+        </div>
+        <div>
+          <label>Notes</label>
+          <input id="sdNotes" type="text" placeholder="Internal notes...">
+        </div>
+        <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:10px">
+          <button class="btn btn-primary" onclick="saveStudentDetailEdit()">💾 Save & Sync Profile</button>
+        </div>
+      </div>
+
+      <!-- ATTENDANCE & LEAVE STATS -->
+      <div style="background:#0e1628;border:1px solid #26314d;border-radius:12px;padding:14px;margin-bottom:14px">
+        <div style="font-weight:700;color:#cbd5e1;margin-bottom:8px;font-size:14px">🌴 Attendance & Leave Summary</div>
+        <div id="sdAttStatsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center"></div>
+      </div>
+
+      <!-- PAYMENT HISTORY -->
+      <div style="background:#0e1628;border:1px solid #26314d;border-radius:12px;padding:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-weight:700;color:#cbd5e1;font-size:14px">💰 Payment History</div>
+          <button class="btn btn-soft" onclick="openStudentDirectPayment()" style="padding:4px 10px;font-size:11px">+ Record Payment</button>
+        </div>
+        <div class="scroll" style="max-height:180px">
+          <table>
+            <thead><tr><th>Date</th><th>Amount</th><th>Type / Desc</th><th>Mode</th><th>Payment ID</th></tr></thead>
+            <tbody id="sdPaymentRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ➕ ADD / EDIT STAFF MODAL -->
+  <div class="modal-backdrop" id="staffModal">
+    <div class="modal">
+      <h2>👨‍🏫 Add / Edit Staff Member</h2>
+      <input id="staffEditId" type="hidden">
+      <div><label>Full Name</label><input id="staffName" type="text" placeholder="e.g. Rahul Sharma"></div>
+      <div class="grid">
+        <div><label>Role / Designation</label>
+          <select id="staffRole">
+            <option value="Lead Choreographer">Lead Choreographer</option>
+            <option value="Assistant Instructor">Assistant Instructor</option>
+            <option value="Zumba Instructor">Zumba Instructor</option>
+            <option value="Desk Admin / Reception">Desk Admin / Reception</option>
+            <option value="Studio Helper / Maintenance">Studio Helper / Maintenance</option>
+          </select>
+        </div>
+        <div><label>Phone Number</label><input id="staffPhone" type="text" placeholder="10-digit mobile"></div>
+      </div>
+      <div class="grid">
+        <div><label>Monthly Salary (₹)</label><input id="staffSalary" type="number" placeholder="e.g. 15000"></div>
+        <div><label>Joining Date</label><input id="staffJoining" type="date"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-soft" onclick="closeModals()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveStaffMember()">Save Staff</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 💵 PAY SALARY MODAL -->
+  <div class="modal-backdrop" id="paySalaryModal">
+    <div class="modal">
+      <h2>💵 Record Salary Payment</h2>
+      <input id="paySalaryStaffId" type="hidden">
+      <div style="background:#0e1628;padding:12px;border-radius:10px;margin-bottom:12px">
+        <div id="paySalaryStaffName" style="font-weight:700;font-size:16px;color:#f59e0b">Staff Name</div>
+        <div id="paySalaryStaffRole" style="font-size:12px;color:#94a3b8">Role</div>
+      </div>
+      <div class="grid">
+        <div><label>Month Paid For</label><input id="paySalaryMonth" type="month"></div>
+        <div><label>Salary Amount (₹)</label><input id="paySalaryAmount" type="number"></div>
+      </div>
+      <div class="grid">
+        <div><label>Payment Date</label><input id="paySalaryDate" type="date"></div>
+        <div><label>Payment Mode</label>
+          <select id="paySalaryMode">
+            <option value="Bank Transfer">Bank Transfer (NEFT/IMPS)</option>
+            <option value="UPI">UPI / GPay / PhonePe</option>
+            <option value="Cash">Cash</option>
+          </select>
+        </div>
+      </div>
+      <div><label>Transaction / Reference Note</label><input id="paySalaryRef" type="text" placeholder="e.g. GPay Ref / Cheque No"></div>
+      <div class="modal-actions">
+        <button class="btn btn-soft" onclick="closeModals()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSalaryPayment()">Confirm Salary Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🏢 RENT CONFIG MODAL -->
+  <div class="modal-backdrop" id="rentConfigModal">
+    <div class="modal">
+      <h2>⚙️ Studio Rent Configuration</h2>
+      <div class="grid">
+        <div><label>Monthly Rent Amount (₹)</label><input id="rentConfigAmount" type="number" placeholder="20000"></div>
+        <div><label>Rent Due Day (1-31)</label><input id="rentConfigDay" type="number" min="1" max="31" value="5"></div>
+      </div>
+      <div><label>Landlord Name / Contact</label><input id="rentConfigLandlord" type="text" placeholder="Landlord Name & Phone"></div>
+      <div class="modal-actions">
+        <button class="btn btn-soft" onclick="closeModals()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveRentConfig()">Save Rent Config</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🏢 PAY RENT MODAL -->
+  <div class="modal-backdrop" id="payRentModal">
+    <div class="modal">
+      <h2>🏢 Record Studio Rent Payment</h2>
+      <div class="grid">
+        <div><label>Month Paid For</label><input id="payRentMonth" type="month"></div>
+        <div><label>Rent Amount (₹)</label><input id="payRentAmount" type="number"></div>
+      </div>
+      <div class="grid">
+        <div><label>Payment Date</label><input id="payRentDate" type="date"></div>
+        <div><label>Payment Mode</label>
+          <select id="payRentMode">
+            <option value="Bank Transfer">Bank Transfer (NEFT/IMPS)</option>
+            <option value="UPI">UPI / GPay / PhonePe</option>
+            <option value="Cheque">Cheque</option>
+            <option value="Cash">Cash</option>
+          </select>
+        </div>
+      </div>
+      <div><label>Payment Note / Landlord Receipt No</label><input id="payRentRef" type="text" placeholder="e.g. Landlord Receipt #102"></div>
+      <div class="modal-actions">
+        <button class="btn btn-soft" onclick="closeModals()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveRentPayment()">Confirm Rent Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📝 ADD EXPENSE MODAL -->
+  <div class="modal-backdrop" id="expenseModal">
+    <div class="modal">
+      <h2>📝 Record Studio Expense</h2>
+      <div><label>Category</label>
+        <select id="expCategory">
+          <option value="Electricity & Power Bill">Electricity & Power Bill</option>
+          <option value="Sound & Lights">Sound System & Lighting</option>
+          <option value="Props & Costumes">Props & Costumes</option>
+          <option value="Social Media & Marketing">Social Media & Marketing</option>
+          <option value="Studio Maintenance & Repairs">Studio Maintenance & Repairs</option>
+          <option value="Water & Refreshments">Water & Refreshments</option>
+          <option value="Software & Subscriptions">Software & Subscriptions</option>
+          <option value="Miscellaneous">Miscellaneous</option>
+        </select>
+      </div>
+      <div class="grid">
+        <div><label>Amount (₹)</label><input id="expAmount" type="number" placeholder="e.g. 2500"></div>
+        <div><label>Expense Date</label><input id="expDate" type="date"></div>
+      </div>
+      <div class="grid">
+        <div><label>Paid To / Vendor</label><input id="expVendor" type="text" placeholder="e.g. Electric Board / Amazon"></div>
+        <div><label>Payment Mode</label>
+          <select id="expMode">
+            <option value="UPI">UPI / Online</option>
+            <option value="Cash">Cash</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+          </select>
+        </div>
+      </div>
+      <div><label>Notes / Bill No</label><input id="expNotes" type="text" placeholder="Bill details..."></div>
+      <div class="modal-actions">
+        <button class="btn btn-soft" onclick="closeModals()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveStudioExpense()">Record Expense</button>
+      </div>
+    </div>
+  </div>
+
+
+    <!-- 💃 DANCE STYLE & COURSE MODAL -->
+    <div id="modalDanceStyle" class="modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center;padding:16px">
+      <div style="background:#131d33;border:1px solid #33415f;border-radius:16px;max-width:480px;width:100%;padding:24px;box-shadow:0 10px 40px rgba(0,0,0,.5)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 id="styleModalTitle" style="margin:0;font-size:18px;color:#f59e0b">💃 Add Dance Style / Course</h3>
+          <button class="btn btn-soft" onclick="closeDanceStyleModal()" style="padding:4px 10px;font-size:13px">✕</button>
+        </div>
+
+        <input type="hidden" id="editStyleIdx" value="-1">
+
+        <div style="margin-bottom:12px">
+          <label style="display:block;font-size:12px;color:#94a3b8;margin-bottom:4px">Course / Style Name <span style="color:#ef4444">*</span></label>
+          <input type="text" id="styleInpName" placeholder="e.g. DEMO 500 5 SESSION, Bollywood, Kathak" style="width:100%;padding:10px 12px;background:#17223b;border:1px solid #33415f;border-radius:8px;color:#fff;font-size:14px">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-bottom:14px">
+          <div>
+            <label style="display:block;font-size:12px;color:#94a3b8;margin-bottom:4px">Icon / Emoji</label>
+            <input type="text" id="styleInpIcon" value="💃" placeholder="💃" style="width:100%;padding:10px 12px;background:#17223b;border:1px solid #33415f;border-radius:8px;color:#fff;font-size:14px;text-align:center">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;color:#94a3b8;margin-bottom:4px">Fee Structure Type</label>
+            <select id="styleInpType" onchange="toggleStyleFeeType()" style="width:100%;padding:10px 12px;background:#17223b;border:1px solid #33415f;border-radius:8px;color:#fff;font-size:13px">
+              <option value="regular">📅 Standard Monthly Packages (1M, 3M, 6M, 12M)</option>
+              <option value="special">⚡ Fixed Course Fee (Single Price)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- FIXED FEE & DURATION SECTION -->
+        <div id="styleFixedFeeBox" style="display:none;background:#0c1322;border:1px solid #22c55e;border-radius:10px;padding:14px;margin-bottom:16px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px">
+            <div>
+              <label style="display:block;font-size:12px;font-weight:700;color:#86efac;margin-bottom:4px">Fixed Course Fee (₹) <span style="color:#ef4444">*</span></label>
+              <input type="number" id="styleInpFee" placeholder="e.g. 2, 500, 3000" style="width:100%;padding:10px 12px;background:#17223b;border:1px solid #22c55e;border-radius:8px;color:#86efac;font-size:18px;font-weight:700">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:700;color:#38bdf8;margin-bottom:4px">Validity / Duration <span style="color:#ef4444">*</span></label>
+              <div style="display:flex;gap:6px">
+                <input type="number" id="styleInpDurationVal" value="5" min="1" max="365" style="width:55%;padding:10px;background:#17223b;border:1px solid #38bdf8;border-radius:8px;color:#fff;font-size:16px;font-weight:700;text-align:center">
+                <select id="styleInpDurationUnit" style="width:45%;padding:10px 4px;background:#17223b;border:1px solid #38bdf8;border-radius:8px;color:#fff;font-size:12px">
+                  <option value="days">Days</option>
+                  <option value="months">Months</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#94a3b8">
+            💡 Student's package expiry and due date will be calculated based on this duration (e.g. 5 Days, 10 Days, or 1 Month).
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="btn btn-primary" onclick="saveCMSDanceStyleModal()" style="flex:1;padding:12px;font-size:14px;background:linear-gradient(135deg,#f59e0b,#d97706);font-weight:700">Save Course Style</button>
+          <button class="btn btn-soft" onclick="closeDanceStyleModal()" style="padding:12px;font-size:14px">Cancel</button>
+        </div>
+      </div>
+    </div>
+    
+</body>
+</html>

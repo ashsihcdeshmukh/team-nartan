@@ -1,0 +1,2415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Team Nartan — Student Portal</title>
+<meta name="theme-color" content="#c8972a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Team Nartan">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+:root{
+  --bg:#0e0b14;--surface:#17131f;--surface2:#211c2e;--surface3:#2c2540;
+  --accent:#c8972a;--accent2:#9b59b6;--text:#f0eee8;--muted:#8a8299;
+  --border:#2e2840;--success:#4caf82;--warning:#e8c97a;--danger:#c96b6b;
+  --grad:linear-gradient(135deg,#c8972a,#9b59b6);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* ── LOGIN SCREEN ── */
+.login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
+.login-screen::before{content:'';position:absolute;top:-40%;left:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(155,89,182,.15) 0%,transparent 70%);pointer-events:none;}
+.login-screen::after{content:'';position:absolute;bottom:-30%;right:-20%;width:500px;height:500px;background:radial-gradient(circle,rgba(200,151,42,.12) 0%,transparent 70%);pointer-events:none;}
+.login-logo{text-align:center;margin-bottom:40px;position:relative;}
+.login-logo .dance-icon{font-size:52px;margin-bottom:12px;display:block;}
+.login-logo h1{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.login-logo p{font-size:13px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:4px;}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:380px;position:relative;}
+.login-card h2{font-size:20px;font-weight:700;margin-bottom:6px;}
+.login-card p{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px;}
+.field input{width:100%;padding:13px 16px;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;font-size:16px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;}
+.field input:focus{border-color:var(--accent);}
+.btn-grad{width:100%;padding:14px;border-radius:12px;border:none;background:var(--grad);color:#fff;font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .2s;margin-top:4px;}
+.btn-grad:hover{opacity:.9;}
+.btn-grad:disabled{opacity:.5;cursor:not-allowed;}
+.otp-row{display:flex;gap:10px;justify-content:center;margin:16px 0;}
+.otp-box{width:52px;height:58px;background:var(--surface2);border:2px solid var(--border);border-radius:12px;font-size:22px;font-weight:700;color:var(--text);text-align:center;font-family:'DM Sans',sans-serif;outline:none;}
+.otp-box:focus{border-color:var(--accent);}
+.login-err{font-size:13px;color:var(--danger);text-align:center;margin-top:10px;display:none;}
+.spin-wrap{text-align:center;padding:10px;color:var(--muted);font-size:13px;}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.otp-method-row{display:flex;gap:10px;margin-bottom:16px;}
+.otp-method-card{flex:1;padding:14px;border:2px solid var(--border);border-radius:12px;text-align:center;cursor:pointer;transition:border-color .2s;}
+.otp-method-card.active{border-color:var(--accent);background:rgba(200,151,42,.06);}
+.method-icon{font-size:24px;margin-bottom:6px;}
+.method-label{font-size:13px;font-weight:700;color:var(--text);}
+
+/* ── APP SHELL ── */
+.app{display:none;min-height:100vh;flex-direction:column;}
+.app.active{display:flex;}
+
+/* TOP BAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar-avatar{width:36px;height:36px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0;}
+.topbar-name{font-size:15px;font-weight:600;}
+.topbar-sub{font-size:12px;color:var(--muted);}
+.btn-logout{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+.topbar-actions{display:flex;align-items:center;gap:8px;}
+.btn-install{display:none;background:var(--accent);border:0;color:#15100a;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.install-link{display:none;width:100%;margin-top:12px;background:var(--surface2);border:1px solid var(--border);color:var(--accent);padding:12px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* CONTENT */
+.content{flex:1;padding:20px 16px 100px;max-width:600px;margin:0 auto;width:100%;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom);}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;border:none;background:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;transition:color .2s;}
+.nav-btn.active{color:var(--accent);}
+.nav-btn .nav-icon{font-size:20px;}
+.nav-indicator{width:4px;height:4px;border-radius:50%;background:var(--accent);margin:0 auto;opacity:0;}
+.nav-btn.active .nav-indicator{opacity:1;}
+
+/* PAGES */
+.page{display:none;animation:fadeIn .25s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTION HEADER */
+.sec-head{margin-bottom:20px;}
+.sec-head h2{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;}
+.sec-head p{font-size:13px;color:var(--muted);margin-top:3px;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;}
+.card-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:12px;}
+
+/* STATUS BADGE */
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
+.badge-active{background:rgba(76,175,130,.15);color:var(--success);}
+.badge-due{background:rgba(232,201,122,.15);color:var(--warning);}
+.badge-expired{background:rgba(201,107,107,.15);color:var(--danger);}
+
+/* HOME PAGE */
+.hero-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;}
+.hero-card::before{content:'';position:absolute;top:0;right:0;width:120px;height:120px;background:radial-gradient(circle,rgba(200,151,42,.12) 0%,transparent 70%);}
+.hero-greeting{font-size:13px;color:var(--muted);margin-bottom:4px;}
+.hero-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--text);}
+.hero-style{font-size:13px;color:var(--accent);margin-top:4px;font-weight:600;}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.stat-mini{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.stat-mini-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+.stat-mini-val{font-size:22px;font-weight:700;font-family:'Cormorant Garamond',serif;color:var(--accent);margin-top:4px;}
+.stat-mini-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* FEE CARD */
+.fee-bar{height:8px;background:var(--surface2);border-radius:4px;margin:10px 0;}
+.fee-bar-fill{height:100%;border-radius:4px;background:var(--grad);}
+.due-alert{background:rgba(232,201,122,.08);border:1px solid rgba(232,201,122,.25);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.due-alert-icon{font-size:24px;}
+.due-alert-text{font-size:13px;line-height:1.6;}
+.due-alert-text strong{color:var(--warning);}
+
+/* SCHEDULE */
+.schedule-day{margin-bottom:16px;}
+.day-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+.class-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+.class-time{font-size:13px;font-weight:700;color:var(--accent);min-width:70px;}
+.class-name{font-size:14px;font-weight:600;}
+.class-batch{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* ATTENDANCE */
+.att-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.att-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
+.att-num{font-size:26px;font-weight:700;font-family:'Cormorant Garamond',serif;}
+.att-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.att-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.att-dot{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;}
+.att-p{background:rgba(76,175,130,.15);color:var(--success);}
+.att-a{background:rgba(201,107,107,.15);color:var(--danger);}
+.att-h{background:rgba(139,130,153,.15);color:var(--muted);}
+
+/* NOTICE BOARD */
+.notice-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden;}
+.notice-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.notice-item.important::before{background:var(--danger);}
+.notice-item.info::before{background:var(--accent);}
+.notice-item.event::before{background:var(--accent2);}
+.notice-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.notice-item.important .notice-tag{color:var(--danger);}
+.notice-item.info .notice-tag{color:var(--accent);}
+.notice-item.event .notice-tag{color:var(--accent2);}
+.notice-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+.notice-body{font-size:13px;color:var(--muted);line-height:1.7;}
+.notice-date{font-size:11px;color:var(--muted);margin-top:8px;}
+.offer-card{display:none;background:linear-gradient(135deg,rgba(200,151,42,.18),rgba(155,89,182,.14));border:1px solid var(--accent);border-radius:14px;padding:14px;margin:12px 0;color:var(--text)}
+.offer-card b{display:block;color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+
+/* WORKSHOPS */
+.workshop-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;}
+.workshop-banner{height:90px;display:flex;align-items:center;justify-content:center;font-size:36px;}
+.workshop-body{padding:16px;}
+.workshop-title{font-size:16px;font-weight:700;margin-bottom:4px;}
+.workshop-meta{font-size:12px;color:var(--muted);margin-bottom:10px;}
+.workshop-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.wtag{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--muted);}
+.btn-register{background:var(--grad);border:none;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:12px;width:100%;}
+
+/* PAYMENT HISTORY */
+.pay-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.pay-item:last-child{border-bottom:none;}
+.pay-date{font-size:12px;color:var(--muted);}
+.pay-desc{font-size:14px;font-weight:600;margin-top:2px;}
+.pay-mode{font-size:11px;color:var(--muted);}
+.pay-amt{font-size:16px;font-weight:700;color:var(--success);}
+
+/* PROFILE */
+.profile-header{text-align:center;padding:24px 0 20px;}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#fff;margin:0 auto 12px;}
+.profile-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+.profile-name{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;}
+.profile-style{font-size:13px;color:var(--accent);margin-top:4px;}
+.info-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:14px;}
+.info-row:last-child{border-bottom:none;}
+.info-row .lbl{color:var(--muted);}
+.info-row .val{font-weight:600;text-align:right;}
+
+/* TOAST */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:12px;font-size:13px;z-index:999;transition:all .3s;opacity:0;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* LOADING */
+.loading{text-align:center;padding:40px;color:var(--muted);}
+.loading .spin{width:24px;height:24px;margin:0 auto 12px;display:block;border-width:3px;}
+
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@media(min-width:600px){.bottom-nav{max-width:600px;left:50%;transform:translateX(-50%);border-radius:16px 16px 0 0;}.content{padding-bottom:120px;}}
+</style>
+</head>
+<body>
+
+<!-- CONFIG -->
+<script>
+var SUPABASE_URL = "https://flzreearlfdultvspdmx.supabase.co";
+var SUPABASE_KEY = "sb_publishable_vtHDcCNL1dMBScbVx-FhcA_CL_yyNsQ";
+var RAZORPAY_KEY = "rzp_live_SdEdsmNOQvqmgv";
+var TG_TOKEN     = "8266966923:AAEn8emSbU7J05GDqsn7_UGoD-wFfAsBbHc";
+var TG_OWNER     = "735593509";
+var WA_KEY       = "ChdoC5rR2WuN";
+var TWOFACTOR_API_KEY = "1925099b-9969-11f1-9cb1-0200cd936042";
+var BACKEND_URL  = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://localhost:3000" : "https://team-nartan-backend.onrender.com";
+</script>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-logo">
+    <span class="dance-icon">💃</span>
+    <h1>Team Nartan</h1>
+    <p>Dance Studio · Student Portal</p>
+  </div>
+
+  <!-- PHONE STEP -->
+  <div class="login-card" id="phone-card">
+    <h2>Welcome back! 👋</h2>
+    <p>Enter your registered phone number to login</p>
+    <div class="field">
+      <label>Phone Number</label>
+      <input type="tel" id="login-phone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric">
+    </div>
+    <div class="otp-method-row">
+      <div class="otp-method-card active" id="method-sms" onclick="selectOtpMethod('sms')">
+        <div class="method-icon">📱</div>
+        <div class="method-label">Get 6-Digit OTP by SMS</div>
+      </div>
+      <div class="otp-method-card" id="method-studio" onclick="selectOtpMethod('studio')">
+        <div class="method-icon">🏢</div>
+        <div class="method-label">Get OTP from Studio Desk</div>
+      </div>
+    </div>
+    <button class="btn-grad" onclick="sendLoginOTP()" id="send-otp-btn">Send OTP</button>
+    <button class="install-link" onclick="installApp()" id="install-login-btn">Install Student App</button>
+    <a href="/tutorial.html" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;color:var(--accent);font-size:13px;font-weight:700;text-decoration:none;background:rgba(200,151,42,.08);padding:10px;border-radius:10px;border:1px dashed var(--accent)">🎥 Watch Tutorial Video: How to Use Portal</a>
+    <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--accent);font-weight:700;background:rgba(200,151,42,.06);padding:8px;border-radius:8px">🔑 Demo Master OTP: 000000 · Test Phone: 9876543210</div>
+    <div class="login-err" id="phone-err">Please enter a valid 10-digit number</div>
+    <div class="login-err" id="not-found-err">Phone not found. Please contact studio.</div>
+  </div>
+
+  <!-- OTP STEP -->
+  <div class="login-card" id="otp-card" style="display:none">
+    <h2>Enter OTP 🔐</h2>
+    <p id="otp-sent-msg">OTP sent to studio staff</p>
+    <div class="otp-row">
+      <input type="tel" class="otp-box" id="l-otp-1" maxlength="1" onpaste="handleOtpPaste(event)" inputmode="numeric" oninput="lotpMove(this,'l-otp-2')" onkeyup="lotpBack(event,'')">
+      <input type="tel" class="otp-box" id="l-otp-2" maxlength="1" inputmode="numeric" oninput="lotpMove(this,'l-otp-3')" onkeyup="lotpBack(event,'l-otp-1')">
+      <input type="tel" class="otp-box" id="l-otp-3" maxlength="1" inputmode="numeric" oninput="lotpMove(this,'l-otp-4')" onkeyup="lotpBack(event,'l-otp-2')">
+      <input type="tel" class="otp-box" id="l-otp-4" maxlength="1" inputmode="numeric" oninput="lotpMove(this,'l-otp-5')" onkeyup="lotpBack(event,'l-otp-3')">
+      <input type="tel" class="otp-box" id="l-otp-5" maxlength="1" inputmode="numeric" oninput="lotpMove(this,'l-otp-6')" onkeyup="lotpBack(event,'l-otp-4')">
+      <input type="tel" class="otp-box" id="l-otp-6" maxlength="1" inputmode="numeric" oninput="lotpMove(this,'')" onkeyup="lotpBack(event,'l-otp-5')">
+    </div>
+    <div id="otp-timer-login" style="text-align:center;font-size:12px;color:var(--warning);margin-bottom:12px;font-weight:600;">Expires in 10:00</div>
+    <button class="btn-grad" onclick="verifyLoginOTP()" id="verify-otp-btn">Verify & Login</button>
+    <div class="login-err" id="otp-err">Incorrect OTP. Try again.</div>
+    <p id="resend-otp-wrap" style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px;cursor:pointer;display:none" onclick="resendLoginOTP()">Resend OTP</p>
+    <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:14px;cursor:pointer" onclick="backToPhone()">← Change number</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-avatar" id="tb-avatar">A</div>
+      <div>
+        <div class="topbar-name" id="tb-name">Student</div>
+        <div class="topbar-sub" id="tb-sub">Team Nartan Dance Studio</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-install" onclick="installApp()" id="install-top-btn">Install</button>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- PWA INSTALL BANNER / POPUP -->
+  <div id="pwa-install-banner" style="display:none;position:fixed;bottom:70px;left:16px;right:16px;max-width:480px;margin:0 auto;background:linear-gradient(135deg,#1f1b2e,#111827);border:1.5px solid var(--accent);border-radius:16px;padding:14px 16px;box-shadow:0 12px 30px rgba(0,0,0,.7);z-index:998;animation:slideUp .3s ease">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:28px;background:rgba(245,158,11,.15);border-radius:12px;padding:4px 8px">📲</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">Add Team Nartan to Home Screen</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px" id="pwa-guide-text">Fast 1-tap app access without browser bar!</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button id="pwa-install-btn" onclick="triggerPwaInstall()" class="btn-grad" style="padding:6px 12px;font-size:11px;border-radius:8px;width:auto;margin:0">Install</button>
+        <button onclick="dismissPwaBanner()" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px 8px">✕</button>
+      </div>
+    </div>
+
+    <!-- IOS STEP BY STEP GUIDE (SHOWN ON IPHONE/SAFARI) -->
+    <div id="pwa-ios-instructions" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1);font-size:12px;color:var(--text);line-height:1.6">
+      <div>1️⃣ Tap the <strong>Share</strong> button <span style="font-size:14px">⎋</span> at bottom of Safari</div>
+      <div>2️⃣ Scroll down and tap <strong>"Add to Home Screen" ➕</strong></div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="hero-card">
+        <div class="hero-greeting" id="greeting">Good morning,</div>
+        <div class="hero-name" id="hero-name">Student</div>
+        <div class="hero-style" id="hero-style">💃 Loading...</div>
+      </div>
+      <div class="offer-card" id="home-offer"><b>Special Offer</b><span id="home-offer-text"></span></div>
+      <div class="stats-row">
+        <div class="stat-mini">
+          <div class="stat-mini-label">Status</div>
+          <div class="stat-mini-val" id="home-status" style="font-size:16px;margin-top:6px">—</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-label">Next Due</div>
+          <div class="stat-mini-val" id="home-due" style="font-size:16px;margin-top:6px">—</div>
+        </div>
+      </div>
+      <div id="due-alert-wrap"></div>
+      <div class="card">
+        <div class="card-title">Quick Links</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div onclick="showPage('schedule')" style="background:var(--surface2);border-radius:12px;padding:14px;text-align:center;cursor:pointer">
+            <div style="font-size:24px;margin-bottom:6px">📅</div>
+            <div style="font-size:13px;font-weight:600">Schedule</div>
+          </div>
+          <div onclick="showPage('fees')" style="background:var(--surface2);border-radius:12px;padding:14px;text-align:center;cursor:pointer">
+            <div style="font-size:24px;margin-bottom:6px">💰</div>
+            <div style="font-size:13px;font-weight:600">Fee History</div>
+          </div>
+          <div onclick="showPage('notice')" style="background:var(--surface2);border-radius:12px;padding:14px;text-align:center;cursor:pointer">
+            <div style="font-size:24px;margin-bottom:6px">📢</div>
+            <div style="font-size:13px;font-weight:600">Notice Board</div>
+          </div>
+          <div onclick="showPage('workshops')" style="background:var(--surface2);border-radius:12px;padding:14px;text-align:center;cursor:pointer">
+            <div style="font-size:24px;margin-bottom:6px">🏆</div>
+            <div style="font-size:13px;font-weight:600">Workshops</div>
+          </div>
+        </div>
+        <div onclick="window.location.href='/tutorial.html'" style="margin-top:12px;background:linear-gradient(135deg,rgba(200,151,42,.15),rgba(56,189,248,.1));border:1.5px solid var(--accent);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:24px">🎥</div>
+            <div>
+              <div style="font-weight:700;font-size:13px;color:var(--accent)">Student Video Tutorial</div>
+              <div style="font-size:11px;color:var(--muted)">Watch step-by-step video guide on using the portal</div>
+            </div>
+          </div>
+          <div style="font-size:14px;color:var(--accent);font-weight:800">Watch →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="page" id="page-schedule">
+      <div class="sec-head"><h2>Class Schedule</h2><p>Your weekly batch timings</p></div>
+      <div id="schedule-body"><div class="loading"><div class="spin"></div>Loading...</div></div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div class="page" id="page-attendance">
+      <div class="sec-head"><h2>Attendance & Leave</h2><p>Your class attendance record & package leave allowance</p></div>
+      
+      <div class="att-summary">
+        <div class="att-box"><div class="att-num" style="color:var(--success)" id="att-present">—</div><div class="att-lbl">Present</div></div>
+        <div class="att-box"><div class="att-num" style="color:var(--danger)" id="att-absent">—</div><div class="att-lbl">Absent / Leave</div></div>
+        <div class="att-box"><div class="att-num" style="color:var(--accent)" id="att-pct">—</div><div class="att-lbl">Rate</div></div>
+      </div>
+
+      <!-- LEAVE & AUTO-EXTENSION CARD -->
+      <div class="card" id="leave-tracker-card" style="border:1px solid rgba(245,158,11,.3);background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(17,24,39,.6))">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div class="card-title" style="margin:0;color:var(--accent)">🌴 Leave Allowance & Auto-Extension</div>
+          <button onclick="openLeaveModal()" class="btn-grad" style="padding:6px 14px;font-size:12px;border-radius:8px;width:auto;margin:0">Request Leave</button>
+        </div>
+        <div id="leave-policy-desc" style="font-size:13px;color:var(--text);margin-bottom:12px;line-height:1.6">Loading package leave details...</div>
+        
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
+          <div style="background:var(--surface2);padding:10px;border-radius:10px;border:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--muted)">Leave Remaining</div>
+            <div id="leave-cap-val" style="font-size:16px;font-weight:700;color:var(--text);margin-top:2px">—</div>
+          </div>
+          <div style="background:var(--surface2);padding:10px;border-radius:10px;border:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--muted)">Days Used</div>
+            <div id="leave-used-val" style="font-size:16px;font-weight:700;color:var(--warning);margin-top:2px">—</div>
+          </div>
+          <div style="background:var(--surface2);padding:10px;border-radius:10px;border:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--muted)">Extension Added</div>
+            <div id="leave-ext-val" style="font-size:16px;font-weight:700;color:var(--success);margin-top:2px">—</div>
+          </div>
+        </div>
+        <div id="leave-extended-note" style="margin-top:10px;font-size:12px;color:var(--muted);text-align:center"></div>
+      </div>
+
+      <!-- LEAVE MODAL -->
+      <div id="leave-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;align-items:center;justify-content:center;padding:16px">
+        <div class="card" style="max-width:420px;width:100%;background:var(--surface);border:1px solid var(--accent);border-radius:16px;padding:20px;position:relative">
+          <h3 style="margin-top:0;font-size:18px;color:var(--text)">🌴 Request / Plan Leave</h3>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Classes run Mon–Fri. Missed classes extend your expiry date up to your package limit.</p>
+          
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600">Start Date</label>
+          <input type="date" id="leave-start-date" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:#fff;margin-bottom:12px;box-sizing:border-box">
+          
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600">End Date (inclusive)</label>
+          <input type="date" id="leave-end-date" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:#fff;margin-bottom:12px;box-sizing:border-box">
+          
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600">Reason / Note</label>
+          <input type="text" id="leave-reason" placeholder="e.g. Out of town, Exams, Sick" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:#fff;margin-bottom:16px;box-sizing:border-box">
+          
+          <div style="display:flex;gap:10px">
+            <button onclick="closeLeaveModal()" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif">Cancel</button>
+            <button onclick="submitStudentLeave()" id="submit-leave-btn" class="btn-grad" style="flex:1;padding:10px;margin:0;width:auto">Submit Leave</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="card-title">Recent 30 Classes</div>
+        <div class="att-grid" id="att-grid"></div>
+      </div>
+      
+      <div class="card" style="margin-top:14px">
+        <div class="card-title">Class Attendance History Log</div>
+        <div id="att-history-list"></div>
+      </div>
+      
+      <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:12px">Classes run Monday to Friday. Expiry date automatically extends for missed classes as per package allowance.</p>
+    </div>
+
+    <!-- FEES -->
+    <div class="page" id="page-fees">
+      <div class="sec-head"><h2>Fee & Payments</h2><p>Your payment history</p></div>
+      <div class="card" id="fee-status-card"></div>
+      <div class="card">
+        <div class="card-title">Payment History</div>
+        <div id="pay-history"></div>
+      </div>
+    </div>
+
+    <!-- NOTICE BOARD -->
+    <div class="page" id="page-notice">
+      <div class="sec-head"><h2>Notice Board</h2><p>Announcements from Team Nartan</p></div>
+      <div id="notice-list"></div>
+    </div>
+
+    <!-- WORKSHOPS -->
+    <div class="page" id="page-workshops">
+      <div class="sec-head"><h2>Workshops & Competitions</h2><p>Upcoming events for you</p></div>
+      <div id="workshop-list"></div>
+    </div>
+
+    <!-- PAY -->
+    <div class="page" id="page-pay">
+      <div class="sec-head"><h2>Make Payment</h2><p>Pay fees, dues or register for events</p></div>
+
+      <!-- MONTHLY FEE RENEWAL -->
+      <div class="card" id="pay-renewal-card">
+        <div class="card-title">🔄 Monthly Fee Renewal</div>
+        <div id="pay-renewal-body">Loading...</div>
+      </div>
+
+      <!-- WORKSHOP PAYMENT -->
+      <div class="card">
+        <div class="card-title">🏆 Workshop / Competition Fee</div>
+        <div style="display:flex;flex-direction:column;gap:10px" id="workshop-pay-list">
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:14px;font-weight:600">SaturdaY-Sunday Workshop</div>
+              <div style="font-size:12px;color:var(--muted)">choregraphy &amp; shooT</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:16px;font-weight:700;color:var(--accent)">₹500</div>
+              <button onclick="payWorkshop('SaturdaY-Sunday Workshop',500)" style="background:var(--grad);border:none;color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-top:4px;font-family:DM Sans,sans-serif">Register</button>
+            </div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:14px;font-weight:600">Solo Choreography for Events / Competition</div>
+              <div style="font-size:12px;color:var(--muted)">Choreography &amp; Competition Routine</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:16px;font-weight:700;color:var(--accent)">₹3,000</div>
+              <button onclick="payWorkshop('Solo Choreography for Events / Competition',3000)" style="background:var(--grad);border:none;color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-top:4px;font-family:DM Sans,sans-serif">Register</button>
+            </div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:14px;font-weight:600">Duet &amp; Group Choreography for Events / Competition</div>
+              <div style="font-size:12px;color:var(--muted)">Duet &amp; Group Routine &amp; Shoot</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:16px;font-weight:700;color:var(--accent)">₹5,000</div>
+              <button onclick="payWorkshop('Duet & Group Choreography for Events / Competition',5000)" style="background:var(--grad);border:none;color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-top:4px;font-family:DM Sans,sans-serif">Register</button>
+            </div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:14px;font-weight:600">Dance Championship</div>
+              <div style="font-size:12px;color:var(--muted)">Choreography Fee</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:16px;font-weight:700;color:var(--accent)">₹3,000</div>
+              <button onclick="payWorkshop('Dance Championship',3000)" style="background:var(--grad);border:none;color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-top:4px;font-family:DM Sans,sans-serif">Register</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENT METHOD MODAL -->
+      <div id="pay-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-end;justify-content:center">
+        <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:28px 20px;width:100%;max-width:600px;animation:slideUp .3s ease">
+          <div style="width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px"></div>
+          <div style="font-size:18px;font-weight:700;margin-bottom:4px" id="modal-pay-title">Pay Monthly Fee</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:20px" id="modal-pay-sub">Choose payment method</div>
+          <div style="background:var(--surface2);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <span style="font-size:14px;color:var(--muted)">Amount</span>
+            <span style="font-size:24px;font-weight:700;font-family:Cormorant Garamond,serif;color:var(--accent)" id="modal-pay-amt">₹0</span>
+          </div>
+          <!-- METHOD CHOOSE -->
+          <div id="modal-method-choose">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+              <div onclick="choosePayMethod('online')" style="border:2px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer">
+                <div style="font-size:26px;margin-bottom:6px">💳</div>
+                <div style="font-size:13px;font-weight:700">Pay Online</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:3px">UPI · Cards</div>
+              </div>
+              <div onclick="choosePayMethod('cash')" style="border:2px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer">
+                <div style="font-size:26px;margin-bottom:6px">💵</div>
+                <div style="font-size:13px;font-weight:700">Pay Cash</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:3px">At Studio Desk</div>
+              </div>
+            </div>
+            <button onclick="closePayModal()" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;font-family:DM Sans,sans-serif">Cancel</button>
+          </div>
+          <!-- CASH OTP -->
+          <div id="modal-cash-section" style="display:none">
+            <div id="modal-cash-request">
+              <div style="text-align:center;padding:10px 0 16px">
+                <div style="font-size:32px;margin-bottom:8px">💵</div>
+                <div style="font-size:14px;color:var(--muted);margin-bottom:14px">Click below to generate OTP. Pay cash at studio desk and staff will share OTP with you.</div>
+              </div>
+              <button onclick="generateStudentCashOTP()" class="btn-grad" id="gen-otp-btn">Generate OTP & Notify Staff</button>
+            </div>
+            <div id="modal-otp-entry" style="display:none">
+              <div style="text-align:center;margin-bottom:14px">
+                <div style="font-size:13px;color:var(--muted)">Staff has been notified. Pay cash and get OTP from desk.</div>
+                <div id="modal-otp-timer" style="font-size:12px;color:var(--warning);font-weight:700;margin-top:6px">Expires in 15:00</div>
+              </div>
+              <div style="display:flex;gap:10px;justify-content:center;margin-bottom:14px">
+                <input type="tel" class="otp-box" id="p-otp-1" maxlength="1" inputmode="numeric" oninput="lotpMove(this,'p-otp-2')" onkeyup="lotpBack(event,'')">
+                <input type="tel" class="otp-box" id="p-otp-2" maxlength="1" inputmode="numeric" oninput="lotpMove(this,'p-otp-3')" onkeyup="lotpBack(event,'p-otp-1')">
+                <input type="tel" class="otp-box" id="p-otp-3" maxlength="1" inputmode="numeric" oninput="lotpMove(this,'p-otp-4')" onkeyup="lotpBack(event,'p-otp-2')">
+                <input type="tel" class="otp-box" id="p-otp-4" maxlength="1" inputmode="numeric" oninput="lotpMove(this,'p-otp-5')" onkeyup="lotpBack(event,'p-otp-3')">
+                <input type="tel" class="otp-box" id="p-otp-5" maxlength="1" inputmode="numeric" oninput="lotpMove(this,'p-otp-6')" onkeyup="lotpBack(event,'p-otp-4')">
+                <input type="tel" class="otp-box" id="p-otp-6" maxlength="1" inputmode="numeric" oninput="lotpMove(this,'')" onkeyup="lotpBack(event,'p-otp-5')">
+              </div>
+              <div id="modal-otp-err" style="font-size:12px;color:var(--danger);text-align:center;margin-bottom:10px;display:none">Incorrect OTP. Try again.</div>
+              <button type="button" onclick="verifyStudentCashOTP()" class="btn-grad" id="student-cash-verify-btn">Verify & Confirm Payment</button>
+              <button onclick="resetStudentCashOTP()" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;font-family:DM Sans,sans-serif;margin-top:8px">Resend OTP</button>
+            </div>
+          </div>
+          <!-- SUCCESS -->
+          <div id="modal-success" style="display:none;text-align:center;padding:20px 0">
+            <div style="font-size:52px;margin-bottom:12px">🎉</div>
+            <div style="font-size:20px;font-weight:700;margin-bottom:6px">Payment Confirmed!</div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:16px" id="modal-success-msg">Your payment has been recorded.</div>
+            <button onclick="closePayModal()" class="btn-grad">Done</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="page" id="page-profile">
+      <div class="profile-header">
+        <div class="profile-avatar" id="profile-avatar">A</div>
+        <div class="profile-name" id="profile-name">Student Name</div>
+        <div class="profile-style" id="profile-style">Dance Style</div>
+      </div>
+      <div class="card">
+        <div class="card-title">My Details</div>
+        <div id="profile-details"></div>
+      </div>
+            <!-- CANCEL / FREEZE ADMISSION CARD -->
+      <div class="card" style="margin-top:14px;border:1px solid rgba(239,68,68,.3);background:linear-gradient(135deg,rgba(239,68,68,.08),var(--surface))">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:700;font-size:14px;color:#fca5a5">🛑 Freeze / Cancel Admission</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Pause your membership or submit a cancellation request. You can reactivate anytime!</div>
+          </div>
+          <button onclick="openCancelModal()" style="background:rgba(239,68,68,.2);border:1px solid #ef4444;color:#fca5a5;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Request</button>
+        </div>
+        <div id="cancel-req-status-banner" style="margin-top:10px"></div>
+      </div>
+
+      <button onclick="logout()" style="width:100%;padding:14px;border-radius:12px;border:1px solid var(--danger);background:none;color:var(--danger);font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px">Logout</button>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="showPage('home')" id="nav-home">
+      <span class="nav-icon">🏠</span><span>Home</span><div class="nav-indicator"></div>
+    </button>
+    <button class="nav-btn" onclick="showPage('schedule')" id="nav-schedule">
+      <span class="nav-icon">📅</span><span>Schedule</span><div class="nav-indicator"></div>
+    </button>
+    <button class="nav-btn" onclick="showPage('attendance')" id="nav-attendance">
+      <span class="nav-icon">✅</span><span>Attendance</span><div class="nav-indicator"></div>
+    </button>
+    <button class="nav-btn" onclick="showPage('fees')" id="nav-fees">
+      <span class="nav-icon">💰</span><span>Fees</span><div class="nav-indicator"></div>
+    </button>
+    <button class="nav-btn" onclick="showPage('notice')" id="nav-notice">
+      <span class="nav-icon">📢</span><span>Notice</span><div class="nav-indicator"></div>
+    </button>
+    <button class="nav-btn" onclick="showPage('pay')" id="nav-pay">
+      <span class="nav-icon">💳</span><span>Pay</span><div class="nav-indicator"></div>
+    </button>
+    <button class="nav-btn" onclick="showPage('profile')" id="nav-profile">
+      <span class="nav-icon">👤</span><span>Profile</span><div class="nav-indicator"></div>
+    </button>
+  </nav>
+</div>
+
+  <!-- CANCEL MODAL -->
+  <div id="cancel-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;align-items:center;justify-content:center;padding:16px">
+    <div class="card" style="max-width:400px;width:100%;background:var(--surface);border:1px solid #ef4444;border-radius:16px;padding:20px;box-sizing:border-box">
+      <h3 style="margin-top:0;font-size:18px;color:#fca5a5">🛑 Freeze / Cancel Admission</h3>
+      <p style="font-size:12px;color:var(--muted)">Your request will be sent to the Studio Manager for review. You will retain app access and can renew anytime.</p>
+      <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600">Reason for leaving / freezing</label>
+      <input type="text" id="cancel-reason" placeholder="e.g. Relocating, Exams, Break" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:#fff;margin-bottom:16px;box-sizing:border-box">
+      <div style="display:flex;gap:10px">
+        <button onclick="closeCancelModal()" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer">Cancel</button>
+        <button onclick="submitCancelRequest()" id="submit-cancel-btn" style="flex:1;padding:10px;border-radius:10px;border:none;background:#ef4444;color:#fff;font-weight:700;cursor:pointer">Submit Request</button>
+      </div>
+    </div>
+  </div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+function escapeHtml(str){
+  if(str == null) return "";
+  return String(str).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+// ── INIT ──
+var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var currentStudent = null;
+var loginOTP = null;
+var loginOTPExpiry = null;
+var loginTimerInt = null;
+var deferredInstallPrompt = null;
+var selectedOtpMethod = 'sms';
+var loginResendCooldown = false;
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("/sw.js").catch(function(err){
+      console.log("Service worker registration failed:", err);
+    });
+  });
+}
+
+window.addEventListener("beforeinstallprompt", function(e){
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  showInstallButtons();
+});
+
+window.addEventListener("appinstalled", function(){
+  deferredInstallPrompt = null;
+  hideInstallButtons();
+  showToast("App installed successfully.");
+});
+
+function isStandaloneApp(){
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
+function showInstallButtons(){
+  if(isStandaloneApp()) return;
+  var loginBtn = document.getElementById("install-login-btn");
+  var topBtn = document.getElementById("install-top-btn");
+  if(loginBtn) loginBtn.style.display = "block";
+  if(topBtn) topBtn.style.display = "inline-block";
+}
+
+function hideInstallButtons(){
+  var loginBtn = document.getElementById("install-login-btn");
+  var topBtn = document.getElementById("install-top-btn");
+  if(loginBtn) loginBtn.style.display = "none";
+  if(topBtn) topBtn.style.display = "none";
+}
+
+async function installApp(){
+  if(isStandaloneApp()){
+    showToast("App is already installed.");
+    return;
+  }
+  if(!deferredInstallPrompt){
+    showToast("Use browser menu and tap Add to Home Screen.");
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  hideInstallButtons();
+}
+
+// ── TOAST ──
+function showToast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  setTimeout(function(){ t.classList.remove("show"); }, 3000);
+}
+
+// ── OTP BOXES ──
+function handleOtpPaste(e){
+  var clip = (e.clipboardData || window.clipboardData).getData('text');
+  var digits = String(clip || '').replace(/\D/g, '').slice(0, 6);
+  if(digits.length >= 4){
+    e.preventDefault();
+    for(var i=0; i<digits.length; i++){
+      var box = document.getElementById('l-otp-' + (i+1));
+      if(box) box.value = digits[i];
+    }
+    var nextBox = document.getElementById('l-otp-' + Math.min(6, digits.length));
+    if(nextBox) nextBox.focus();
+  }
+}
+
+function lotpMove(el, nextId){
+  el.value = el.value.replace(/[^0-9]/g,"").slice(-1);
+  if(el.value && nextId) document.getElementById(nextId).focus();
+}
+function lotpBack(e, prevId){
+  if(e.key==="Backspace" && !e.target.value && prevId) document.getElementById(prevId).focus();
+}
+
+function selectOtpMethod(method){
+  selectedOtpMethod = method;
+  document.getElementById("method-sms").classList.toggle("active", method === "sms");
+  document.getElementById("method-studio").classList.toggle("active", method === "studio");
+}
+
+function packageOptionsForStudent(s){
+  var cat = String(s.category || "").toLowerCase();
+  var style = String(s.dance_style || "").toLowerCase();
+  var batch = String(s.batch || "").toLowerCase();
+  var isAdultBatch = style.indexOf("zumba") >= 0 || style.indexOf("hip-hop") >= 0 || style.indexOf("advance") >= 0 || batch.indexOf("zumba") >= 0 || batch.indexOf("hip-hop") >= 0 || batch.indexOf("advance") >= 0;
+  var isKids = !isAdultBatch && (cat.indexOf("kids") >= 0 || Number(s.age || 99) <= 8);
+  return isKids
+    ? [{m:1,amt:1200},{m:3,amt:3000},{m:6,amt:5500,popular:true},{m:12,amt:9500}]
+    : [{m:1,amt:1500},{m:3,amt:3500},{m:6,amt:6500,popular:true},{m:12,amt:10500}];
+}
+
+function normalizeStudent(s){
+  if(!s) return null;
+  s.dance_style = s.dance_style || s.category || "Dance";
+  s.monthly_fee = Number(s.monthly_fee || s.fee_amount || 0);
+  s.next_due_date = s.next_due_date || s.due_date || "";
+  s.enrolled_date = s.enrolled_date || s.admission_date || "";
+  s.last_paid_date = s.last_paid_date || s.admission_date || "";
+  var isCancelled = (String(s.fee_status || "").toLowerCase() === "cancelled" || String(s.status || "").toLowerCase() === "cancelled");
+  s.status = isCancelled ? "Cancelled" : "Active";
+  s.batch = s.batch || "Team Nartan";
+  return s;
+}
+
+// ── STUDENT LOOKUP & LOGIN ──
+var selectedOtpMethod = 'sms';
+
+function selectOtpMethod(method){
+  selectedOtpMethod = method;
+  var smsCard = document.getElementById("method-sms");
+  var studioCard = document.getElementById("method-studio");
+  if(smsCard) smsCard.classList.toggle("active", method === "sms");
+  if(studioCard) studioCard.classList.toggle("active", method === "studio");
+}
+
+async function findStudentByPhone(phone){
+  var cleaned = String(phone || "").replace(/\D/g, "");
+  var last10 = cleaned.slice(-10);
+  if(last10.length < 10) return null;
+  
+  var with91 = "91" + last10;
+  var formats = [last10, with91, "+" + with91, cleaned];
+
+  try {
+    for(var i=0; i<formats.length; i++){
+      var res = await sb.from("students").select("*").eq("phone", formats[i]).maybeSingle();
+      if(res && res.data) return normalizeStudent(res.data);
+    }
+  } catch(e){}
+
+  try {
+    var all = await sb.from("students").select("*").order("created_at", { ascending:false });
+    if(all && all.data){
+      var found = all.data.find(function(s){
+        var sp = String(s.phone || "").replace(/\D/g, "");
+        return sp === last10 || sp.slice(-10) === last10;
+      });
+      if(found) return normalizeStudent(found);
+    }
+  } catch(e){}
+
+  // Demo Fallback for test phones
+  if(last10 === "9876543210" || last10 === "7869240161" || last10 === "9123456789" || last10 === "9988776655" || last10 === "0000000000"){
+    return normalizeStudent({
+      id: "TN-DEMO-001",
+      name: last10 === "7869240161" ? "Sharda Yadav" : (last10 === "9123456789" ? "Ananya Roy" : "Aarav Sharma"),
+      phone: last10,
+      dance_style: "Kathak & Bollywood Commercial",
+      batch: "Team Nartan Elite Batch",
+      category: "Adults",
+      fee_plan: "3 Months",
+      fee_amount: 5000,
+      fee_status: "paid",
+      next_due_date: "2026-11-15",
+      admission_date: "2026-01-15"
+    });
+  }
+
+  return null;
+}
+
+// ── EXPLICIT 6-DIGIT SMS OTP LOGIN FLOW ──
+var twoFactorSessionId = "";
+
+async function sendLoginOTP(){
+  var phone = document.getElementById("login-phone").value.trim().replace(/\D/g,"");
+  document.getElementById("phone-err").style.display="none";
+  document.getElementById("not-found-err").style.display="none";
+  document.getElementById("otp-err").style.display="none";
+  
+  if(phone.length !== 10){
+    document.getElementById("phone-err").style.display="block";
+    return;
+  }
+
+  var btn = document.getElementById("send-otp-btn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin" style="border-top-color:#fff"></span>Sending 6-digit SMS OTP...';
+
+  try {
+    var student = await findStudentByPhone(phone);
+    if(!student){
+      document.getElementById("not-found-err").style.display="block";
+      btn.disabled=false; btn.textContent="Send OTP";
+      return;
+    }
+
+    // Always generate an explicit 6-digit random code
+    loginOTP = String(Math.floor(100000 + Math.random() * 900000));
+    loginOTPExpiry = Date.now() + 10 * 60 * 1000;
+    sessionStorage.setItem("loginOTP", loginOTP);
+    sessionStorage.setItem("loginOTPExpiry", loginOTPExpiry);
+    sessionStorage.setItem("loginPhone", phone);
+
+    if(selectedOtpMethod === "studio"){
+      sessionStorage.setItem("loginOtpMode", "studio");
+
+      try {
+        await fetch("https://api.telegram.org/bot" + TG_TOKEN + "/sendMessage", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({
+            chat_id: TG_OWNER,
+            text: "🏢 STUDIO DESK LOGIN OTP\n\nStudent: " + student.name + "\nPhone: " + phone + "\n\nOTP: " + loginOTP + "\n\nValid for 10 minutes."
+          })
+        });
+      } catch(e){}
+
+      document.getElementById("phone-card").style.display="none";
+      document.getElementById("otp-card").style.display="block";
+      document.getElementById("otp-sent-msg").textContent = "OTP sent to studio desk Telegram. Please ask studio staff for your 6-digit OTP.";
+      ["l-otp-1","l-otp-2","l-otp-3","l-otp-4","l-otp-5","l-otp-6"].forEach(function(id){ document.getElementById(id).value=""; });
+      document.getElementById("l-otp-1").focus();
+      startLoginTimer();
+      loginResendCooldown = false;
+      btn.disabled=false; btn.textContent="Send OTP";
+      return;
+    }
+
+    // Direct 2Factor Explicit 6-Digit SMS Endpoint (Safe try-catch for instant demo support)
+    sessionStorage.setItem("loginOtpMode", "twofactor_sms");
+    try {
+      var smsUrl = "https://2factor.in/API/V1/" + TWOFACTOR_API_KEY + "/SMS/" + phone + "/" + loginOTP;
+      var smsRes = await Promise.race([
+        fetch(smsUrl),
+        new Promise(function(_, reject){ setTimeout(function(){ reject(new Error("timeout")); }, 2500); })
+      ]);
+      var smsData = await smsRes.json();
+      if(smsData && smsData.Status === "Success"){
+        twoFactorSessionId = smsData.Details;
+        sessionStorage.setItem("twoFactorSessionId", twoFactorSessionId);
+      }
+    } catch(err){
+      console.warn("SMS dispatch notice:", err.message);
+    }
+
+    // Send Telegram log for studio admin
+    try {
+      await fetch("https://api.telegram.org/bot" + TG_TOKEN + "/sendMessage", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          chat_id: TG_OWNER,
+          text: "📩 6-Digit SMS OTP Dispatched\n\nStudent: " + student.name + "\nPhone: " + phone + "\n\nOTP: " + loginOTP + "\n\nValid for 10 minutes."
+        })
+      });
+    } catch(e){}
+
+    document.getElementById("phone-card").style.display="none";
+    document.getElementById("otp-card").style.display="block";
+    document.getElementById("otp-sent-msg").textContent = "📩 6-digit OTP sent via SMS to " + phone + ".";
+    ["l-otp-1","l-otp-2","l-otp-3","l-otp-4","l-otp-5","l-otp-6"].forEach(function(id){ document.getElementById(id).value=""; });
+    document.getElementById("l-otp-1").focus();
+    startLoginTimer();
+    loginResendCooldown = false;
+
+  } catch(e){
+    showToast("Error: " + e.message);
+  }
+  btn.disabled=false; btn.textContent="Send OTP";
+}
+
+function stopLoginTimer(){
+  if(loginTimerInt){
+    clearInterval(loginTimerInt);
+    loginTimerInt = null;
+  }
+}
+
+function startLoginTimer(){
+  stopLoginTimer();
+  var timerEl = document.getElementById("otp-timer-login");
+  loginTimerInt = setInterval(function(){
+    var left = Math.max(0, Math.round((loginOTPExpiry - Date.now()) / 1000));
+    if(left <= 0){
+      stopLoginTimer();
+      if(timerEl) timerEl.textContent = "OTP Expired";
+      var resendWrap = document.getElementById("resend-otp-wrap");
+      if(resendWrap) resendWrap.style.display = "block";
+    } else {
+      var m = Math.floor(left / 60);
+      var s = left % 60;
+      if(timerEl) timerEl.textContent = "Expires in " + m + ":" + (s < 10 ? "0" : "") + s;
+    }
+  }, 1000);
+}
+
+async function verifyLoginOTP(){
+  var entered = ["l-otp-1","l-otp-2","l-otp-3","l-otp-4","l-otp-5","l-otp-6"].map(function(id){
+    var el = document.getElementById(id);
+    return el ? el.value.trim() : "";
+  }).join("");
+
+  document.getElementById("otp-err").style.display="none";
+  if(entered.length < 4){
+    document.getElementById("otp-err").textContent = "Please enter the OTP received via SMS.";
+    document.getElementById("otp-err").style.display="block";
+    return;
+  }
+
+  var btn = document.getElementById("verify-otp-btn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin" style="border-top-color:#fff"></span>Verifying OTP...';
+
+  try {
+    var phone = sessionStorage.getItem("loginPhone") || "";
+    var sessId = sessionStorage.getItem("twoFactorSessionId") || twoFactorSessionId;
+    var savedOtp = sessionStorage.getItem("loginOTP") || loginOTP;
+    var valid = false;
+
+    // Direct match with the generated 6-digit OTP or Universal Demo Master OTP (000000)
+    if(entered === "000000" || (savedOtp && (entered === savedOtp || entered === String(savedOtp).slice(0, 4)))){
+      valid = true;
+    }
+
+    // 2Factor SMS verify check
+    if(!valid && sessId){
+      try {
+        var verifyUrl = "https://2factor.in/API/V1/" + TWOFACTOR_API_KEY + "/SMS/VERIFY/" + sessId + "/" + entered;
+        var vRes = await fetch(verifyUrl);
+        var vData = await vRes.json();
+        if(vData && (vData.Status === "Success" || String(vData.Details || "").toLowerCase().indexOf("match") >= 0)){
+          valid = true;
+        }
+      } catch(e){}
+    }
+
+    if(!valid){
+      document.getElementById("otp-err").textContent = "Incorrect OTP. Please check your SMS and enter the 6-digit code.";
+      document.getElementById("otp-err").style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "Verify & Login";
+      return;
+    }
+
+    // Success! Load fresh student record
+    var student = await findStudentByPhone(phone);
+    if(!student){
+      showToast("Student profile not found.");
+      btn.disabled = false; btn.textContent = "Verify & Login";
+      return;
+    }
+
+    currentStudent = student;
+    localStorage.setItem("logged_student_id", student.id);
+    localStorage.setItem("logged_student_phone", phone);
+    sessionStorage.setItem("loggedInPhone", phone);
+    sessionStorage.setItem("studentData", JSON.stringify(student));
+
+    stopLoginTimer();
+    
+    // Load student data, fresh attendance & CMS
+    await loadApp();
+    checkPwaPrompt();
+    showToast("Welcome, " + student.name + "! 👋");
+
+  } catch(e){
+    showToast("Verification error: " + e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = "Verify & Login";
+}
+
+async function resendLoginOTP(){
+  if(loginResendCooldown) return;
+  loginResendCooldown = true;
+  
+  var resendWrap = document.getElementById("resend-otp-wrap");
+  if(resendWrap) resendWrap.style.display = "none";
+  
+  ["l-otp-1","l-otp-2","l-otp-3","l-otp-4","l-otp-5","l-otp-6"].forEach(function(id){ document.getElementById(id).value=""; });
+  document.getElementById("otp-err").style.display="none";
+  
+  await sendLoginOTP();
+  
+  setTimeout(function(){
+    loginResendCooldown = false;
+    if(resendWrap) resendWrap.style.display = "block";
+  }, 60000);
+}
+
+function backToPhone(){
+  document.getElementById("otp-card").style.display="none";
+  document.getElementById("phone-card").style.display="block";
+  clearInterval(loginTimerInt);
+  loginResendCooldown = false;
+  var resendWrap = document.getElementById("resend-otp-wrap");
+  if(resendWrap) resendWrap.style.display = "none";
+  ["l-otp-1","l-otp-2","l-otp-3","l-otp-4","l-otp-5","l-otp-6"].forEach(function(id){ document.getElementById(id).value=""; });
+  document.getElementById("otp-err").style.display="none";
+}
+
+// ── LOAD APP ──
+async function loadApp(){
+  var s = currentStudent;
+
+  // Show app
+  document.getElementById("login-screen").style.display="none";
+  document.getElementById("app").classList.add("active");
+
+  // Top bar
+  document.getElementById("tb-avatar").textContent = s.name.charAt(0).toUpperCase();
+  document.getElementById("tb-name").textContent = s.name;
+  document.getElementById("tb-sub").textContent = s.dance_style + " · " + (s.batch||"Team Nartan");
+
+  // Greeting
+  var hr = new Date().getHours();
+  var greet = hr<12?"Good morning,":hr<17?"Good afternoon,":"Good evening,";
+  document.getElementById("greeting").textContent = greet;
+  document.getElementById("hero-name").textContent = s.name.split(" ")[0];
+  document.getElementById("hero-style").textContent = "💃 " + s.dance_style + " · " + (s.batch||"");
+
+  // Status
+  var isCancelled = (String(s.fee_status || "").toLowerCase() === "cancelled" || String(s.status || "").toLowerCase() === "cancelled");
+  var due = new Date(s.next_due_date || s.due_date);
+  var today = new Date(); today.setHours(0,0,0,0);
+  var daysLeft = Math.round((due-today)/86400000);
+  var statusTxt = isCancelled ? "Cancelled / Frozen" : (daysLeft<0 ? "Expired" : (daysLeft<=3 ? "Due Soon" : "Active"));
+  var statusClass = isCancelled ? "badge-cancelled" : (daysLeft<0 ? "badge-expired" : (daysLeft<=3 ? "badge-due" : "badge-active"));
+  document.getElementById("home-status").innerHTML = '<span class="badge '+statusClass+'">'+statusTxt+'</span>';
+  document.getElementById("home-due").textContent = fmt(s.next_due_date);
+
+  // Due alert
+  if(daysLeft<=3){
+    var alertTxt = daysLeft<0?"Your fee is <strong>overdue by "+Math.abs(daysLeft)+" day(s)</strong>. Please pay at the studio immediately.":
+      daysLeft===0?"Your fee is <strong>due today</strong>. Please pay at the studio.":
+      "Your fee is due in <strong>"+daysLeft+" day(s)</strong> on "+fmt(s.next_due_date)+". Please pay soon.";
+    document.getElementById("due-alert-wrap").innerHTML =
+      '<div class="due-alert"><div class="due-alert-icon">⚠️</div><div class="due-alert-text">'+alertTxt+
+      "<button onclick=\"showPage('pay')\" style=\"display:block;margin-top:10px;background:var(--grad);border:none;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif\">Pay Now</button></div></div>";
+  } else {
+    document.getElementById("due-alert-wrap").innerHTML = "";
+  }
+
+  // Profile
+  document.getElementById("profile-avatar").textContent = s.name.charAt(0).toUpperCase();
+  if(s.photo_base64){ document.getElementById("profile-avatar").innerHTML='<img src="'+s.photo_base64+'">'; }
+  document.getElementById("profile-name").textContent = s.name;
+  document.getElementById("profile-style").textContent = s.dance_style;
+  document.getElementById("profile-details").innerHTML =
+    [["Name",s.name],["Age",s.age+" years"],["Phone",s.phone],["Parent/Guardian",s.parent_name||"—"],
+     ["Dance Style",s.dance_style],["Batch",s.batch||"—"],["Category",s.category||"—"],
+     ["Enrolled",fmt(s.enrolled_date)],["Status",statusTxt]
+    ].map(function(r){ return '<div class="info-row"><span class="lbl">'+r[0]+'</span><span class="val">'+r[1]+'</span></div>'; }).join("");
+
+  // Load payments
+  loadPayments(s.id);
+  loadSchedule(s);
+  loadAttendance(s.id);
+  loadNotices();
+  loadWorkshops();
+  loadAppContent();
+  renderCancelStatus();
+}
+
+// ── PAYMENTS ──
+async function loadPayments(studentId){
+  var feeCard = document.getElementById("fee-status-card");
+  var payList = document.getElementById("pay-history");
+  try {
+    var pays = [];
+    var s = currentStudent;
+
+    // 1. Try dedicated payments table
+    try {
+      var result = await sb.from("payments").select("*").eq("student_id", studentId).order("payment_date", {ascending:false});
+      if(!result.error && result.data && result.data.length > 0){
+        pays = result.data;
+      }
+    } catch(e){}
+
+    // 2. Read all payments from student.notes cloud storage
+    try {
+      var rawNotes = (s && s.notes) || "";
+      var mPay = String(rawNotes).match(/<!--PAY_START-->([\s\S]*?)<!--PAY_END-->/);
+      if(mPay){
+        var parsed = JSON.parse(mPay[1]) || [];
+        parsed.forEach(function(p){
+          if(!pays.find(function(x){ return x.payment_id === p.payment_id; })){
+            pays.push({
+              payment_id: p.payment_id || ("PAY-" + Date.now()),
+              amount: p.amount,
+              payment_date: p.date || p.payment_date,
+              mode: p.mode || "Online",
+              type: p.type || "Fee",
+              title: p.title || p.type || "Fee Payment",
+              duration_months: p.duration_months || 1
+            });
+          }
+        });
+      }
+    } catch(e){}
+
+    // 3. Always include initial admission package in payment history if not already present
+    var hasAdm = pays.some(function(p){
+      return String(p.type || '').toLowerCase().includes('admission') || (p.payment_date && p.payment_date === (s.admission_date || s.enrolled_date));
+    });
+    if(!hasAdm && (s.admission_date || s.enrolled_date)){
+      pays.push({
+        payment_id: s.payment_id || ("ADM-" + s.id),
+        amount: Number(s.admission_fee || s.fee_amount || s.monthly_fee || 3500),
+        payment_date: s.admission_date || s.enrolled_date || "2026-05-25",
+        mode: s.payment_method || "Admission / Online",
+        type: "Admission Package",
+        title: s.dance_style + " (" + (s.fee_plan || "Initial Admission Package") + ")",
+        duration_months: 1
+      });
+    }
+
+    // Sort payments descending
+    pays.sort(function(a,b){ return new Date(b.payment_date) - new Date(a.payment_date); });
+
+    var total = pays.reduce(function(a,p){ return a + Number(p.amount || 0); }, 0);
+    var due = new Date(s.next_due_date || s.due_date);
+    var today = new Date(); today.setHours(0,0,0,0);
+    var daysLeft = Math.round((due - today) / 86400000);
+    var statusClass = s.fee_status === "cancelled" ? "badge-cancelled" : (daysLeft < 0 ? "badge-expired" : (daysLeft <= 3 ? "badge-due" : "badge-active"));
+    var statusTxt = s.fee_status === "cancelled" ? "Cancelled / Frozen" : (daysLeft < 0 ? "Overdue" : (daysLeft <= 3 ? "Due Soon" : "Active"));
+
+    feeCard.innerHTML =
+      '<div class="card-title">Fee Status</div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+      '<div><div style="font-size:13px;color:var(--muted)">Current Package</div><div style="font-size:22px;font-weight:700;font-family:Cormorant Garamond,serif;color:var(--accent)">₹'+(s.fee_amount || s.monthly_fee)+' ('+(s.fee_plan||'1M')+')</div></div>'+
+      '<span class="badge '+statusClass+'">'+statusTxt+'</span></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:8px">'+
+      '<span>Next due: <strong style="color:var(--text)">'+fmt(s.next_due_date || s.due_date)+'</strong></span>'+
+      '<span>Total paid: <strong style="color:var(--success)">₹'+total+'</strong></span></div>'+
+      '<button onclick="showPage(\'pay\')" style="width:100%;margin-top:14px;background:var(--grad);border:none;color:#fff;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">View Payment & Renewal Options</button>';
+
+    if(pays.length === 0){
+      payList.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">No payments recorded yet.</div>';
+      return;
+    }
+
+    payList.innerHTML = pays.map(function(p){
+      var desc = p.title || (s.dance_style + ' — ' + (p.duration_months || 1) + ' Month(s)');
+      return '<div class="pay-item"><div><div class="pay-date">' + fmt(p.payment_date) + '</div><div class="pay-desc">' + escapeHtml(desc) + '</div><div class="pay-mode">' + escapeHtml(p.mode) + ' · ID: ' + escapeHtml(p.payment_id) + '</div></div><div class="pay-amt">+₹' + p.amount + '</div></div>';
+    }).join("");
+  } catch(e){
+    if(feeCard) feeCard.innerHTML = "<div style='color:var(--muted)'>Could not load fees.</div>";
+  }
+}
+
+// ── SCHEDULE ──
+function loadSchedule(s){
+  var body = document.getElementById("schedule-body");
+  var batchDays = {
+    "Monday to Friday — 4:00 PM Kids Batch (2.5 to 6 years)":["Mon","Tue","Wed","Thu","Fri"],
+    "Monday to Friday — 5:00 PM Kids Batch (3 to 8 years)":["Mon","Tue","Wed","Thu","Fri"],
+    "Monday to Friday — 5:00 PM to 6:00 PM Zumba":["Mon","Tue","Wed","Thu","Fri"],
+    "Monday to Friday — 6:00 PM to 7:30 PM Hip-Hop Advance Batch":["Mon","Tue","Wed","Thu","Fri"],
+    "Monday to Friday — 6:00 PM to 8:00 PM Basic Hip-Hop Batch":["Mon","Tue","Wed","Thu","Fri"]
+  };
+  var batch = s.batch || "Monday to Friday — 5:00 PM Kids Batch (3 to 8 years)";
+  var days = batchDays[batch] || ["Mon","Tue","Wed","Thu","Fri"];
+  var timeMatch = batch.match(/\d+:\d+ [AP]M/g) || ["5:00 PM","6:00 PM"];
+  var html = "";
+  days.forEach(function(day){
+    html += '<div class="schedule-day"><div class="day-label">'+day+'</div>'+
+      '<div class="class-item">'+
+      '<div class="class-time">'+timeMatch[0]+'</div>'+
+      '<div><div class="class-name">'+s.dance_style+'</div>'+
+      '<div class="class-batch">'+batch+'</div></div></div></div>';
+  });
+  html += '<p style="font-size:12px;color:var(--muted);text-align:center;margin-top:12px">Contact studio for schedule changes or holiday updates.</p>';
+  body.innerHTML = html;
+}
+
+
+function calculateRenewalDueDate(currentDue, months){
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  
+  var base = today;
+  if(currentDue){
+    var d = new Date(String(currentDue).slice(0,10) + 'T00:00:00');
+    if(!isNaN(d.getTime()) && d > today){
+      base = d; // Package still active: extend from future expiry date!
+    }
+  }
+  
+  var next = new Date(base.getTime());
+  next.setMonth(next.getMonth() + Number(months || 1));
+  return next.toISOString().slice(0,10);
+}
+
+// ── LEAVE POLICY & AUTO EXTENSION ──
+function getStudentPackageCap(s){
+  var m = Number(s.duration_months || 1);
+  if(s.fee_plan){
+    var match = String(s.fee_plan).match(/\d+/);
+    if(match) m = Number(match[0]);
+  }
+  if(m >= 12) return 60; // 12M -> 60 days (2 months)
+  if(m >= 6) return 30;  // 6M -> 30 days (1 month)
+  if(m >= 3) return 15;  // 3M -> 15 days
+  return 5;              // 1M -> 5 days
+}
+
+function safeDatePortal(dateText){
+  if(!dateText) return new Date();
+  var str = String(dateText).trim();
+  if(!str) return new Date();
+  var dateOnly = str.includes('T') ? str.slice(0,10) : (str.length >= 10 ? str.slice(0,10) : str);
+  var d = new Date(dateOnly + 'T00:00:00');
+  return isNaN(d.getTime()) ? new Date() : d;
+}
+
+function addDaysToDate(dateStr, days){
+  var d = safeDatePortal(dateStr);
+  d.setDate(d.getDate() + Number(days || 0));
+  return isNaN(d.getTime()) ? new Date().toISOString().slice(0,10) : d.toISOString().slice(0,10);
+}
+
+function computeLeaveAllowance(s, rows){
+  var cap = getStudentPackageCap(s);
+  
+  // Find current cycle start date (latest payment/renewal date or admission date)
+  var cycleStartDate = s.admission_date || s.enrolled_date || "2020-01-01";
+  try {
+    var rawNotes = s.notes || "";
+    var mPay = String(rawNotes).match(/<!--PAY_START-->([\s\S]*?)<!--PAY_END-->/);
+    if(mPay){
+      var pList = JSON.parse(mPay[1]) || [];
+      if(pList.length > 0){
+        var lastP = pList[pList.length - 1];
+        if(lastP.date) cycleStartDate = lastP.date;
+      }
+    }
+  } catch(e){}
+
+  // Count leaves ONLY for the current active package cycle (on or after cycleStartDate)
+  var currentCycleLeaves = (rows || []).filter(function(r){
+    var isLeave = (r.status === "Absent" || r.status === "Leave");
+    var rDate = String(r.attendance_date || "").slice(0,10);
+    return isLeave && rDate >= cycleStartDate;
+  });
+
+  var usedDays = currentCycleLeaves.length;
+  var extensionDays = Math.min(usedDays, cap);
+  var remaining = Math.max(0, cap - usedDays);
+  
+  // Current real due date from database
+  var baseDueStr = s.due_date || s.next_due_date || new Date().toISOString().slice(0,10);
+  var extendedDueStr = extensionDays > 0 ? addDaysToDate(baseDueStr, extensionDays) : baseDueStr;
+  
+  return {
+    cap: cap,
+    used: usedDays,
+    extensionDays: extensionDays,
+    remaining: remaining,
+    baseDue: baseDueStr,
+    extendedDue: extendedDueStr,
+    cycleStart: cycleStartDate,
+    isCapped: usedDays >= cap
+  };
+}
+
+function openLeaveModal(){
+  var today = new Date().toISOString().slice(0,10);
+  document.getElementById("leave-start-date").value = today;
+  document.getElementById("leave-end-date").value = today;
+  document.getElementById("leave-reason").value = "";
+  
+  // Show remaining leave allowance in modal
+  var s = currentStudent;
+  if(s){
+    var rawNotes = s.notes || "";
+    var existingRecords = [];
+    var match = String(rawNotes).match(/<!--ATT_START-->([\s\S]*?)<!--ATT_END-->/);
+    if(match){
+      try{ existingRecords = JSON.parse(match[1]) || []; }catch(e){}
+    }
+    var tempRows = existingRecords.map(function(r){ return { attendance_date: r.d, status: r.s, note: r.n }; });
+    var leaveInfo = computeLeaveAllowance(s, tempRows);
+    
+    var infoEl = document.getElementById("modal-leave-balance-info");
+    if(!infoEl){
+      var modalP = document.querySelector("#leave-modal p");
+      if(modalP){
+        infoEl = document.createElement("div");
+        infoEl.id = "modal-leave-balance-info";
+        infoEl.style.cssText = "font-size:12px;padding:8px 12px;border-radius:8px;margin-bottom:12px;font-weight:700";
+        modalP.parentNode.insertBefore(infoEl, modalP.nextSibling);
+      }
+    }
+    if(infoEl){
+      if(leaveInfo.remaining <= 0){
+        infoEl.style.background = "#3b1418";
+        infoEl.style.color = "#fca5a5";
+        infoEl.innerHTML = "⚠️ You have used your full " + leaveInfo.cap + " Days leave allowance. Extra leaves will not extend your package expiry.";
+      } else {
+        infoEl.style.background = "rgba(245,158,11,.15)";
+        infoEl.style.color = "#facc15";
+        infoEl.innerHTML = "🌴 Available Allowance: <strong>" + leaveInfo.remaining + " of " + leaveInfo.cap + " Days remaining</strong> (" + (s.fee_plan || "Package") + ").";
+      }
+    }
+  }
+  
+  document.getElementById("leave-modal").style.display = "flex";
+}
+
+function closeLeaveModal(){
+  document.getElementById("leave-modal").style.display = "none";
+}
+
+function openCancelModal(){
+  document.getElementById("cancel-reason").value = "";
+  document.getElementById("cancel-modal").style.display = "flex";
+}
+
+function closeCancelModal(){
+  document.getElementById("cancel-modal").style.display = "none";
+}
+
+async function submitCancelRequest(){
+  if(!currentStudent) return;
+  var s = currentStudent;
+  var reason = document.getElementById("cancel-reason").value.trim() || "Student Freeze / Cancellation";
+  var btn = document.getElementById("submit-cancel-btn");
+  btn.disabled = true;
+  btn.textContent = "Submitting...";
+
+  try {
+    var stuResult = await sb.from("students").select("notes").eq("id", s.id).maybeSingle();
+    var rawNotes = (stuResult && stuResult.data && stuResult.data.notes) || s.notes || "";
+
+    var cancelReqs = [];
+    var mCan = String(rawNotes).match(/<!--CANCEL_REQ_START-->([\s\S]*?)<!--CANCEL_REQ_END-->/);
+    if(mCan){
+      try{ cancelReqs = JSON.parse(mCan[1]) || []; }catch(e){}
+    }
+
+    var newCancel = {
+      id: "cr_" + Date.now(),
+      student_id: s.id,
+      student_name: s.name,
+      phone: s.phone,
+      reason: reason,
+      status: "pending",
+      requested_at: new Date().toISOString().slice(0,10)
+    };
+
+    cancelReqs.push(newCancel);
+
+    var cleanNote = String(rawNotes).replace(/<!--CANCEL_REQ_START-->[\s\S]*?<!--CANCEL_REQ_END-->/g, '').trim();
+    var updatedNote = cleanNote + (cleanNote ? '\n' : '') + '<!--CANCEL_REQ_START-->' + JSON.stringify(cancelReqs) + '<!--CANCEL_REQ_END-->';
+    s.notes = updatedNote;
+
+    await sb.from("students").update({ notes: updatedNote }).eq("id", s.id);
+
+    // Notify Telegram Admin
+    try {
+      var tgMsg = "🛑 STUDENT CANCEL / FREEZE REQUEST\n\n" +
+        "Student: " + s.name + "\n" +
+        "Phone: " + s.phone + "\n" +
+        "Reason: " + reason + "\n\n" +
+        "👉 Review & Approve in Studio Manager:\nhttps://team-nartan-manager.web.app";
+      fetch("https://api.telegram.org/bot" + TG_TOKEN + "/sendMessage", {
+        method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ chat_id: TG_OWNER, text: tgMsg })
+      }).catch(function(){});
+    } catch(e){}
+
+    closeCancelModal();
+    renderCancelStatus();
+    showToast("Cancellation request submitted! Studio Manager will review. 🛑");
+  } catch(err){
+    showToast("Failed to submit request: " + err.message);
+  }
+  btn.disabled = false;
+  btn.textContent = "Submit Request";
+}
+
+function renderCancelStatus(){
+  if(!currentStudent) return;
+  var s = currentStudent;
+  var banner = document.getElementById("cancel-req-status-banner");
+  if(!banner) return;
+
+  var isCancelled = (String(s.fee_status || "").toLowerCase() === "cancelled" || String(s.status || "").toLowerCase() === "cancelled");
+  var cardTitle = document.querySelector("#page-profile .card-title");
+  
+  if(isCancelled){
+    banner.innerHTML = '<div style="background:#3b1418;border:1.5px solid #ef4444;color:#fca5a5;padding:14px;border-radius:12px;margin-top:10px;text-align:center">' +
+      '<div style="font-weight:800;font-size:15px;color:#fca5a5">🛑 Membership Status: Cancelled / Frozen</div>' +
+      '<div style="font-size:12px;color:#fecaca;margin:6px 0 12px 0">Your studio membership is currently frozen / cancelled. You can reactivate and renew your package at any time!</div>' +
+      '<button onclick="showPage(\'pay\')" class="btn-grad" style="padding:10px 20px;font-size:13px;border-radius:10px;width:auto;margin:0 auto">🔄 Reactivate & Renew Package</button>' +
+    '</div>';
+
+    var reqBtn = document.querySelector("#page-profile button[onclick='openCancelModal()']");
+    if(reqBtn) reqBtn.style.display = "none";
+    return;
+  }
+
+  var reqBtn = document.querySelector("#page-profile button[onclick='openCancelModal()']");
+  if(reqBtn) reqBtn.style.display = "inline-block";
+
+  var mCan = String(s.notes || "").match(/<!--CANCEL_REQ_START-->([\s\S]*?)<!--CANCEL_REQ_END-->/);
+  if(mCan){
+    try {
+      var reqs = JSON.parse(mCan[1]) || [];
+      var pending = reqs.find(function(r){ return r.status === "pending"; });
+      if(pending){
+        banner.innerHTML = '<div style="background:#3b1418;border:1px solid #7f1d1d;color:#fca5a5;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;margin-top:8px">⏳ Freeze / Cancellation Request Pending Studio Approval (Reason: ' + escapeHtml(pending.reason) + ')</div>';
+        return;
+      }
+    } catch(e){}
+  }
+  banner.innerHTML = "";
+}
+
+
+async function submitStudentLeave(){
+  if(!currentStudent) return;
+  var s = currentStudent;
+  var start = document.getElementById("leave-start-date").value;
+  var end = document.getElementById("leave-end-date").value || start;
+  var reason = document.getElementById("leave-reason").value.trim() || "Student Leave";
+  
+  if(!start){ showToast("Please select a start date"); return; }
+  if(end < start){ showToast("End date cannot be before start date"); return; }
+  
+  var btn = document.getElementById("submit-leave-btn");
+  btn.disabled = true;
+  btn.textContent = "Submitting...";
+  
+  try {
+    // Generate dates between start and end (Monday-Friday only)
+    var cur = new Date(start + 'T00:00:00');
+    var endD = new Date(end + 'T00:00:00');
+    var datesToMark = [];
+    
+    while(cur <= endD){
+      var day = cur.getDay();
+      if(day >= 1 && day <= 5){ // Mon-Fri
+        datesToMark.push(cur.toISOString().slice(0,10));
+      }
+      cur.setDate(cur.getDate() + 1);
+    }
+    
+    if(datesToMark.length === 0){
+      datesToMark.push(start);
+    }
+
+    // Fetch existing student notes
+    var stuResult = await sb.from("students").select("notes").eq("id", s.id).maybeSingle();
+    var rawNotes = (stuResult && stuResult.data && stuResult.data.notes) || s.notes || "";
+    
+    // Parse existing leave requests
+    var leaveRequests = [];
+    var mReq = String(rawNotes).match(/<!--LEAVE_REQ_START-->([\s\S]*?)<!--LEAVE_REQ_END-->/);
+    if(mReq){
+      try{ leaveRequests = JSON.parse(mReq[1]) || []; }catch(e){}
+    }
+    
+    // Calculate student package cap & remaining days
+    var existingRecords = [];
+    var matchAtt = String(rawNotes).match(/<!--ATT_START-->([\s\S]*?)<!--ATT_END-->/);
+    if(matchAtt){
+      try{ existingRecords = JSON.parse(matchAtt[1]) || []; }catch(e){}
+    }
+    var tempRows = existingRecords.map(function(r){ return { attendance_date: r.d, status: r.s, note: r.n }; });
+    var leaveInfo = computeLeaveAllowance(s, tempRows);
+    var allowedExtensionDays = Math.min(datesToMark.length, leaveInfo.remaining);
+
+    var newReq = {
+      id: "lr_" + Date.now(),
+      student_id: s.id,
+      student_name: s.name,
+      phone: s.phone,
+      start: start,
+      end: end,
+      days: datesToMark.length,
+      allowed_extension_days: allowedExtensionDays,
+      cap: leaveInfo.cap,
+      remaining_before: leaveInfo.remaining,
+      dates: datesToMark,
+      reason: reason,
+      status: "pending",
+      created_at: new Date().toISOString().slice(0,10)
+    };
+    
+    leaveRequests.push(newReq);
+    
+    var cleanNote = String(rawNotes).replace(/<!--LEAVE_REQ_START-->[\s\S]*?<!--LEAVE_REQ_END-->/g, '').trim();
+    var updatedNote = cleanNote + (cleanNote ? '\n' : '') + '<!--LEAVE_REQ_START-->' + JSON.stringify(leaveRequests) + '<!--LEAVE_REQ_END-->';
+    s.notes = updatedNote;
+
+    // Update Supabase
+    await sb.from("students").update({
+      notes: updatedNote
+    }).eq("id", s.id);
+
+    // Send Telegram Notification to Studio Owner
+    try {
+      var tgMsg = "🌴 NEW LEAVE REQUEST\n\n" +
+        "Student: " + s.name + "\n" +
+        "Phone: " + s.phone + "\n" +
+        "Dates: " + start + " to " + end + " (" + datesToMark.length + " class days)\n" +
+        "Reason: " + reason + "\n\n" +
+        "👉 Review & Approve in Studio Manager:\nhttps://team-nartan-manager.web.app";
+      fetch("https://api.telegram.org/bot" + TG_TOKEN + "/sendMessage", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ chat_id: TG_OWNER, text: tgMsg })
+      }).catch(function(){});
+    }catch(e){}
+
+    closeLeaveModal();
+    await loadAttendance(s.id);
+    showToast("Leave request submitted! Studio Manager will review and approve. 🌴");
+  } catch(err){
+    showToast("Failed to submit leave: " + err.message);
+  }
+  
+  btn.disabled = false;
+  btn.textContent = "Submit Leave Request";
+}
+
+// ── ATTENDANCE ──
+async function loadAttendance(studentId){
+  var grid = document.getElementById("att-grid");
+  var historyList = document.getElementById("att-history-list");
+  if(!studentId){
+    if(grid) grid.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:13px;text-align:center;padding:16px">Please log in to view attendance.</div>';
+    return;
+  }
+
+  // Always fetch latest student record from Supabase to catch newly backfilled dates & extended due date!
+  try {
+    var fresh = await sb.from("students").select("*").eq("id", studentId).maybeSingle();
+    if(fresh && fresh.data){
+      currentStudent = normalizeStudent(fresh.data);
+      populateTopBar(currentStudent);
+    }
+  } catch(e){}
+
+  var rows = [];
+
+  // Read attendance from student.notes cloud storage (used by Studio Manager)
+  try {
+    var rawNotes = (currentStudent && currentStudent.notes) || "";
+    var match = String(rawNotes).match(/<!--ATT_START-->([\s\S]*?)<!--ATT_END-->/);
+    if(match){
+      var parsed = JSON.parse(match[1]);
+      if(Array.isArray(parsed)){
+        rows = parsed.map(function(item){
+          return {
+            attendance_date: item.d,
+            status: item.s,
+            note: item.n || ''
+          };
+        });
+      }
+    }
+  } catch(err){}
+
+  // Also check dedicated attendance table if present
+  try {
+    var result = await sb.from("attendance").select("*").eq("student_id", studentId).order("attendance_date", {ascending:false});
+    if(!result.error && result.data && result.data.length > 0){
+      result.data.forEach(function(r){
+        var dStr = String(r.attendance_date).slice(0,10);
+        if(!rows.find(function(x){ return String(x.attendance_date).slice(0,10) === dStr; })){
+          rows.push(r);
+        }
+      });
+    }
+  } catch(e){}
+
+  var todayStr = new Date().toISOString().slice(0,10);
+  
+  // Sort rows descending by date and ignore any accidental future test dates
+  rows = rows.filter(function(r){
+    var dStr = String(r.attendance_date || '').slice(0,10);
+    return dStr <= todayStr;
+  });
+  rows.sort(function(a,b){
+    return new Date(b.attendance_date) - new Date(a.attendance_date);
+  });
+
+  // Calculate leaveInfo to get active package cycle start date
+  var s = currentStudent;
+  var leaveInfo = computeLeaveAllowance(s, rows);
+  var cycleStart = leaveInfo.cycleStart;
+
+  // Filter rows strictly for the current active package cycle
+  var currentCycleRows = rows.filter(function(r){
+    var dStr = String(r.attendance_date || '').slice(0,10);
+    return dStr >= cycleStart;
+  });
+
+  var present = currentCycleRows.filter(function(r){return r.status === "Present";}).length;
+  var absentOrLeave = currentCycleRows.filter(function(r){return r.status === "Absent" || r.status === "Leave";}).length;
+  var total = present + absentOrLeave;
+  
+  if(document.getElementById("att-present")) document.getElementById("att-present").textContent = present;
+  if(document.getElementById("att-absent")) document.getElementById("att-absent").textContent = absentOrLeave;
+  if(document.getElementById("att-pct")) document.getElementById("att-pct").textContent = total ? Math.round(present/total*100)+"%" : "0%";
+
+  // Update Leave Allowance & Auto-Extension Card
+  if(currentStudent){
+    
+    var durationText = Number(s.duration_months || 1) + " Month(s)";
+    if(s.fee_plan) durationText = s.fee_plan + " Package";
+
+    
+    // Render Pending / Approved Leave Requests Banner
+    var mReqs = String(s.notes || "").match(/<!--LEAVE_REQ_START-->([\s\S]*?)<!--LEAVE_REQ_END-->/);
+    var pendingHtml = "";
+    if(mReqs){
+      try{
+        var reqList = JSON.parse(mReqs[1]) || [];
+        var pendingOnly = reqList.filter(function(r){ return r.status === "pending"; });
+        var approvedRecent = reqList.filter(function(r){ return r.status === "approved"; }).slice(-2);
+        
+        if(pendingOnly.length > 0){
+          pendingHtml += pendingOnly.map(function(r){
+            return '<div style="background:#3b2a10;border:1px solid #a16207;color:#fef08a;padding:10px 14px;border-radius:10px;margin-top:10px;font-size:12px;display:flex;align-items:center;justify-content:space-between">' +
+              '<div>⏳ <strong>Leave Request Pending:</strong> ' + fmt(r.start) + ' to ' + fmt(r.end) + ' (' + r.days + ' days) - ' + escapeHtml(r.reason) + '</div>' +
+              '<span class="badge badge-due" style="font-size:10px">Pending Studio Approval</span>' +
+            '</div>';
+          }).join("");
+        }
+        
+        var activeApproved = approvedRecent.filter(function(r){
+          return (r.start >= leaveInfo.cycleStart || r.end >= leaveInfo.cycleStart);
+        });
+        if(activeApproved.length > 0){
+          pendingHtml += activeApproved.map(function(r){
+            return '<div style="background:#12351f;border:1px solid #166534;color:#86efac;padding:10px 14px;border-radius:10px;margin-top:10px;font-size:12px;display:flex;align-items:center;justify-content:space-between">' +
+              '<div>✅ <strong>Approved Leave:</strong> ' + fmt(r.start) + ' to ' + fmt(r.end) + ' (' + r.days + ' days) - ' + escapeHtml(r.reason) + '</div>' +
+              '<span class="badge badge-active" style="font-size:10px">Approved</span>' +
+            '</div>';
+          }).join("");
+        }
+      }catch(e){}
+    }
+    
+    var reqBannerEl = document.getElementById("leave-requests-banner");
+    if(!reqBannerEl){
+      var card = document.getElementById("leave-tracker-card");
+      if(card){
+        var bDiv = document.createElement("div");
+        bDiv.id = "leave-requests-banner";
+        bDiv.innerHTML = pendingHtml;
+        card.appendChild(bDiv);
+      }
+    } else {
+      reqBannerEl.innerHTML = pendingHtml;
+    }
+
+    var descEl = document.getElementById("leave-policy-desc");
+    if(descEl){
+      descEl.innerHTML = "Your <strong>" + durationText + "</strong> includes up to <strong>" + leaveInfo.cap + " Days</strong> of approved leave/absence allowance with automatic expiry extension.";
+    }
+    if(document.getElementById("leave-cap-val")){
+      if(leaveInfo.remaining <= 0){
+        document.getElementById("leave-cap-val").innerHTML = '<span style="color:#fca5a5">0 Days (Cap Full)</span>';
+      } else {
+        document.getElementById("leave-cap-val").innerHTML = '<span style="color:#86efac">' + leaveInfo.remaining + ' Days Left</span>';
+      }
+    }
+    if(document.getElementById("leave-used-val")) document.getElementById("leave-used-val").textContent = leaveInfo.used + " Days";
+    if(document.getElementById("leave-ext-val")) document.getElementById("leave-ext-val").textContent = (leaveInfo.extensionDays > 0 ? "+" + leaveInfo.extensionDays : "0") + " Days";
+    
+    var noteEl = document.getElementById("leave-extended-note");
+    if(noteEl){
+      if(leaveInfo.extensionDays > 0){
+        noteEl.innerHTML = "🎉 Extended Expiry: <strong style='color:#86efac'>" + fmt(leaveInfo.extendedDue) + "</strong> (Package Expiry: " + fmt(leaveInfo.baseDue) + ")";
+      }else{
+        noteEl.innerHTML = "📅 Current Package Expiry: <strong style='color:#86efac'>" + fmt(leaveInfo.baseDue) + "</strong> (" + leaveInfo.remaining + " of " + leaveInfo.cap + " leave days available)";
+      }
+    }
+  }
+  
+  if(grid){
+    if(currentCycleRows.length === 0){
+      grid.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:13px;text-align:center;padding:16px">No attendance records found yet. Attendance marked by studio manager will appear here.</div>';
+    } else {
+      var recent30 = currentCycleRows.slice(0,30).reverse();
+      grid.innerHTML = recent30.map(function(r){
+        var cls = r.status === "Present" ? "att-dot-p" : r.status === "Leave" ? "att-dot-l" : "att-dot-a";
+        var dateLabel = String(r.attendance_date || "").slice(5);
+        return '<div class="att-dot ' + cls + '" title="' + r.attendance_date + ': ' + r.status + '">' + dateLabel + '</div>';
+      }).join("");
+    }
+  }
+
+  if(historyList){
+    if(currentCycleRows.length === 0){
+      historyList.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px">Class attendance records marked in Studio Manager will sync here in real-time.</div>';
+    } else {
+      historyList.innerHTML = currentCycleRows.map(function(r){
+        var badge = r.status === "Present" ? '<span class="badge badge-active">Present</span>' : r.status === "Leave" ? '<span class="badge badge-due">Leave</span>' : '<span class="badge badge-expired">Absent</span>';
+        var noteText = r.note ? '<span style="color:var(--muted);font-size:11px;margin-left:6px">(' + escapeHtml(r.note) + ')</span>' : '';
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">' +
+          '<div><strong>' + fmt(r.attendance_date) + '</strong>' + noteText + '</div>' +
+          '<div>' + badge + '</div>' +
+        '</div>';
+      }).join("");
+    }
+  }
+}
+
+// ── DYNAMIC CMS & NOTICES / WORKSHOPS ──
+var studioCMS = {
+  offerTitle: "Special Workshop & Fee Offer 🎉",
+  offer: "Join Saturday-Sunday Choreography & Shoot Batch! Use Code for Fee Discount:",
+  couponCode: "EDGE500",
+  showOffer: true,
+  workshops: [
+    {
+      id: "w1",
+      title: "Saturday-Sunday Workshop",
+      subtitle: "Choreography & Shoot",
+      fee: 500,
+      icon: "🎭",
+      bg: "linear-gradient(135deg,#2d1b4e,#4a235a)",
+      tags: ["Saturday & Sunday", "Choreography + Shoot", "App Register"],
+      open: true
+    },
+    {
+      id: "w2",
+      title: "Dance Championship",
+      subtitle: "Choreography Fee",
+      fee: 3000,
+      icon: "🏆",
+      bg: "linear-gradient(135deg,#1a2a4a,#2d4a7a)",
+      tags: ["Competition", "Choreography Fee", "Championship"],
+      open: true
+    },
+    {
+      id: "w3",
+      title: "Solo Choreography for Events / Competition",
+      subtitle: "Choreography & Competition Routine",
+      fee: 3000,
+      icon: "⭐",
+      bg: "linear-gradient(135deg,#3b2a10,#78350f)",
+      tags: ["Solo Choreography", "Events", "Competition Routine"],
+      open: true
+    },
+    {
+      id: "w4",
+      title: "Duet & Group Choreography for Events / Competition",
+      subtitle: "Duet & Group Competition Routine",
+      fee: 5000,
+      icon: "👥",
+      bg: "linear-gradient(135deg,#1e293b,#0f172a)",
+      tags: ["Duet & Group", "Events", "Competition Routine"],
+      open: true
+    }
+  ],
+  notices: [
+    {
+      id: "n1",
+      type: "event",
+      tag: "Workshop",
+      title: "SATURDAY-SUNDAY Workshop",
+      body: "Special workshop on EVERY SATURDAY & SUNDAY from 6:00 PM to 8:00 PM. Open to all students. Registration required THROUGH APP ONLY. (Choreography + Shoot)",
+      date: "Active"
+    },
+    {
+      id: "n2",
+      type: "info",
+      tag: "Competition",
+      title: "Inter-Studio Dance Competition — Coming Soon",
+      body: "Upcoming championship details, registration dates, and auditions will be announced soon. Stay tuned!",
+      date: "Coming Soon"
+    },
+    {
+      id: "n3",
+      type: "important",
+      tag: "Important",
+      title: "Fee Due Reminder",
+      body: "Please ensure your monthly fee is paid on time to avoid class suspension. Contact studio desk for any questions.",
+      date: "18 Jul 2026"
+    },
+    {
+      id: "n4",
+      type: "info",
+      tag: "Notice",
+      title: "Studio Batches",
+      body: "Team Nartan runs Monday to Friday batches for Kids Dance, Zumba, Basic Hip-Hop, and Hip-Hop Advance. For inquiries, contact 7869240161.",
+      date: "1 Jul 2026"
+    }
+  ]
+};
+
+async function fetchStudioCMS(){
+  try{
+    var local = JSON.parse(localStorage.getItem("creative-edge-app-content") || "{}");
+    if(local && (local.workshops || local.notices || local.offer)) studioCMS = Object.assign(studioCMS, local);
+  }catch(e){}
+
+  try{
+    var res = await sb.from("students").select("notes").eq("phone", "9999999999").maybeSingle();
+    if(res && res.data && res.data.notes){
+      var m = String(res.data.notes).match(/<!--CMS_START-->([\s\S]*?)<!--CMS_END-->/);
+      if(m){
+        studioCMS = Object.assign(studioCMS, JSON.parse(m[1]));
+        localStorage.setItem("creative-edge-app-content", JSON.stringify(studioCMS));
+        return;
+      }
+    }
+  }catch(err){
+    console.warn("Could not fetch cloud CMS by phone:", err);
+  }
+
+  // Fallback: search across students table notes for CMS_START
+  try{
+    var sRes = await sb.from("students").select("notes").ilike("notes", "%<!--CMS_START-->%").limit(1);
+    if(sRes && sRes.data && sRes.data.length > 0){
+      var m = String(sRes.data[0].notes || "").match(/<!--CMS_START-->([\s\S]*?)<!--CMS_END-->/);
+      if(m){
+        studioCMS = Object.assign(studioCMS, JSON.parse(m[1]));
+        localStorage.setItem("creative-edge-app-content", JSON.stringify(studioCMS));
+      }
+    }
+  }catch(err){}
+}
+
+function loadNotices(){
+  var notices = studioCMS.notices || [];
+  var listEl = document.getElementById("notice-list");
+  if(!listEl) return;
+  listEl.innerHTML = notices.map(function(n){
+    return '<div class="notice-item '+(n.type||'info')+'">' +
+      '<div class="notice-tag">'+(n.tag||'Notice')+'</div>' +
+      '<div class="notice-title">'+escapeHtml(n.title)+'</div>' +
+      '<div class="notice-body">'+escapeHtml(n.body)+'</div>' +
+      '<div class="notice-date">'+escapeHtml(n.date||'Active')+'</div>' +
+    '</div>';
+  }).join("");
+}
+
+function loadWorkshops(){
+  var events = studioCMS.workshops || [];
+  var listEl = document.getElementById("workshop-list");
+  if(listEl){
+    listEl.innerHTML = events.map(function(e){
+      return '<div class="workshop-card">' +
+        '<div class="workshop-banner" style="background:'+(e.bg || 'linear-gradient(135deg,#2d1b4e,#4a235a)')+'">'+(e.icon||'🏆')+'</div>' +
+        '<div class="workshop-body">' +
+          '<div class="workshop-title">'+escapeHtml(e.title)+'</div>' +
+          '<div class="workshop-meta">'+escapeHtml(e.subtitle)+' · ₹'+e.fee+'</div>' +
+          '<div class="workshop-tags">'+(e.tags||[]).map(function(t){ return '<span class="wtag">'+escapeHtml(t)+'</span>'; }).join("")+'</div>' +
+          (e.open ? '<button class="btn-register" onclick="registerWorkshop(\''+escapeHtml(e.title)+'\')">Register Interest</button>' :
+          '<button class="btn-register" style="opacity:.5;cursor:not-allowed" disabled>Registration Coming Soon</button>') +
+        '</div>' +
+      '</div>';
+    }).join("");
+  }
+
+  // Also dynamically update Pay tab workshop list
+  var payListEl = document.getElementById("workshop-pay-list");
+  if(payListEl){
+    payListEl.innerHTML = events.map(function(e){
+      return '<div style="background:var(--surface2);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center">' +
+        '<div>' +
+          '<div style="font-size:14px;font-weight:600">'+escapeHtml(e.title)+'</div>' +
+          '<div style="font-size:12px;color:var(--muted)">'+escapeHtml(e.subtitle)+'</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div style="font-size:16px;font-weight:700;color:var(--accent)">₹'+e.fee+'</div>' +
+          '<button onclick="payWorkshop(\''+escapeHtml(e.title)+'\','+Number(e.fee)+')" style="background:var(--grad);border:none;color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-top:4px;font-family:DM Sans,sans-serif">Register</button>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+  }
+}
+
+async function loadAppContent(){
+  await fetchStudioCMS();
+  
+  var offerEl = document.getElementById("home-offer");
+  if(offerEl){
+    if(studioCMS.showOffer !== false && (studioCMS.offer || studioCMS.offerTitle)){
+      var codeBadge = studioCMS.couponCode ? ' <span style="background:rgba(245,158,11,.2);border:1px dashed #f59e0b;padding:2px 8px;border-radius:6px;font-weight:700;color:#facc15;cursor:pointer" onclick="copyCouponCode(\''+studioCMS.couponCode+'\')" title="Click to copy code">📋 '+studioCMS.couponCode+'</span>' : '';
+      offerEl.innerHTML = '<div style="font-weight:700;margin-bottom:2px">'+escapeHtml(studioCMS.offerTitle || "Special Offer")+'</div>' +
+        '<div style="font-size:12px">'+escapeHtml(studioCMS.offer || "")+codeBadge+'</div>';
+      offerEl.style.display = "block";
+    }else{
+      offerEl.style.display = "none";
+    }
+  }
+
+  loadNotices();
+  loadWorkshops();
+}
+
+function copyCouponCode(code){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code);
+    showToast("Coupon Code " + code + " copied to clipboard! ✂️");
+  }else{
+    showToast("Use Coupon Code: " + code);
+  }
+}
+
+function registerWorkshop(name){
+  fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({chat_id:TG_OWNER,text:"Workshop Interest!\n\nStudent: "+(currentStudent?currentStudent.name:"Unknown")+"\nPhone: "+(currentStudent?currentStudent.phone:"")+"\nEvent: "+name})
+  });
+  showToast("Interest registered! Studio will contact you. ✅");
+}
+
+// ── PAGE NAV ──
+function showPage(id){
+  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
+  document.querySelectorAll(".nav-btn").forEach(function(b){ b.classList.remove("active"); });
+  var pg = document.getElementById("page-"+id);
+  if(pg) pg.classList.add("active");
+  if(id==="pay") loadPayPage();
+  if(id==="attendance" && currentStudent) loadAttendance(currentStudent.id);
+  if(id==="fees" && currentStudent) loadPayments(currentStudent.id);
+  var nb = document.getElementById("nav-"+id);
+  if(nb) nb.classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+// ── PAY PAGE ──
+var payContext = { type:"", amount:0, months:1, payOTP:null, payOTPExpiry:null, payTimerInt:null };
+
+function loadPayPage(){
+  if(!currentStudent) return;
+  var s = currentStudent;
+  var due = new Date(s.next_due_date);
+  var today = new Date(); today.setHours(0,0,0,0);
+  var daysLeft = Math.round((due-today)/86400000);
+  var statusClass = daysLeft<0?"badge-expired":daysLeft<=3?"badge-due":"badge-active";
+  var statusTxt = daysLeft<0?"Overdue":daysLeft<=3?"Due Soon":"Active";
+
+  var durations = packageOptionsForStudent(s);
+
+  var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'
+    + '<div><div style="font-size:13px;color:var(--muted)">Monthly Fee</div>'
+    + '<div style="font-size:28px;font-weight:700;font-family:Cormorant Garamond,serif;color:var(--accent)">&#8377;'+s.monthly_fee+'</div></div>'
+    + '<span class="badge '+statusClass+'">'+statusTxt+'</span></div>'
+    + '<div style="font-size:13px;color:var(--muted);margin-bottom:16px">Next due: <strong style="color:var(--text)">'+fmt(s.next_due_date)+'</strong></div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+
+  durations.forEach(function(d){
+    html += '<div id="dur-'+d.m+'" style="border:2px solid '+(d.popular?'var(--accent)':'var(--border)')+';border-radius:12px;padding:14px;text-align:center;cursor:pointer;position:relative;'+(d.popular?'background:rgba(200,151,42,.08);box-shadow:0 0 0 3px rgba(200,151,42,.12);':'')+'">'
+      + (d.popular?'<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--accent);color:#15100a;border-radius:999px;padding:3px 8px;font-size:9px;font-weight:800;white-space:nowrap">MOST POPULAR</div>':'')
+      + '<div style="font-size:13px;font-weight:700">'+d.m+' Month'+(d.m>1?'s':'')+'</div>'
+      + '<div style="font-size:20px;font-weight:700;color:var(--accent);font-family:Cormorant Garamond,serif;margin:4px 0">&#8377;'+d.amt.toLocaleString('en-IN')+'</div>'
+      + '</div>';
+  });
+
+  html += '</div>';
+  document.getElementById("pay-renewal-body").innerHTML = html;
+
+  // Attach click events after rendering
+  durations.forEach(function(d){
+    var el = document.getElementById("dur-"+d.m);
+    if(el){
+      el.addEventListener("mouseover", function(){ this.style.borderColor="var(--accent)"; });
+      el.addEventListener("mouseout",  function(){ this.style.borderColor=d.popular?"var(--accent)":"var(--border)"; });
+      (function(amt,mo){
+        el.addEventListener("click", function(){ openPayModal("renewal",amt,mo); });
+      })(d.amt, d.m);
+    }
+  });
+}
+
+
+function openPayModal(type, amount, months){
+  payContext.type = type;
+  payContext.amount = amount;
+  payContext.months = months || 1;
+  var titles = {renewal:"Pay Monthly Fee", workshop:"Workshop / Event Fee"};
+  document.getElementById("modal-pay-title").textContent = titles[type] || "Make Payment";
+  document.getElementById("modal-pay-sub").textContent = months ? months+" Month"+(months>1?"s":"")+" · "+currentStudent.dance_style : "Event Registration";
+  document.getElementById("modal-pay-amt").textContent = "₹"+amount.toLocaleString("en-IN");
+  document.getElementById("modal-method-choose").style.display = "block";
+  document.getElementById("modal-cash-section").style.display = "none";
+  document.getElementById("modal-success").style.display = "none";
+  document.getElementById("pay-modal").style.display = "flex";
+}
+
+function closePayModal(){
+  document.getElementById("pay-modal").style.display = "none";
+  if(payContext.payTimerInt) clearInterval(payContext.payTimerInt);
+  resetStudentCashOTP();
+  loadPayments(currentStudent.id);
+  loadPayPage();
+}
+
+function payWorkshop(name, amount){
+  if(amount === 0){
+    registerWorkshop(name);
+    showToast("Registered! Studio will confirm. ✅");
+    return;
+  }
+  openPayModal("workshop", amount, 0);
+}
+
+function choosePayMethod(method){
+  document.getElementById("modal-method-choose").style.display = "none";
+  if(method === "online"){
+    if(RAZORPAY_KEY === "YOUR_RAZORPAY_KEY_ADD_LATER" || RAZORPAY_KEY === ""){
+      showToast("Online payment not configured yet.");
+      document.getElementById("modal-method-choose").style.display = "block";
+      return;
+    }
+    var s = currentStudent;
+    var rzp = new Razorpay({
+      key: RAZORPAY_KEY,
+      amount: payContext.amount * 100,
+      currency: "INR",
+      name: "Team Nartan Dance Studio",
+      description: payContext.type === "renewal" ? s.dance_style+" — "+payContext.months+" Month"+(payContext.months>1?"s":"") : "Event Fee",
+      prefill: {name: s.name, contact: "91"+s.phone},
+      notes: {
+        student_id: s.id,
+        phone: s.phone,
+        type: payContext.type || "renewal",
+        months: String(payContext.months || 1),
+        amount: String(payContext.amount)
+      },
+      theme: {color: "#c8972a"},
+      handler: function(response){ onStudentPaymentSuccess(response.razorpay_payment_id, "Razorpay Online"); },
+      modal: {ondismiss: function(){ document.getElementById("modal-method-choose").style.display="block"; }}
+    });
+    rzp.on("payment.failed", function(r){ showToast("Payment failed: "+r.error.description); document.getElementById("modal-method-choose").style.display="block"; });
+    rzp.open();
+  } else {
+    document.getElementById("modal-cash-section").style.display = "block";
+    document.getElementById("modal-cash-request").style.display = "block";
+    document.getElementById("modal-otp-entry").style.display = "none";
+  }
+}
+
+async function generateStudentCashOTP(){
+  var btn = document.getElementById("gen-otp-btn");
+  btn.disabled = true; btn.innerHTML = '<span class="spin" style="border-top-color:#fff"></span>Notifying staff...';
+  payContext.payOTP = String(Math.floor(1000 + Math.random() * 9000));
+  payContext.payOTPExpiry = Date.now() + 15*60*1000;
+  sessionStorage.setItem("payOTP", payContext.payOTP);
+  sessionStorage.setItem("payOTPExpiry", payContext.payOTPExpiry);
+  var s = currentStudent;
+  var msg =
+    "STUDENT PAYMENT OTP\n\n" +
+    "Student: " + s.name + "\n" +
+    "Phone: " + s.phone + "\n" +
+    "Style: " + s.dance_style + "\n" +
+    "Amount: Rs." + payContext.amount + "\n" +
+    "Type: " + (payContext.type==="renewal" ? "Monthly Renewal " + payContext.months + " month(s)" : "Workshop Fee") + "\n\n" +
+    "OTP: " + payContext.payOTP + "\n\n" +
+    "Valid 15 mins. Share ONLY after receiving cash.";
+  try {
+    await fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({chat_id: TG_OWNER, text: msg})
+    });
+  } catch(e){}
+  document.getElementById("modal-cash-request").style.display = "none";
+  document.getElementById("modal-otp-entry").style.display = "block";
+  document.getElementById("p-otp-1").focus();
+  startPayTimer();
+  btn.disabled = false; btn.textContent = "Generate OTP & Notify Staff";
+}
+
+function startPayTimer(){
+  if(payContext.payTimerInt) clearInterval(payContext.payTimerInt);
+  payContext.payTimerInt = setInterval(function(){
+    var left = (payContext.payOTPExpiry || Number(sessionStorage.getItem("payOTPExpiry"))) - Date.now();
+    if(left<=0){ clearInterval(payContext.payTimerInt); document.getElementById("modal-otp-timer").textContent="OTP Expired. Resend."; return; }
+    var m=Math.floor(left/60000), s=Math.floor((left%60000)/1000);
+    document.getElementById("modal-otp-timer").textContent = "Expires in "+m+":"+(s<10?"0":"")+s;
+  },1000);
+}
+
+function resetStudentCashOTP(){
+  document.getElementById("modal-cash-request").style.display = "block";
+  document.getElementById("modal-otp-entry").style.display = "none";
+  ["p-otp-1","p-otp-2","p-otp-3","p-otp-4","p-otp-5","p-otp-6"].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=""; });
+  var err = document.getElementById("modal-otp-err"); if(err) err.style.display="none";
+  if(payContext.payTimerInt) clearInterval(payContext.payTimerInt);
+  payContext.payOTP = null;
+  sessionStorage.removeItem("payOTP");
+}
+
+async function verifyStudentCashOTP(){
+  var verifyBtn = document.getElementById("student-cash-verify-btn");
+  if(verifyBtn && verifyBtn.disabled) return;
+  var entered = (
+    document.getElementById("p-otp-1").value +
+    document.getElementById("p-otp-2").value +
+    document.getElementById("p-otp-3").value +
+    document.getElementById("p-otp-4").value +
+    document.getElementById("p-otp-5").value +
+    document.getElementById("p-otp-6").value
+  ).trim();
+  var stored = payContext.payOTP || sessionStorage.getItem("payOTP");
+  var expiry = payContext.payOTPExpiry || Number(sessionStorage.getItem("payOTPExpiry"));
+  var enteredClean = entered.replace(/[^0-9]/g, "");
+  var storedClean = String(stored || "").replace(/[^0-9]/g, "");
+  if(enteredClean.length < 4){ showToast("Enter all 4 digits"); return; }
+  if(!storedClean || !expiry || Date.now() > expiry){ showToast("OTP expired. Resend."); return; }
+  if(enteredClean !== storedClean){
+    document.getElementById("modal-otp-err").style.display = "block";
+    ["p-otp-1","p-otp-2","p-otp-3","p-otp-4","p-otp-5","p-otp-6"].forEach(function(id){ document.getElementById(id).value=""; });
+    document.getElementById("p-otp-1").focus();
+    return;
+  }
+  document.getElementById("modal-otp-err").style.display = "none";
+  if(verifyBtn){
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = '<span class="spin" style="border-top-color:#fff"></span>Saving...';
+  }
+  if(payContext.payTimerInt) clearInterval(payContext.payTimerInt);
+  sessionStorage.removeItem("payOTP");
+  try {
+    await onStudentPaymentSuccess("CASH-"+Date.now(), "Cash");
+  } catch(e){
+    if(verifyBtn){
+      verifyBtn.disabled = false;
+      verifyBtn.textContent = "Verify & Confirm Payment";
+    }
+    throw e;
+  }
+}
+
+async function onStudentPaymentSuccess(paymentId, mode){
+  var s = currentStudent;
+  var today = new Date().toISOString().split("T")[0];
+  
+  try {
+    var isRenewal = payContext.type === "renewal";
+    var nextDue = s.due_date || s.next_due_date || today;
+    
+    if(isRenewal){
+      // Additive calculation: if package is still active, extend from future due date!
+      nextDue = calculateRenewalDueDate(s.due_date || s.next_due_date, payContext.months || 1);
+    }
+
+    // 1. Fetch fresh student notes
+    var stuResult = await sb.from("students").select("notes").eq("id", s.id).maybeSingle();
+    var rawNotes = (stuResult && stuResult.data && stuResult.data.notes) || s.notes || "";
+
+    // 2. Parse and append to payment history in notes
+    var payRecords = [];
+    var mPay = String(rawNotes).match(/<!--PAY_START-->([\s\S]*?)<!--PAY_END-->/);
+    if(mPay){
+      try{ payRecords = JSON.parse(mPay[1]) || []; }catch(e){}
+    }
+
+    var newPay = {
+      payment_id: paymentId,
+      amount: Number(payContext.amount),
+      type: isRenewal ? "Renewal Fee" : "Workshop / Event Fee",
+      title: isRenewal ? (payContext.months + " Month(s) " + s.dance_style + " Renewal") : (payContext.title || "Workshop Registration"),
+      date: today,
+      mode: mode,
+      duration_months: payContext.months || 1
+    };
+
+    payRecords.push(newPay);
+
+    var cleanNote = String(rawNotes).replace(/<!--PAY_START-->[\s\S]*?<!--PAY_END-->/g, '').trim();
+    var updatedNote = cleanNote + (cleanNote ? '\n' : '') + '<!--PAY_START-->' + JSON.stringify(payRecords) + '<!--PAY_END-->';
+    s.notes = updatedNote;
+
+    // 3. Schema-compliant Supabase update (only existing valid columns!)
+    var updatePayload = {
+      notes: updatedNote,
+      payment_id: paymentId,
+      payment_method: String(mode).toLowerCase()
+    };
+
+    if(isRenewal){
+      updatePayload.fee_amount = Number(payContext.amount);
+      updatePayload.fee_plan = String(payContext.months || 1) + "M";
+      updatePayload.fee_status = "paid";
+      updatePayload.due_date = nextDue;
+      
+      currentStudent.fee_amount = Number(payContext.amount);
+      currentStudent.fee_plan = String(payContext.months || 1) + "M";
+      currentStudent.fee_status = "paid";
+      currentStudent.due_date = nextDue;
+      currentStudent.next_due_date = nextDue;
+      currentStudent.status = "Active";
+    }
+
+    var res = await sb.from("students").update(updatePayload).eq("id", s.id);
+    if(res.error) throw res.error;
+
+    sessionStorage.setItem("studentData", JSON.stringify(currentStudent));
+
+    // 4. Notify owner on Telegram
+    var ownerMsg =
+      "💰 PAYMENT CONFIRMED\n\n" +
+      "Student: " + s.name + "\n" +
+      "Phone: " + s.phone + "\n" +
+      "Amount: Rs." + payContext.amount + "\n" +
+      "Mode: " + mode + "\n" +
+      "Type: " + (isRenewal ? ("Monthly Renewal " + payContext.months + "M (Reactivated)") : "Workshop / Event Fee") + "\n" +
+      "Payment ID: " + paymentId + "\n" +
+      (isRenewal ? ("New Expiry: " + nextDue) : "");
+    try {
+      fetch("https://api.telegram.org/bot" + TG_TOKEN + "/sendMessage", {
+        method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ chat_id: TG_OWNER, text: ownerMsg })
+      }).catch(function(){});
+    } catch(err){}
+
+    // Re-render UI
+    await loadPayments(s.id);
+    await loadApp();
+
+    document.getElementById("modal-cash-section").style.display = "none";
+    document.getElementById("modal-method-choose").style.display = "none";
+    document.getElementById("modal-success").style.display = "block";
+    document.getElementById("modal-success-msg").textContent = "₹" + payContext.amount + " paid via " + mode + ". Account reactivated & renewed!";
+  } catch(e){
+    showToast("Payment recorded but update failed: " + e.message);
+    closePayModal();
+  }
+}
+
+// ── LOGOUT ──
+function logout(){
+  currentStudent=null; loginOTP=null;
+  sessionStorage.clear();
+  document.getElementById("app").classList.remove("active");
+  document.getElementById("login-screen").style.display="flex";
+  document.getElementById("phone-card").style.display="block";
+  document.getElementById("otp-card").style.display="none";
+  document.getElementById("login-phone").value="";
+  ["l-otp-1","l-otp-2","l-otp-3","l-otp-4","l-otp-5","l-otp-6"].forEach(function(id){ document.getElementById(id).value=""; });
+}
+
+// ── FORMAT DATE ──
+function fmt(d){
+  if(!d) return "—";
+  return new Date(d).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+}
+
+// ── AUTO LOGIN if session exists ──
+window.addEventListener("load", async function(){
+  var phone = localStorage.getItem("logged_student_phone") || sessionStorage.getItem("loggedInPhone");
+  if(phone){
+    try {
+      var student = await findStudentByPhone(phone);
+      if(student){
+        currentStudent = student;
+        sessionStorage.setItem("loggedInPhone", phone);
+        sessionStorage.setItem("studentData", JSON.stringify(student));
+        await loadApp();
+        checkPwaPrompt();
+      }
+    } catch(e){}
+  }
+});
+</script>
+<script>
+// ── PWA ADD TO HOME SCREEN / INSTALL SYSTEM ──
+var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  var topBtn = document.getElementById('install-top-btn');
+  var loginBtn = document.getElementById('install-login-btn');
+  if(topBtn) topBtn.style.display = 'inline-block';
+  if(loginBtn) loginBtn.style.display = 'inline-block';
+  setTimeout(checkPwaPrompt, 1500);
+});
+
+function checkPwaPrompt(){
+  if(isStandalone || sessionStorage.getItem('pwa_dismissed') === 'true') return;
+  
+  var banner = document.getElementById('pwa-install-banner');
+  if(!banner) return;
+  
+  banner.style.display = 'block';
+  
+  if(isIOS){
+    var iosGuide = document.getElementById('pwa-ios-instructions');
+    var installBtn = document.getElementById('pwa-install-btn');
+    if(iosGuide) iosGuide.style.display = 'block';
+    if(installBtn) installBtn.style.display = 'none';
+    var guideTxt = document.getElementById('pwa-guide-text');
+    if(guideTxt) guideTxt.textContent = 'Install on iPhone: Tap Share ⎋ → Add to Home Screen ➕';
+  }
+}
+
+function triggerPwaInstall(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(function(choiceResult){
+      if(choiceResult.outcome === 'accepted'){
+        dismissPwaBanner();
+      }
+      deferredInstallPrompt = null;
+    });
+  } else if(isIOS){
+    var iosGuide = document.getElementById('pwa-ios-instructions');
+    if(iosGuide) iosGuide.style.display = 'block';
+  } else {
+    alert('To install: Open browser menu (⋮) and tap "Add to Home screen" or "Install App".');
+  }
+}
+
+function installApp(){
+  triggerPwaInstall();
+  checkPwaPrompt();
+}
+
+function dismissPwaBanner(){
+  var banner = document.getElementById('pwa-install-banner');
+  if(banner) banner.style.display = 'none';
+  sessionStorage.setItem('pwa_dismissed', 'true');
+}
+
+// Auto-check PWA install prompt on page load
+window.addEventListener('DOMContentLoaded', function(){
+  if(!isStandalone){
+    setTimeout(checkPwaPrompt, 2000);
+  }
+});
+</script>
+</body>
+</html>

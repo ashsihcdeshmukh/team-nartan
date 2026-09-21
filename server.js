@@ -15,14 +15,36 @@ app.use(express.urlencoded({ extended: true }));
 const otpStore = new Map(); // phone -> { otp, expiresAt }
 const DEFAULT_OTP = "000000";
 
-// ── Static Portals ──────────────────────────────
+// ── Static Portals (Exact Clones) ──────────────────────────────
 app.use('/shared', express.static(path.join(__dirname, 'public/shared')));
-app.use('/student', express.static(path.join(__dirname, 'public/student')));
-app.use('/admission', express.static(path.join(__dirname, 'public/admission')));
-app.use('/manager', express.static(path.join(__dirname, 'public/manager')));
+app.use('/icons', express.static(path.join(__dirname, 'icons')));
+app.use('/sw.js', (req, res) => res.sendFile(path.join(__dirname, 'app/sw.js')));
+app.use('/manifest.webmanifest', (req, res) => res.sendFile(path.join(__dirname, 'app/manifest.webmanifest')));
+
+app.use('/student', express.static(path.join(__dirname, 'app')));
+app.use('/app', express.static(path.join(__dirname, 'app')));
+app.use('/admission', express.static(path.join(__dirname, 'admission')));
+app.use('/manager', express.static(path.join(__dirname, 'manager')));
 app.use('/', express.static(path.join(__dirname, 'public')));
 
-// ── API ROUTES ──────────────────────────────────
+// ── Original Backend API Routers ────────────────────────
+try {
+  const { router: studentsRouter } = require('./routes/students');
+  const paymentsRouter = require('./routes/payments');
+  const remindersRouter = require('./routes/reminders');
+  const chatbotRouter = require('./routes/chatbot');
+  const telegramRouter = require('./routes/telegram');
+
+  app.use('/api/students', studentsRouter);
+  app.use('/api/payments', paymentsRouter);
+  app.use('/api/reminders', remindersRouter);
+  app.use('/api/chatbot', chatbotRouter);
+  app.use('/api/telegram', telegramRouter);
+} catch (e) {
+  console.warn('[Routes] Router mounting note:', e.message);
+}
+
+// ── Additional Demo Helpers ──────────────────────
 
 // 1. Studio Info
 app.get('/api/studio-info', (req, res) => {
