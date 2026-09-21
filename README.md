@@ -10,12 +10,12 @@ A turnkey demo ecosystem built for **Team Nartan Dance Studio**, featuring:
 
 ## 🔑 Demo Login Credentials
 - **Default Master OTP**: `000000` (Universal master OTP for all accounts)
-- **Sample Enrolled Students**:
-  - `9876543210` — Aarav Sharma (Kathak Classical)
-  - `9123456789` — Ananya Roy (Bollywood Commercial)
-  - `9988776655` — Rohan Verma (Urban Hip-Hop)
-  - `9811223344` — Meera Nair (Contemporary)
-  - `9822334455` — Kabir Kapoor (Zumba Fitness)
+- **Sample Enrolled Students (Safe Fictional Demo Series)**:
+  - `9999900001` — Aarav Sharma (Kathak Classical)
+  - `9999900002` — Pooja Patel (Bollywood Commercial)
+  - `9999900003` — Rohan Mehta (Urban Hip-Hop / Leave Demo)
+  - `9999900004` — Ananya Verma (Contemporary & Movement)
+  - `9999900005` — Kabir Joshi (Urban Hip-Hop Intensive)
 
 ---
 

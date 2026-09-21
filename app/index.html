@@ -210,11 +210,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <script>
 var SUPABASE_URL = "https://team-nartan-demo.supabase.co";
 var SUPABASE_KEY = "sb_demo_key_team_nartan";
-var RAZORPAY_KEY = "rzp_test_team_nartan_demo";
-var TG_TOKEN     = "demo_bot_token";
-var TG_OWNER     = "demo_owner_id";
-var WA_KEY       = "demo_wa_key";
-var TWOFACTOR_API_KEY = "demo_2factor_key";
+var RAZORPAY_KEY = "rzp_test_demo";
+var TG_TOKEN     = "";
+var TG_OWNER     = "";
+var WA_KEY       = "";
+var TWOFACTOR_API_KEY = "DEMO_BYPASS";
 var BACKEND_URL  = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://localhost:3000" : "";
 </script>
 
@@ -247,8 +247,8 @@ var BACKEND_URL  = (window.location.hostname === "localhost" || window.location.
     <button class="btn-grad" onclick="sendLoginOTP()" id="send-otp-btn">Send OTP</button>
     <button class="install-link" onclick="installApp()" id="install-login-btn">Install Student App</button>
     <a href="/tutorial.html" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;color:var(--accent);font-size:13px;font-weight:700;text-decoration:none;background:rgba(200,151,42,.08);padding:10px;border-radius:10px;border:1px dashed var(--accent)">🎥 Watch Tutorial Video: How to Use Portal</a>
-    <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--accent);font-weight:700;background:rgba(200,151,42,.06);padding:8px;border-radius:8px">🔑 Enter ANY 10-Digit Mobile Number · Demo OTP: 000000</div>
-    <button type="button" onclick="generateRandomTestPhone()" style="background:transparent;border:1px dashed var(--accent);color:var(--accent);padding:9px;border-radius:10px;font-size:12px;font-weight:700;width:100%;margin-top:8px;cursor:pointer">🎲 Auto-Fill Random Test Mobile Number</button>
+    <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--accent);font-weight:700;background:rgba(200,151,42,.06);padding:8px;border-radius:8px">🔑 Demo Phone: 9999900001 (or your number) · Demo OTP: 000000</div>
+    <button type="button" onclick="document.getElementById('login-phone').value='9999900001';showToast('Filled Safe Demo Phone: 9999900001');" style="background:transparent;border:1px dashed var(--accent);color:var(--accent);padding:9px;border-radius:10px;font-size:12px;font-weight:700;width:100%;margin-top:8px;cursor:pointer">📱 Auto-Fill Safe Demo Number (9999900001)</button>
     <div class="login-err" id="phone-err">Please enter a valid 10-digit number</div>
     <div class="login-err" id="not-found-err">Phone not found. Please contact studio.</div>
   </div>
@@ -848,10 +848,10 @@ async function findStudentByPhone(phone){
 }
 
 function generateRandomTestPhone(){
-  var rand = "9" + Math.floor(100000000 + Math.random() * 900000000);
+  var rand = "999990000" + Math.floor(1 + Math.random() * 9);
   var inp = document.getElementById("login-phone");
   if(inp) inp.value = rand;
-  showToast("Generated Random Demo Mobile: " + rand);
+  showToast("Selected Safe Demo Mobile: " + rand);
 }
 
 // ── EXPLICIT 6-DIGIT SMS OTP LOGIN FLOW ──
@@ -912,34 +912,9 @@ async function sendLoginOTP(){
       return;
     }
 
-    // Direct 2Factor Explicit 6-Digit SMS Endpoint (Safe try-catch for instant demo support)
-    sessionStorage.setItem("loginOtpMode", "twofactor_sms");
-    try {
-      var smsUrl = "https://2factor.in/API/V1/" + TWOFACTOR_API_KEY + "/SMS/" + phone + "/" + loginOTP;
-      var smsRes = await Promise.race([
-        fetch(smsUrl),
-        new Promise(function(_, reject){ setTimeout(function(){ reject(new Error("timeout")); }, 2500); })
-      ]);
-      var smsData = await smsRes.json();
-      if(smsData && smsData.Status === "Success"){
-        twoFactorSessionId = smsData.Details;
-        sessionStorage.setItem("twoFactorSessionId", twoFactorSessionId);
-      }
-    } catch(err){
-      console.warn("SMS dispatch notice:", err.message);
-    }
-
-    // Send Telegram log for studio admin
-    try {
-      await fetch("https://api.telegram.org/bot" + TG_TOKEN + "/sendMessage", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({
-          chat_id: TG_OWNER,
-          text: "📩 6-Digit SMS OTP Dispatched\n\nStudent: " + student.name + "\nPhone: " + phone + "\n\nOTP: " + loginOTP + "\n\nValid for 10 minutes."
-        })
-      });
-    } catch(e){}
+    // Demo Mode: Direct transition with zero external network requests
+    sessionStorage.setItem("loginOtpMode", "demo_otp");
+    console.log('[Demo Mode] Login OTP generated:', loginOTP);
 
     document.getElementById("phone-card").style.display="none";
     document.getElementById("otp-card").style.display="block";

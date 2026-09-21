@@ -2,11 +2,11 @@
  * Team Nartan Isolated Client-Side Database & Sandbox
  * 
  * 100% Isolated: Completely intercepts and replaces external Supabase connections
- * so ZERO client data from Creative Edge is ever requested, fetched, or exposed.
+ * with zero external API dependencies. All test phone numbers use the fictional series 9999900001 - 9999900010.
  */
 
 (function() {
-  // Purge any legacy Creative Edge keys from localStorage
+  // Purge any legacy keys from localStorage
   try {
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const k = localStorage.key(i);
@@ -22,7 +22,7 @@
     {
       id: "TN-2026-001",
       name: "Aarav Sharma",
-      phone: "9876543210",
+      phone: "9999900001",
       category: "Adults",
       batch: "Kathak Classical (Weekend 10:00 AM - 11:30 AM)",
       dance_style: "Kathak",
@@ -44,7 +44,7 @@
     {
       id: "TN-2026-002",
       name: "Pooja Patel",
-      phone: "9823417856",
+      phone: "9999900002",
       category: "Adults",
       batch: "Bollywood Commercial (MWF 6:00 PM - 7:00 PM)",
       dance_style: "Bollywood",
@@ -66,7 +66,7 @@
     {
       id: "TN-2026-003",
       name: "Rohan Mehta",
-      phone: "9988776655",
+      phone: "9999900003",
       category: "Adults",
       batch: "Urban Hip-Hop & Popping (TTS 7:00 PM - 8:30 PM)",
       dance_style: "Hip-Hop",
@@ -88,7 +88,7 @@
     {
       id: "TN-2026-004",
       name: "Ananya Verma",
-      phone: "9123456789",
+      phone: "9999900004",
       category: "Adults",
       batch: "Contemporary & Movement (Sat/Sun 4:00 PM - 5:30 PM)",
       dance_style: "Contemporary",
@@ -110,7 +110,7 @@
     {
       id: "TN-2026-005",
       name: "Kabir Joshi",
-      phone: "9765432109",
+      phone: "9999900005",
       category: "Adults",
       batch: "Urban Hip-Hop & Popping (TTS 7:00 PM - 8:30 PM)",
       dance_style: "Hip-Hop",
@@ -132,7 +132,7 @@
     {
       id: "TN-2026-006",
       name: "Priya Singh",
-      phone: "9811223344",
+      phone: "9999900006",
       category: "Adults",
       batch: "Kathak Classical (Weekend 10:00 AM - 11:30 AM)",
       dance_style: "Kathak",
@@ -154,7 +154,7 @@
     {
       id: "TN-2026-007",
       name: "Vikram Malhotra",
-      phone: "9933445566",
+      phone: "9999900007",
       category: "Adults",
       batch: "Morning Zumba & Dance Fitness (Mon-Fri 7:00 AM - 8:00 AM)",
       dance_style: "Zumba",
@@ -176,7 +176,7 @@
     {
       id: "TN-2026-008",
       name: "Neha Kulkarni",
-      phone: "9845012345",
+      phone: "9999900008",
       category: "Adults",
       batch: "Bollywood Commercial (MWF 6:00 PM - 7:00 PM)",
       dance_style: "Bollywood",
@@ -198,7 +198,7 @@
     {
       id: "TN-2026-009",
       name: "Siddharth Rao",
-      phone: "9731234567",
+      phone: "9999900009",
       category: "Kids",
       parent_name: "Manish Rao",
       batch: "Kids Dance Foundations (MWF 5:00 PM - 6:00 PM)",
@@ -221,7 +221,7 @@
     {
       id: "TN-2026-010",
       name: "Tanvi Deshmukh",
-      phone: "9820011223",
+      phone: "9999900010",
       category: "Adults",
       batch: "Contemporary & Movement (Sat/Sun 4:00 PM - 5:30 PM)",
       dance_style: "Contemporary",
@@ -256,16 +256,16 @@
   ];
 
   const INITIAL_ATTENDANCE = [
-    { id: "ATT-101", student_id: "TN-2026-001", student_name: "Aarav Sharma", phone: "9876543210", batch: "Kathak Classical (Weekend 10:00 AM - 11:30 AM)", attendance_date: TODAY, status: "Present", note: "" },
-    { id: "ATT-102", student_id: "TN-2026-002", student_name: "Pooja Patel", phone: "9823417856", batch: "Bollywood Commercial (MWF 6:00 PM - 7:00 PM)", attendance_date: TODAY, status: "Present", note: "" },
-    { id: "ATT-103", student_id: "TN-2026-003", student_name: "Rohan Mehta", phone: "9988776655", batch: "Urban Hip-Hop & Popping (TTS 7:00 PM - 8:30 PM)", attendance_date: TODAY, status: "Present", note: "" },
-    { id: "ATT-104", student_id: "TN-2026-004", student_name: "Ananya Verma", phone: "9123456789", batch: "Contemporary & Movement (Sat/Sun 4:00 PM - 5:30 PM)", attendance_date: TODAY, status: "Present", note: "" },
-    { id: "ATT-105", student_id: "TN-2026-005", student_name: "Kabir Joshi", phone: "9765432109", batch: "Urban Hip-Hop & Popping (TTS 7:00 PM - 8:30 PM)", attendance_date: TODAY, status: "Present", note: "" },
-    { id: "ATT-106", student_id: "TN-2026-006", student_name: "Priya Singh", phone: "9811223344", batch: "Kathak Classical (Weekend 10:00 AM - 11:30 AM)", attendance_date: TODAY, status: "Absent", note: "Viral Fever (Informed studio)" },
-    { id: "ATT-107", student_id: "TN-2026-007", student_name: "Vikram Malhotra", phone: "9933445566", batch: "Morning Zumba & Dance Fitness (Mon-Fri 7:00 AM - 8:00 AM)", attendance_date: TODAY, status: "Present", note: "" },
-    { id: "ATT-108", student_id: "TN-2026-008", student_name: "Neha Kulkarni", phone: "9845012345", batch: "Bollywood Commercial (MWF 6:00 PM - 7:00 PM)", attendance_date: TODAY, status: "Present", note: "" },
-    { id: "ATT-109", student_id: "TN-2026-009", student_name: "Siddharth Rao", phone: "9731234567", batch: "Kids Dance Foundations (MWF 5:00 PM - 6:00 PM)", attendance_date: TODAY, status: "Present", note: "" },
-    { id: "ATT-110", student_id: "TN-2026-010", student_name: "Tanvi Deshmukh", phone: "9820011223", batch: "Contemporary & Movement (Sat/Sun 4:00 PM - 5:30 PM)", attendance_date: TODAY, status: "Leave", note: "Approved Leave - Family Function" }
+    { id: "ATT-101", student_id: "TN-2026-001", student_name: "Aarav Sharma", phone: "9999900001", batch: "Kathak Classical (Weekend 10:00 AM - 11:30 AM)", attendance_date: TODAY, status: "Present", note: "" },
+    { id: "ATT-102", student_id: "TN-2026-002", student_name: "Pooja Patel", phone: "9999900002", batch: "Bollywood Commercial (MWF 6:00 PM - 7:00 PM)", attendance_date: TODAY, status: "Present", note: "" },
+    { id: "ATT-103", student_id: "TN-2026-003", student_name: "Rohan Mehta", phone: "9999900003", batch: "Urban Hip-Hop & Popping (TTS 7:00 PM - 8:30 PM)", attendance_date: TODAY, status: "Present", note: "" },
+    { id: "ATT-104", student_id: "TN-2026-004", student_name: "Ananya Verma", phone: "9999900004", batch: "Contemporary & Movement (Sat/Sun 4:00 PM - 5:30 PM)", attendance_date: TODAY, status: "Present", note: "" },
+    { id: "ATT-105", student_id: "TN-2026-005", student_name: "Kabir Joshi", phone: "9999900005", batch: "Urban Hip-Hop & Popping (TTS 7:00 PM - 8:30 PM)", attendance_date: TODAY, status: "Present", note: "" },
+    { id: "ATT-106", student_id: "TN-2026-006", student_name: "Priya Singh", phone: "9999900006", batch: "Kathak Classical (Weekend 10:00 AM - 11:30 AM)", attendance_date: TODAY, status: "Absent", note: "Viral Fever (Informed studio)" },
+    { id: "ATT-107", student_id: "TN-2026-007", student_name: "Vikram Malhotra", phone: "9999900007", batch: "Morning Zumba & Dance Fitness (Mon-Fri 7:00 AM - 8:00 AM)", attendance_date: TODAY, status: "Present", note: "" },
+    { id: "ATT-108", student_id: "TN-2026-008", student_name: "Neha Kulkarni", phone: "9999900008", batch: "Bollywood Commercial (MWF 6:00 PM - 7:00 PM)", attendance_date: TODAY, status: "Present", note: "" },
+    { id: "ATT-109", student_id: "TN-2026-009", student_name: "Siddharth Rao", phone: "9999900009", batch: "Kids Dance Foundations (MWF 5:00 PM - 6:00 PM)", attendance_date: TODAY, status: "Present", note: "" },
+    { id: "ATT-110", student_id: "TN-2026-010", student_name: "Tanvi Deshmukh", phone: "9999900010", batch: "Contemporary & Movement (Sat/Sun 4:00 PM - 5:30 PM)", attendance_date: TODAY, status: "Leave", note: "Approved Leave - Family Function" }
   ];
 
   function getTable(table) {
@@ -288,6 +288,11 @@
     }
     try {
       const parsed = JSON.parse(raw);
+      // Auto-migrate if older phone format detected
+      if (table === 'students' && parsed && parsed.length > 0 && !parsed[0].phone.startsWith('999990')) {
+        localStorage.setItem(key, JSON.stringify(INITIAL_STUDENTS));
+        return JSON.parse(JSON.stringify(INITIAL_STUDENTS));
+      }
       if (table === 'students' && (!parsed || parsed.length === 0)) {
         localStorage.setItem(key, JSON.stringify(INITIAL_STUDENTS));
         return JSON.parse(JSON.stringify(INITIAL_STUDENTS));
@@ -421,7 +426,7 @@
 
   window.createNartanClient = createNartanClient;
 
-  // Intercept window.supabase globally to guarantee zero network calls to external DBs
+  // Intercept window.supabase globally to guarantee zero external calls
   function interceptSupabase() {
     if (!window.supabase) window.supabase = {};
     window.supabase.createClient = function(url, key) {

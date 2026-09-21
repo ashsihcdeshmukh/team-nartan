@@ -742,8 +742,8 @@
     })();
 
     const sb = (window.createNartanClient ? window.createNartanClient() : window.supabase.createClient());
-    const TG_BOT_TOKEN = '8266966923:AAEn8emSbU7J05GDqsn7_UGoD-wFfAsBbHc';
-    const TG_OWNER_ID = '735593509';
+    const TG_BOT_TOKEN = '';
+    const TG_OWNER_ID = '';
     const OWNER_PHONE = '919999999999';
     let students = [];
     let payments = [];
@@ -2354,12 +2354,8 @@
     }
 
     async function sendTelegramText(text){
-      const url = 'https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage';
-      try{
-        await fetch(url, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_OWNER_ID,text:text})});
-      }catch(e){
-        window.open(url + '?chat_id=' + encodeURIComponent(TG_OWNER_ID) + '&text=' + encodeURIComponent(text), '_blank');
-      }
+      console.log('[Demo Mode] Telegram alert simulated:', text);
+      return { ok: true };
     }
 
     function sendAllWhatsApp(){dueStudents().forEach(function(s){sendWhatsApp(s.id)})}

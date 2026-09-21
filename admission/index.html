@@ -116,7 +116,7 @@
 <script>
   const SUPABASE_URL     = 'https://team-nartan-demo.supabase.co';
   const SUPABASE_ANON_KEY= 'sb_demo_key_team_nartan';
-  const RAZORPAY_KEY     = 'rzp_test_team_nartan_demo';
+  const RAZORPAY_KEY     = 'rzp_test_demo';
 </script>
 
 <div class="hero">
@@ -948,25 +948,8 @@ async function requestCashOTP(){
     'OTP: ' + currentOTP + '\n\n' +
     'Valid for 15 minutes. Share OTP with student ONLY after receiving cash.';
 
-  try {
-    await fetch(
-      'https://api.telegram.org/bot8266966923:AAEn8emSbU7J05GDqsn7_UGoD-wFfAsBbHc/sendMessage',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: '735593509', text: tgMsg })
-      }
-    );
-  } catch(e){ console.log('Telegram notify failed', e); }
-
-  // Also send via CallMeBot WhatsApp
-  try {
-    await fetch(
-      'https://api.callmebot.com/whatsapp.php?phone=91' + S.phone +
-      '&text=' + encodeURIComponent('Team Nartan Dance Studio\n\nYour cash payment OTP is: ' + currentOTP + '\n\nValid for 15 minutes.') +
-      '&apikey=ChdoC5rR2WuN'
-    );
-  } catch(e){}
+  // Demo mode: External notifications disabled
+  console.log('[Demo Mode] Cash payment OTP generated:', currentOTP);
 
   // Show OTP entry UI
   document.getElementById('cash-request').style.display   = 'none';
@@ -1070,20 +1053,8 @@ async function verifyCashOTP(){
     sessionStorage.removeItem('cashOTP');
     sessionStorage.removeItem('cashOTPExpiry');
 
-    // Notify owner on Telegram that cash payment confirmed
-    try {
-      await fetch(
-        'https://api.telegram.org/bot8266966923:AAEn8emSbU7J05GDqsn7_UGoD-wFfAsBbHc/sendMessage',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: '735593509',
-            text: 'CASH PAYMENT CONFIRMED\n\nStudent: ' + S.name + '\nPhone: ' + S.phone + '\nAmount: Rs.' + S.amount + '\nStyle: ' + S.style + '\nDuration: ' + S.months + ' month(s)\n\nPayment ID: ' + cashPayId + '\nAdded to database automatically.'
-          })
-        }
-      );
-    } catch(err) { console.warn('Telegram notify failed:', err); }
+    // Demo mode: External Telegram notifications disabled
+    console.log('[Demo Mode] Cash payment confirmed for', S.name);
 
     document.getElementById('pay-id-show').textContent = cashPayId;
     const pEl2 = document.getElementById('success-phone-show'); if(pEl2) pEl2.textContent = S.phone;
