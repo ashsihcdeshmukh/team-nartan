@@ -847,7 +847,7 @@ async function findStudentByPhone(phone){
 
   // Universal Demo Mode: Accept ANY 10-digit number entered by tester
   if(last10.length === 10){
-    return normalizeStudent({
+    var demoProfile = {
       id: "TN-" + Math.floor(1000 + Math.random() * 9000),
       name: "Demo Dancer (" + last10.slice(-4) + ")",
       phone: last10,
@@ -858,8 +858,13 @@ async function findStudentByPhone(phone){
       fee_amount: 5000,
       fee_status: "paid",
       next_due_date: "2026-11-20",
-      admission_date: "2026-01-10"
-    });
+      admission_date: "2026-01-10",
+      created_at: new Date().toISOString()
+    };
+    try {
+      await sb.from("students").insert([demoProfile]);
+    } catch(e){}
+    return normalizeStudent(demoProfile);
   }
 
   return null;
@@ -1898,10 +1903,22 @@ var studioCMS = {
 
 async function fetchStudioCMS(){
   try{
-    var raw = localStorage.getItem("team-nartan-app-content") || localStorage.getItem("creative-edge-app-content");
+    var raw = localStorage.getItem("team-nartan-app-content");
     var local = raw ? JSON.parse(raw) : null;
     if(local && (local.workshops || local.notices || local.offer || local.admission)) {
       studioCMS = Object.assign(studioCMS, local);
+    }
+  }catch(e){}
+
+  try{
+    var resp = await fetch("/api/sync/cms");
+    if(resp.ok){
+      var json = await resp.json();
+      if(json && json.data && (json.data.workshops || json.data.notices || json.data.offer || json.data.offerTitle)){
+        studioCMS = Object.assign(studioCMS, json.data);
+        localStorage.setItem("team-nartan-app-content", JSON.stringify(studioCMS));
+        return;
+      }
     }
   }catch(e){}
 
@@ -1916,26 +1933,12 @@ async function fetchStudioCMS(){
         return;
       }
     }
-  }catch(err){
-    console.warn("Could not fetch cloud CMS by phone:", err);
-  }
-
-  // Fallback: search across students table notes for CMS_START
-  try{
-    var sRes = await sb.from("students").select("notes").ilike("notes", "%<!--CMS_START-->%").limit(1);
-    if(sRes && sRes.data && sRes.data.length > 0){
-      var m = String(sRes.data[0].notes || "").match(/<!--CMS_START-->([\s\S]*?)<!--CMS_END-->/);
-      if(m){
-        studioCMS = Object.assign(studioCMS, JSON.parse(m[1]));
-        localStorage.setItem("team-nartan-app-content", JSON.stringify(studioCMS));
-      }
-    }
   }catch(err){}
 }
 
 // Live sync across tabs / windows when Studio Manager publishes CMS changes
 window.addEventListener("storage", function(e){
-  if(e.key === "team-nartan-app-content" || e.key === "creative-edge-app-content" || e.key === "tn_demo_db_students"){
+  if(e.key === "team-nartan-app-content" || e.key === "tn_demo_db_students"){
     fetchStudioCMS().then(function(){
       loadNotices();
       loadWorkshops();

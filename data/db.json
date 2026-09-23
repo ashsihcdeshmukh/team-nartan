@@ -209,27 +209,213 @@
     }
   ],
   "payments": [
-    { "id": "PAY-TN-001", "student_id": "TN-2026-001", "student_name": "Aarav Sharma", "amount": 6000, "payment_date": "2026-07-15", "mode": "Razorpay Online", "type": "Admission Package", "title": "Kathak Classical (3 Months)" },
-    { "id": "PAY-TN-002", "student_id": "TN-2026-002", "student_name": "Pooja Patel", "amount": 1800, "payment_date": "2026-08-25", "mode": "Cash", "type": "Admission Package", "title": "Bollywood Commercial (1 Month)" },
-    { "id": "PAY-TN-003", "student_id": "TN-2026-003", "student_name": "Rohan Mehta", "amount": 5500, "payment_date": "2026-06-01", "mode": "Razorpay Online", "type": "Admission Package", "title": "Urban Hip-Hop (3 Months)" },
-    { "id": "PAY-TN-004", "student_id": "TN-2026-004", "student_name": "Ananya Verma", "amount": 6500, "payment_date": "2026-08-10", "mode": "Razorpay Online", "type": "Package Renewal", "title": "Contemporary Movement (3 Months)" },
-    { "id": "PAY-TN-005", "student_id": "TN-2026-005", "student_name": "Kabir Joshi", "amount": 10500, "payment_date": "2026-04-10", "mode": "Cash", "type": "Admission Package", "title": "Hip-Hop 6-Month Intensive" },
-    { "id": "PAY-TN-006", "student_id": "TN-2026-006", "student_name": "Priya Singh", "amount": 2200, "payment_date": "2026-08-20", "mode": "UPI Online", "type": "Admission Package", "title": "Kathak 1-Month" },
-    { "id": "PAY-TN-007", "student_id": "TN-2026-007", "student_name": "Vikram Malhotra", "amount": 1600, "payment_date": "2026-09-01", "mode": "Razorpay Online", "type": "Admission Package", "title": "Zumba Morning Batch" },
-    { "id": "PAY-TN-008", "student_id": "TN-2026-008", "student_name": "Neha Kulkarni", "amount": 4800, "payment_date": "2026-07-01", "mode": "Razorpay Online", "type": "Admission Package", "title": "Bollywood 3 Months Package" },
-    { "id": "PAY-TN-009", "student_id": "TN-2026-009", "student_name": "Siddharth Rao", "amount": 3000, "payment_date": "2026-08-01", "mode": "Cash", "type": "Admission Package", "title": "Kids Dance 3 Months" },
-    { "id": "PAY-TN-010", "student_id": "TN-2026-010", "student_name": "Tanvi Deshmukh", "amount": 10500, "payment_date": "2026-03-26", "mode": "Razorpay Online", "type": "Admission Package", "title": "Contemporary 6 Months" }
+    {
+      "id": "PAY-TN-001",
+      "student_id": "TN-2026-001",
+      "student_name": "Aarav Sharma",
+      "amount": 6000,
+      "payment_date": "2026-07-15",
+      "mode": "Razorpay Online",
+      "type": "Admission Package",
+      "title": "Kathak Classical (3 Months)"
+    },
+    {
+      "id": "PAY-TN-002",
+      "student_id": "TN-2026-002",
+      "student_name": "Pooja Patel",
+      "amount": 1800,
+      "payment_date": "2026-08-25",
+      "mode": "Cash",
+      "type": "Admission Package",
+      "title": "Bollywood Commercial (1 Month)"
+    },
+    {
+      "id": "PAY-TN-003",
+      "student_id": "TN-2026-003",
+      "student_name": "Rohan Mehta",
+      "amount": 5500,
+      "payment_date": "2026-06-01",
+      "mode": "Razorpay Online",
+      "type": "Admission Package",
+      "title": "Urban Hip-Hop (3 Months)"
+    },
+    {
+      "id": "PAY-TN-004",
+      "student_id": "TN-2026-004",
+      "student_name": "Ananya Verma",
+      "amount": 6500,
+      "payment_date": "2026-08-10",
+      "mode": "Razorpay Online",
+      "type": "Package Renewal",
+      "title": "Contemporary Movement (3 Months)"
+    },
+    {
+      "id": "PAY-TN-005",
+      "student_id": "TN-2026-005",
+      "student_name": "Kabir Joshi",
+      "amount": 10500,
+      "payment_date": "2026-04-10",
+      "mode": "Cash",
+      "type": "Admission Package",
+      "title": "Hip-Hop 6-Month Intensive"
+    },
+    {
+      "id": "PAY-TN-006",
+      "student_id": "TN-2026-006",
+      "student_name": "Priya Singh",
+      "amount": 2200,
+      "payment_date": "2026-08-20",
+      "mode": "UPI Online",
+      "type": "Admission Package",
+      "title": "Kathak 1-Month"
+    },
+    {
+      "id": "PAY-TN-007",
+      "student_id": "TN-2026-007",
+      "student_name": "Vikram Malhotra",
+      "amount": 1600,
+      "payment_date": "2026-09-01",
+      "mode": "Razorpay Online",
+      "type": "Admission Package",
+      "title": "Zumba Morning Batch"
+    },
+    {
+      "id": "PAY-TN-008",
+      "student_id": "TN-2026-008",
+      "student_name": "Neha Kulkarni",
+      "amount": 4800,
+      "payment_date": "2026-07-01",
+      "mode": "Razorpay Online",
+      "type": "Admission Package",
+      "title": "Bollywood 3 Months Package"
+    },
+    {
+      "id": "PAY-TN-009",
+      "student_id": "TN-2026-009",
+      "student_name": "Siddharth Rao",
+      "amount": 3000,
+      "payment_date": "2026-08-01",
+      "mode": "Cash",
+      "type": "Admission Package",
+      "title": "Kids Dance 3 Months"
+    },
+    {
+      "id": "PAY-TN-010",
+      "student_id": "TN-2026-010",
+      "student_name": "Tanvi Deshmukh",
+      "amount": 10500,
+      "payment_date": "2026-03-26",
+      "mode": "Razorpay Online",
+      "type": "Admission Package",
+      "title": "Contemporary 6 Months"
+    }
   ],
   "attendance": [
-    { "id": "ATT-101", "student_id": "TN-2026-001", "student_name": "Aarav Sharma", "phone": "9999900001", "batch": "Kathak Classical (Weekend 10:00 AM - 11:30 AM)", "attendance_date": "2026-09-21", "status": "Present", "note": "" },
-    { "id": "ATT-102", "student_id": "TN-2026-002", "student_name": "Pooja Patel", "phone": "9999900002", "batch": "Bollywood Commercial (MWF 6:00 PM - 7:00 PM)", "attendance_date": "2026-09-21", "status": "Present", "note": "" },
-    { "id": "ATT-103", "student_id": "TN-2026-003", "student_name": "Rohan Mehta", "phone": "9999900003", "batch": "Urban Hip-Hop & Popping (TTS 7:00 PM - 8:30 PM)", "attendance_date": "2026-09-21", "status": "Present", "note": "" },
-    { "id": "ATT-104", "student_id": "TN-2026-004", "student_name": "Ananya Verma", "phone": "9999900004", "batch": "Contemporary & Movement (Sat/Sun 4:00 PM - 5:30 PM)", "attendance_date": "2026-09-21", "status": "Present", "note": "" },
-    { "id": "ATT-105", "student_id": "TN-2026-005", "student_name": "Kabir Joshi", "phone": "9999900005", "batch": "Urban Hip-Hop & Popping (TTS 7:00 PM - 8:30 PM)", "attendance_date": "2026-09-21", "status": "Present", "note": "" },
-    { "id": "ATT-106", "student_id": "TN-2026-006", "student_name": "Priya Singh", "phone": "9999900006", "batch": "Kathak Classical (Weekend 10:00 AM - 11:30 AM)", "attendance_date": "2026-09-21", "status": "Absent", "note": "Viral Fever (Informed studio)" },
-    { "id": "ATT-107", "student_id": "TN-2026-007", "student_name": "Vikram Malhotra", "phone": "9999900007", "batch": "Morning Zumba & Dance Fitness (Mon-Fri 7:00 AM - 8:00 AM)", "attendance_date": "2026-09-21", "status": "Present", "note": "" },
-    { "id": "ATT-108", "student_id": "TN-2026-008", "student_name": "Neha Kulkarni", "phone": "9999900008", "batch": "Bollywood Commercial (MWF 6:00 PM - 7:00 PM)", "attendance_date": "2026-09-21", "status": "Present", "note": "" },
-    { "id": "ATT-109", "student_id": "TN-2026-009", "student_name": "Siddharth Rao", "phone": "9999900009", "batch": "Kids Dance Foundations (MWF 5:00 PM - 6:00 PM)", "attendance_date": "2026-09-21", "status": "Present", "note": "" },
-    { "id": "ATT-110", "student_id": "TN-2026-010", "student_name": "Tanvi Deshmukh", "phone": "9999900010", "batch": "Contemporary & Movement (Sat/Sun 4:00 PM - 5:30 PM)", "attendance_date": "2026-09-21", "status": "Leave", "note": "Approved Leave - Family Function" }
-  ]
+    {
+      "id": "ATT-101",
+      "student_id": "TN-2026-001",
+      "student_name": "Aarav Sharma",
+      "phone": "9999900001",
+      "batch": "Kathak Classical (Weekend 10:00 AM - 11:30 AM)",
+      "attendance_date": "2026-09-21",
+      "status": "Present",
+      "note": ""
+    },
+    {
+      "id": "ATT-102",
+      "student_id": "TN-2026-002",
+      "student_name": "Pooja Patel",
+      "phone": "9999900002",
+      "batch": "Bollywood Commercial (MWF 6:00 PM - 7:00 PM)",
+      "attendance_date": "2026-09-21",
+      "status": "Present",
+      "note": ""
+    },
+    {
+      "id": "ATT-103",
+      "student_id": "TN-2026-003",
+      "student_name": "Rohan Mehta",
+      "phone": "9999900003",
+      "batch": "Urban Hip-Hop & Popping (TTS 7:00 PM - 8:30 PM)",
+      "attendance_date": "2026-09-21",
+      "status": "Present",
+      "note": ""
+    },
+    {
+      "id": "ATT-104",
+      "student_id": "TN-2026-004",
+      "student_name": "Ananya Verma",
+      "phone": "9999900004",
+      "batch": "Contemporary & Movement (Sat/Sun 4:00 PM - 5:30 PM)",
+      "attendance_date": "2026-09-21",
+      "status": "Present",
+      "note": ""
+    },
+    {
+      "id": "ATT-105",
+      "student_id": "TN-2026-005",
+      "student_name": "Kabir Joshi",
+      "phone": "9999900005",
+      "batch": "Urban Hip-Hop & Popping (TTS 7:00 PM - 8:30 PM)",
+      "attendance_date": "2026-09-21",
+      "status": "Present",
+      "note": ""
+    },
+    {
+      "id": "ATT-106",
+      "student_id": "TN-2026-006",
+      "student_name": "Priya Singh",
+      "phone": "9999900006",
+      "batch": "Kathak Classical (Weekend 10:00 AM - 11:30 AM)",
+      "attendance_date": "2026-09-21",
+      "status": "Absent",
+      "note": "Viral Fever (Informed studio)"
+    },
+    {
+      "id": "ATT-107",
+      "student_id": "TN-2026-007",
+      "student_name": "Vikram Malhotra",
+      "phone": "9999900007",
+      "batch": "Morning Zumba & Dance Fitness (Mon-Fri 7:00 AM - 8:00 AM)",
+      "attendance_date": "2026-09-21",
+      "status": "Present",
+      "note": ""
+    },
+    {
+      "id": "ATT-108",
+      "student_id": "TN-2026-008",
+      "student_name": "Neha Kulkarni",
+      "phone": "9999900008",
+      "batch": "Bollywood Commercial (MWF 6:00 PM - 7:00 PM)",
+      "attendance_date": "2026-09-21",
+      "status": "Present",
+      "note": ""
+    },
+    {
+      "id": "ATT-109",
+      "student_id": "TN-2026-009",
+      "student_name": "Siddharth Rao",
+      "phone": "9999900009",
+      "batch": "Kids Dance Foundations (MWF 5:00 PM - 6:00 PM)",
+      "attendance_date": "2026-09-21",
+      "status": "Present",
+      "note": ""
+    },
+    {
+      "id": "ATT-110",
+      "student_id": "TN-2026-010",
+      "student_name": "Tanvi Deshmukh",
+      "phone": "9999900010",
+      "batch": "Contemporary & Movement (Sat/Sun 4:00 PM - 5:30 PM)",
+      "attendance_date": "2026-09-21",
+      "status": "Leave",
+      "note": "Approved Leave - Family Function"
+    }
+  ],
+  "cmsData": {
+    "offerTitle": "Special Navratri Offer",
+    "offer": "Flat 20% Off on all quarterly packages!",
+    "couponCode": "NARTAN20",
+    "showOffer": true
+  }
 }

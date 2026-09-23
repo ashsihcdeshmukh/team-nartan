@@ -288,11 +288,6 @@
     }
     try {
       const parsed = JSON.parse(raw);
-      // Auto-migrate if older phone format detected
-      if (table === 'students' && parsed && parsed.length > 0 && !parsed[0].phone.startsWith('999990')) {
-        localStorage.setItem(key, JSON.stringify(INITIAL_STUDENTS));
-        return JSON.parse(JSON.stringify(INITIAL_STUDENTS));
-      }
       if (table === 'students' && (!parsed || parsed.length === 0)) {
         localStorage.setItem(key, JSON.stringify(INITIAL_STUDENTS));
         return JSON.parse(JSON.stringify(INITIAL_STUDENTS));

@@ -403,12 +403,25 @@ let admissionConfig = {
 
 async function loadAdmissionConfigFromCloud(){
   try {
-    const raw = localStorage.getItem('team-nartan-app-content') || localStorage.getItem('creative-edge-app-content');
+    const raw = localStorage.getItem('team-nartan-app-content');
     if(raw){
       const parsed = JSON.parse(raw);
       if(parsed && parsed.admission){
         admissionConfig = Object.assign(admissionConfig, parsed.admission);
         renderDynamicAdmissionElements();
+      }
+    }
+  } catch(e){}
+
+  try {
+    const resp = await fetch('/api/sync/cms');
+    if(resp.ok){
+      const json = await resp.json();
+      if(json && json.data && json.data.admission){
+        admissionConfig = Object.assign(admissionConfig, json.data.admission);
+        localStorage.setItem('team-nartan-app-content', JSON.stringify(json.data));
+        renderDynamicAdmissionElements();
+        return;
       }
     }
   } catch(e){}
@@ -432,7 +445,7 @@ async function loadAdmissionConfigFromCloud(){
 
 // Live sync across tabs / windows when Studio Manager publishes changes
 window.addEventListener('storage', function(e){
-  if(e.key === 'team-nartan-app-content' || e.key === 'creative-edge-app-content'){
+  if(e.key === 'team-nartan-app-content'){
     loadAdmissionConfigFromCloud();
   }
 });

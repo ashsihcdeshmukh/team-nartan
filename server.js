@@ -280,15 +280,49 @@ app.get('/api/stats', (req, res) => {
 });
 
 // 11. Cross-Device Sync API
+app.get('/api/sync/all', (req, res) => {
+  const db = store.readDb();
+  res.json({
+    success: true,
+    data: {
+      students: db.students || [],
+      payments: db.payments || [],
+      attendance: db.attendance || [],
+      batches: db.batches || [],
+      cms: db.cmsData || {}
+    }
+  });
+});
+
+app.get('/api/sync/cms', (req, res) => {
+  const db = store.readDb();
+  res.json({ success: true, data: db.cmsData || {} });
+});
+
+app.post('/api/sync/cms', (req, res) => {
+  const db = store.readDb();
+  db.cmsData = req.body || {};
+  store.writeDb(db);
+  res.json({ success: true, data: db.cmsData });
+});
+
 app.get('/api/sync/:table', (req, res) => {
   const table = req.params.table;
   const db = store.readDb();
+  if (table === 'cms') {
+    return res.json({ success: true, data: db.cmsData || {} });
+  }
   res.json({ success: true, data: db[table] || [] });
 });
 
 app.post('/api/sync/:table', (req, res) => {
   const table = req.params.table;
   const db = store.readDb();
+  if (table === 'cms') {
+    db.cmsData = req.body || {};
+    store.writeDb(db);
+    return res.json({ success: true, data: db.cmsData });
+  }
   if (Array.isArray(req.body)) {
     db[table] = req.body;
     store.writeDb(db);

@@ -2874,11 +2874,12 @@
       }catch(e){}
 
       try{
-        const res = await sb.from('students').select('notes').eq('phone', '9999999999').maybeSingle();
-        if(res && res.data && res.data.notes){
-          const m = String(res.data.notes).match(/<!--CMS_START-->([\s\S]*?)<!--CMS_END-->/);
-          if(m){
-            studioCMSData = Object.assign(studioCMSData, JSON.parse(m[1]));
+        const resp = await fetch('/api/sync/cms');
+        if(resp.ok){
+          const res = await resp.json();
+          if(res && res.data && (res.data.workshops || res.data.notices || res.data.offer || res.data.offerTitle)){
+            studioCMSData = Object.assign(studioCMSData, res.data);
+            localStorage.setItem('team-nartan-app-content', JSON.stringify(studioCMSData));
           }
         }
       }catch(e){
@@ -2918,28 +2919,17 @@
       if(document.getElementById('feeDuetChoreo')) pr.duet = Number(document.getElementById('feeDuetChoreo').value || 5000);
 
       localStorage.setItem('team-nartan-app-content', JSON.stringify(studioCMSData));
-      localStorage.setItem('creative-edge-app-content', JSON.stringify(studioCMSData));
 
       let synced = false;
-      const noteContent = '<!--CMS_START-->' + JSON.stringify(studioCMSData) + '<!--CMS_END-->';
-
       try{
-        const check = await sb.from('students').select('id').eq('phone', '9999999999').maybeSingle();
-        if(check && check.data && check.data.id){
-          const upd = await sb.from('students').update({ notes: noteContent }).eq('id', check.data.id);
-          synced = !upd.error;
-        } else {
-          const ins = await sb.from('students').insert([{
-            name: 'STUDIO_CMS_CONFIG',
-            phone: '9999999999',
-            category: 'System',
-            fee_status: 'Paid',
-            notes: noteContent
-          }]);
-          synced = !ins.error;
-        }
+        const postResp = await fetch('/api/sync/cms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(studioCMSData)
+        });
+        if(postResp.ok) synced = true;
       }catch(e){
-        console.warn('CMS sync error:', e);
+        console.warn('CMS cloud sync error:', e);
       }
 
       const modeEl = document.getElementById('contentMode');
@@ -3672,10 +3662,53 @@ async function markAllAttendance(status){
         .subscribe(function(status){console.log('Realtime:', status)});
     }
 
+    function startCloudSyncPolling(){
+      setInterval(async function(){
+        try {
+          const resp = await fetch('/api/sync/all');
+          if(resp.ok){
+            const res = await resp.json();
+            if(res && res.data){
+              let changed = false;
+              if(res.data.students && res.data.students.length > 0){
+                const currentStr = localStorage.getItem('tn_demo_db_students');
+                const newStr = JSON.stringify(res.data.students);
+                if(currentStr !== newStr){
+                  localStorage.setItem('tn_demo_db_students', newStr);
+                  changed = true;
+                }
+              }
+              if(res.data.payments && res.data.payments.length > 0){
+                const currentP = localStorage.getItem('tn_demo_db_payments');
+                const newP = JSON.stringify(res.data.payments);
+                if(currentP !== newP){
+                  localStorage.setItem('tn_demo_db_payments', newP);
+                  changed = true;
+                }
+              }
+              if(res.data.attendance && res.data.attendance.length > 0){
+                const currentA = localStorage.getItem('tn_demo_db_attendance');
+                const newA = JSON.stringify(res.data.attendance);
+                if(currentA !== newA){
+                  localStorage.setItem('tn_demo_db_attendance', newA);
+                  changed = true;
+                }
+              }
+              if(changed){
+                console.log('[Team Nartan] 🔄 Cloud sync detected new updates — refreshing manager dashboard.');
+                await loadAll();
+              }
+            }
+          }
+        } catch(e){}
+      }, 10000);
+    }
+
     document.addEventListener('DOMContentLoaded', function(){
       document.getElementById('attendanceDate').value = todayText();
       loadAll();
       setupRealtime();
+      startCloudSyncPolling();
     });
   </script>
 
