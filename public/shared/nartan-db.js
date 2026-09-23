@@ -305,7 +305,39 @@
 
   function setTable(table, data) {
     localStorage.setItem('tn_demo_db_' + table, JSON.stringify(data));
+    try {
+      fetch('/api/sync/' + table, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).catch(function(){});
+    } catch(e){}
   }
+
+  // Cross-device server sync so submissions from phones immediately appear on laptops/computers
+  function syncTableFromServer(table) {
+    fetch('/api/sync/' + table)
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if(res && res.data && res.data.length > 0){
+          localStorage.setItem('tn_demo_db_' + table, JSON.stringify(res.data));
+        } else {
+          var local = getTable(table);
+          if(local && local.length > 0){
+            fetch('/api/sync/' + table, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(local)
+            }).catch(function(){});
+          }
+        }
+      })
+      .catch(function(){});
+  }
+
+  try {
+    ['students', 'payments', 'attendance'].forEach(syncTableFromServer);
+  } catch(e){}
 
   function createNartanClient() {
     return {

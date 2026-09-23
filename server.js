@@ -279,6 +279,23 @@ app.get('/api/stats', (req, res) => {
   res.json({ success: true, stats: store.getStats() });
 });
 
+// 11. Cross-Device Sync API
+app.get('/api/sync/:table', (req, res) => {
+  const table = req.params.table;
+  const db = store.readDb();
+  res.json({ success: true, data: db[table] || [] });
+});
+
+app.post('/api/sync/:table', (req, res) => {
+  const table = req.params.table;
+  const db = store.readDb();
+  if (Array.isArray(req.body)) {
+    db[table] = req.body;
+    store.writeDb(db);
+  }
+  res.json({ success: true, data: db[table] || [] });
+});
+
 // Root fallback / health
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', studio: 'Team Nartan Dance Studio', time: new Date().toISOString() });
